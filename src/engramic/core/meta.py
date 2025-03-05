@@ -11,8 +11,9 @@ if TYPE_CHECKING:
 @dataclass()
 class Meta:
     """
-        Test.
+    Test.
     """
+
     def __init__(
         self,
         location: str,

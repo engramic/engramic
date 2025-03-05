@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 @dataclass()
 class Engram:
     """
-    Represents a unit of memory, consisting of a text string (such as a phrase, sentence, or paragraph) 
+    Represents a unit of memory, consisting of a text string (such as a phrase, sentence, or paragraph)
     along with contextual information to help an LLM understand its domain relevance.
 
     Attributes:
@@ -29,7 +29,7 @@ class Engram:
         indices (list[Index] | None): A list of indices (text & embedding pair) related to the engram, this is used for semantic query.
         meta_id (str | None): A metadata identifier giving overview of the source document.
         library_id (str | None): An identifier linking the engram to a library, a collection of source documents.
-    
+
     Methods:
         render_engram(): Returns a structured string representation of the engram to be used by the LLM.
     """

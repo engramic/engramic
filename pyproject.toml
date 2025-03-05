@@ -88,8 +88,8 @@ extend-select = ["C901"]
 ignore = ["PLC0414","RET504"] 
 
 #ignores
-#redundant "as" in init files
-#allowing assignments before a return
+#PLC0414 - redundant "as" in init files
+#RET504 -allowing assignments before a return
 
 [tool.ruff.lint.extend-per-file-ignores]
 "docs/.hooks/*" = ["INP001", "T201"]

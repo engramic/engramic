@@ -18,11 +18,11 @@ class MockIndex:
 
 def test_engram_initialization():
     """Test that an Engram object is initialized correctly."""
-    engram = Engram(location='test_location', source_id='test_source', text='test_text', is_native_source=True)
+    engram = Engram(location='test_location', source_id='test_source', content='test_text', is_native_source=True)
 
     assert engram.location == 'test_location'
     assert engram.source_id == 'test_source'
-    assert engram.text == 'test_text'
+    assert engram.content == 'test_text'
     assert engram.is_native_source is True
     assert engram.context is None
     assert engram.indices is None
@@ -35,7 +35,7 @@ def test_render_engram():
     engram = Engram(
         location='test_location',
         source_id='test_source',
-        text='test_text',
+        content='test_text',
         is_native_source=True,
         context=MockContext(),
         indices=[MockIndex('index1'), MockIndex('index2')],
