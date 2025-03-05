@@ -1,0 +1,98 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "engramic"
+dynamic = ["version"]
+description = 'An open source (for companies less than 250 employees) AI library for processing, storing, and retrieving proprietary, unstructured data.'
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Engramic Community License" }
+license-files = { paths = ["LICENSE.txt"] }
+keywords = ["AI", "LLM", "RAG", "Retrieval Augmented Generation", "Memory"]
+authors = [
+  { name = "Preisz Consulting, LLC", email = "license@engramic.org" }
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/engramic/engramic#readme"
+Issues = "https://github.com/engramic/engramic/issues"
+Source = "https://github.com/engramic/engramic"
+
+[tool.hatch.version]
+path = "src/engramic/__about__.py"
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = ["engramic","debugpy"]
+
+[tool.hatch.envs.remote_debug]
+dependencies = ["pytest","debugpy"]
+
+[tool.hatch.envs.docs]
+dependencies = [
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocstrings[python]"
+]
+
+[tool.hatch.envs.docs.scripts]
+"build" = "mkdocs build"
+"serve" = "mkdocs serve -a 0.0.0.0:8000"
+
+[tool.hatch.envs.remote_debug.scripts]
+debug = "python -m debugpy --listen localhost:5678 --wait-for-client -m pytest tests/"
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.9", "3.10","3.11","3.12","3.13"]
+
+[tool.coverage.run]
+source_pkgs = ["engramic", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/engramic/__about__.py",
+]
+
+[tool.coverage.paths]
+engramic = ["src/engramic", "*/engramic/src/engramic"]
+tests = ["tests", "*/engramic/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+
+[tool.ruff.format]
+preview = true
+quote-style = "single"
+
+[tool.ruff.lint]
+preview = true
+extend-select = ["C901"]
+ignore = ["PLC0414","RET504"] 
+
+#ignores
+#redundant "as" in init files
+#allowing assignments before a return
+
+[tool.ruff.lint.extend-per-file-ignores]
+"docs/.hooks/*" = ["INP001", "T201"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["foo", "bar"]
