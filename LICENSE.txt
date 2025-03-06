@@ -1,0 +1,14 @@
+Engramic Community License
+Copyright (c) 2025 Preisz Consulting, LLC.
+
+This Software is provided under the terms of the MIT License.
+
+Notwithstanding the foregoing, the following Restrictions apply:
+
+Restrictions.
+
+1. If you or the entity you represent employ 250 or more people worldwide, including majority owned subsidiaries, you or the entity may not distribute, sublicense, or sell this Software, including, but not limited to, SaaS, cloud-based services, or managed services without obtaining an alternative license from license@engramic.org.
+
+2. You may not act on behalf of any person or entity employing 250 or more people worldwide to circumvent Restriction 1.
+
+All derivative works must retain this Small Entity License and these Restrictions.

@@ -41,6 +41,7 @@ htmlcov/
 .tox/
 .nox/
 .coverage
+.coverage*
 .coverage.*
 .cache
 nosetests.xml
@@ -68,7 +69,7 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
+# mkdocs
 docs/_build/
 
 # PyBuilder
