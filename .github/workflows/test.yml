@@ -27,5 +27,14 @@ jobs:
       - uses: actions/checkout@v4
 
       # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Install Hatch
+        run: pip install --user hatch
+
+      - name: Add Hatch to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Run formatting & linting
+        run: hatch fmt
+
+      - name: Run tests on the entire python matrix
+        run: hatch test -a
