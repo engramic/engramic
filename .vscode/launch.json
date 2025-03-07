@@ -1,15 +1,26 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "Attach to Hatch Test",
-        "type": "debugpy",
-        "request": "attach",
-        "connect": {
+  "version": "0.2.0",
+  "configurations": [
+  {
+      "name": "Example - Mock Only",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/mock_only/mock_only.py",
+      "console": "integratedTerminal",
+      "subProcess":true,
+      "debugOPtions":["RedirectOutput"]
+  },
+  {
+      "name": "Attach to Hatch Test",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
           "host": "localhost",
           "port": 5678
-        }
       }
-    ]
-  }
+  },
+      
+  ]
+}
+
   
