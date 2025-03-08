@@ -4,10 +4,14 @@
 
 from abc import ABC, abstractmethod
 
-from index import Index
+from engramic.core.prompt import Prompt
 
 
-class IndexDB(ABC):
+class Retrieval(ABC):
+    class RetrievalResponse:
+        def __init__(self, set_in: set) -> None:
+            self.set = set_in
+
     @abstractmethod
-    def query(self) -> list[Index]:
+    def get_sources(self, prompt: Prompt) -> RetrievalResponse:
         pass

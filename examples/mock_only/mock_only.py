@@ -4,14 +4,21 @@
 
 import logging
 
-from engramic.application.retrieve.retrieve import Retrieve
+from engramic.application.retrieve import Ask, RetrieveService
+from engramic.core import Library, Prompt
 from engramic.infrastructure.system import Host
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def main()->None:
-    host = Host([Retrieve])
+
+def main() -> None:
+    retrieve_service = RetrieveService()
+    host = Host([retrieve_service],"mock")
+
+    ask = Ask(Prompt('What is your name?'))
+    retrieve_service.submit(ask)
+
     host.wait_for_shutdown()
 
 

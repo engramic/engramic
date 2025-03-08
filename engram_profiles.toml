@@ -1,0 +1,17 @@
+version = 1.0
+
+[mock]
+type = "profile"
+vector = "mock"
+llm.retrieve_gen_index = "mock"
+llm.retrieve_pompt_analysis = "mock"
+
+[standard]
+type = "pointer"
+ptr = "standard-2025-01-01"
+
+[standard-2025-03-01]
+type = "profile"
+vector = "mock"
+llm.retrieve_gen_index = "mock"
+llm.retrieve_pompt_analysis = "mock"

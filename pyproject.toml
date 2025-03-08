@@ -27,6 +27,12 @@ classifiers = [
 ]
 dependencies = []
 
+[tool.hatch.envs.dev]
+dependencies = ["pre-commit"]
+
+[tool.hatch.envs.dev.scripts]
+post-install = "pre-commit install"
+
 [project.urls]
 Documentation = "https://github.com/engramic/engramic#readme"
 Issues = "https://github.com/engramic/engramic/issues"

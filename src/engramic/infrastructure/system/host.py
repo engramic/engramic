@@ -4,28 +4,33 @@
 
 import logging
 import threading
-
+from engramic.infrastructure.engram_profiles import EngramProfiles
+from engramic.infrastructure.system.service import Service
+from engramic.infrastructure.system.plugin_manager import PluginManager
 
 class Host:
-    def __init__(self, service_classes)->None:
+    def __init__(self, service_list:list[Service],selected_profile:str) -> None:
         """Initialize the host with an empty service list."""
-        self.services = [service_class() for service_class in service_classes]
+        self.services = service_list
+        self.plugin_manager = PluginManager()
+        self.profile = EngramProfiles()
+
+        profile = self.profile.get_profile(selected_profile)
+        self.plugin_manager.install_dependencies(profile)
+
         for service in self.services:
             service.start()
         self.stop_event = threading.Event()
 
-    def stop_all(self)->None:
+    def stop_all(self) -> None:
         """Stop all running services."""
         for service in self.services:
             service.stop()
 
-    def wait_for_shutdown(self)->None:
+    def wait_for_shutdown(self) -> None:
         try:
             self.stop_event.wait()  # This blocks until the event is set
         except KeyboardInterrupt:
-            logging.info("\nShutdown requested. Exiting gracefully...")
+            logging.info('\nShutdown requested. Exiting gracefully...')
         finally:
-            self.cleanup()
-
-    def cleanup(self)->None:
-        logging.info("Cleaning up.")
+            logging.info('Cleaning up.')
