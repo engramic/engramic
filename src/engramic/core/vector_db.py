@@ -4,11 +4,12 @@
 
 from abc import ABC, abstractmethod
 
+
 class VectorDB(ABC):
     """
     An abstract base class that defines an interface for any Large Language Model.
     """
-    
+
     @abstractmethod
     def query(self, prompt: str) -> list[int]:
         """
@@ -22,4 +23,3 @@ class VectorDB(ABC):
         Returns:
             str: The model-generated response.
         """
-        pass

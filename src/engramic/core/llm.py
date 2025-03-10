@@ -5,11 +5,12 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+
 class LLM(ABC):
     """
     An abstract base class that defines an interface for any Large Language Model.
     """
-    
+
     @abstractmethod
     def submit(self, prompt: str, **kwargs: Any) -> str:
         """
@@ -23,4 +24,3 @@ class LLM(ABC):
         Returns:
             str: The model-generated response.
         """
-        pass

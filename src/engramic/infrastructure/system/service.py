@@ -8,7 +8,6 @@ import threading
 from concurrent.futures import Future
 
 
-
 class Service:
     """Base class for services running in their own thread with an asyncio loop."""
 
@@ -16,8 +15,7 @@ class Service:
         self.loop = asyncio.new_event_loop()
         self.thread = threading.Thread(target=self._run, daemon=True)
 
-
-    def start(self,host) -> None:
+    def start(self, host) -> None:
         self.host = host
         """Start the service thread."""
         self.thread.start()
@@ -37,7 +35,6 @@ class Service:
         self.loop.call_soon_threadsafe(asyncio.create_task, self._shutdown_loop())
         self.thread.join()
 
-
     @staticmethod
     def sleep(seconds) -> None:
         asyncio.sleep(seconds)
@@ -46,7 +43,7 @@ class Service:
         """
         Submit multiple asyncio coroutines and return a single future
         that resolves to a dictionary mapping coroutine names to results.
-        
+
         Example:
         future = scheduler.submit_async_tasks(coro1(), coro2())
         """
@@ -76,18 +73,20 @@ class Service:
 
         for name, result in zip(tasks.keys(), results):
             if isinstance(result, Exception):
-                logging.error(f"Task {name} failed with error: {result}")
+                logging.error('Task %s failed with error: %s', name, result)
 
-        return {name: result for name, result in zip(tasks.keys(), results)}
+        return dict(zip(tasks.keys(), results))
 
     def _get_coro_name(self, coro):
         """Extracts the coroutine function name if possible, otherwise generates a fallback name."""
         try:
-            if hasattr(coro, "__name__"):  # Works for direct functions
+            if hasattr(coro, '__name__'):  # Works for direct functions
                 return coro.__name__
-            if hasattr(coro, "cr_code") and hasattr(coro.cr_code, "co_name"):  # Works for coroutine objects
+            if hasattr(coro, 'cr_code') and hasattr(coro.cr_code, 'co_name'):  # Works for coroutine objects
                 return coro.cr_code.co_name
-        except Exception as e:
-            logging.warning(f"Failed to retrieve coroutine name: {e}")
+        except AttributeError:  # More specific exception
+            logging.warning('Failed to retrieve coroutine name due to missing attributes.')
+        except TypeError:  # If `coro` isn't the expected type
+            logging.warning('Failed to retrieve coroutine name due to incorrect type.')
 
-        return f"unnamed_coro_{id(coro)}"  # Fallback unique identifier
+        return 'unknown_coroutine'

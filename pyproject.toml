@@ -47,6 +47,7 @@ path = "src/engramic/__about__.py"
 extra-dependencies = ["engramic","debugpy"]
 
 [tool.hatch.envs.docs]
+template = "default"
 dependencies = [
   "mkdocs",
   "mkdocs-material",
@@ -87,11 +88,12 @@ quote-style = "single"
 [tool.ruff.lint]
 preview = true
 extend-select = ["C901"]
-ignore = ["PLC0414","RET504"] 
+ignore = ["PLC0414","RET504","PLR6301"] 
 
 #ignores
 #PLC0414 - redundant "as" in init files
 #RET504 -allowing assignments before a return
+#PLR6301 - not using self in a method. Should add back later.
 
 [tool.ruff.lint.extend-per-file-ignores]
 "docs/.hooks/*" = ["INP001", "T201"]

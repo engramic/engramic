@@ -5,19 +5,19 @@
 import logging
 import threading
 
-from engramic.infrastructure.system.service import Service
 from engramic.infrastructure.system.plugin_manager import PluginManager
-import engramic.infrastructure.system.plugin_specifications
+from engramic.infrastructure.system.service import Service
+
 
 class Host:
-    def __init__(self, service_list:list[Service],selected_profile:str) -> None:
+    def __init__(self, service_list: list[Service], selected_profile: str) -> None:
         """Initialize the host with an empty service list."""
-        
+
         self.plugin_manager = PluginManager()
-        
+
         self.services = service_list
 
-        profile = self.plugin_manager.set_profile(selected_profile)
+        self.plugin_manager.set_profile(selected_profile)
         self.plugin_manager.install_dependencies()
         self.plugin_manager.import_plugins()
 
@@ -40,6 +40,3 @@ class Host:
             logging.info('\nShutdown requested. Exiting gracefully...')
         finally:
             logging.info('Cleaning up.')
-
-    def get_plugin(category,usage):
-        self.plugin_manager.get_plugin(category,usage)

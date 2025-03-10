@@ -10,4 +10,3 @@ from dataclasses import dataclass, field
 class Prompt:
     id: str = field(default_factory=lambda: str(uuid.uuid4()), init=False)
     user_input: str
-
