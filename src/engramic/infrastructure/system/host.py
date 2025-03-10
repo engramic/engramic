@@ -4,23 +4,29 @@
 
 import logging
 import threading
-from engramic.infrastructure.engram_profiles import EngramProfiles
+
 from engramic.infrastructure.system.service import Service
 from engramic.infrastructure.system.plugin_manager import PluginManager
+import engramic.infrastructure.system.plugin_specifications
 
 class Host:
     def __init__(self, service_list:list[Service],selected_profile:str) -> None:
         """Initialize the host with an empty service list."""
-        self.services = service_list
+        
         self.plugin_manager = PluginManager()
-        self.profile = EngramProfiles()
+        
+        self.services = service_list
 
-        profile = self.profile.get_profile(selected_profile)
-        self.plugin_manager.install_dependencies(profile)
+        profile = self.plugin_manager.set_profile(selected_profile)
+        self.plugin_manager.install_dependencies()
+        self.plugin_manager.import_plugins()
 
         for service in self.services:
-            service.start()
+            service.start(self)
         self.stop_event = threading.Event()
+
+    def get_plugin_manager(self):
+        return self.plugin_manager
 
     def stop_all(self) -> None:
         """Stop all running services."""
@@ -34,3 +40,6 @@ class Host:
             logging.info('\nShutdown requested. Exiting gracefully...')
         finally:
             logging.info('Cleaning up.')
+
+    def get_plugin(category,usage):
+        self.plugin_manager.get_plugin(category,usage)

@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import pluggy
 import importlib
 import subprocess
 import sys
@@ -11,8 +12,10 @@ import shutil
 import logging
 from  pathlib import Path
 from enum import Enum
-from dataclasses import dataclass
-from typing import List
+from dataclasses import dataclass, field
+from typing import Set, Dict, List
+from engramic.infrastructure.system.engram_profiles import EngramProfiles
+
 
 class ResponseType(Enum):
             SUCCESS = 1
@@ -22,20 +25,26 @@ class PluginManager:
     
     PLUGIN_DEFAULT_ROOT = "src/engramic/infrastructure/plugins"
 
-    
-
     @dataclass
     class PluginManagerResponse:
         response: ResponseType
-        installed_dependencies: List[str]
-        detected_dependencies: List[str]
+        installed_dependencies: Set[str]
+        detected_dependencies: Set[str]
+
+    def __init__(self):
+        self.profiles = EngramProfiles()
+
     
-    def install_dependencies(self, current_profile: dict) -> PluginManagerResponse:
+    def install_dependencies(self) -> PluginManagerResponse:
         """
         Analyzes the given profile and installs missing dependencies.
         """
+        current_profile = self.profiles.get_currently_set_profile()
 
         dependencies = set()
+        installed_dependencies = set()
+        detected_dependencies = set()
+
         for row_key in current_profile:
             if row_key=="type":
                 continue
@@ -50,20 +59,56 @@ class PluginManager:
                 plugin_name = row_value
                 dependencies.update(self._get_packages(row_key,plugin_name))
             
-        installed_dependencies = []
-        detected_dependencies = []
         for dependency in dependencies:
             if self._is_package_installed(dependency) != False:
                 self._install_package(dependency)
-                installed_dependencies.append(dependency)
+                installed_dependencies.add(dependency)
             else:
-                detected_dependencies.append(dependency)
+                detected_dependencies.add(dependency)
 
         return self.PluginManagerResponse(
                     ResponseType.SUCCESS,
                     installed_dependencies,
                     detected_dependencies
-                )        
+                )
+    
+    def set_profile(self,profile_name:str):
+        return self.profiles.set_current_profile(profile_name)
+
+    def import_plugins(self):
+        for category in os.listdir(self.PLUGIN_DEFAULT_ROOT):
+            category_path = os.path.join(self.PLUGIN_DEFAULT_ROOT, category)
+
+            if os.path.isdir(category_path):  # Ensure it's a directory
+                for plugin_name in os.listdir(category_path):
+                    plugin_path = os.path.join(category_path, plugin_name)
+                    plugin_file = os.path.join(plugin_path, f"{plugin_name}.py")
+
+                    if os.path.isdir(plugin_path) and os.path.isfile(plugin_file):
+                        module_name = f"{category}.{plugin_name}"  # Create a unique module name
+
+                        spec = importlib.util.spec_from_file_location(module_name, plugin_file)
+                        module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(module)  # Load the module
+                        sys.modules[module_name] = module
+                        
+                        
+                        
+    def get_plugin(self,category,usage):
+        profile = self.profiles.get_currently_set_profile()
+        
+        implementation = profile[category][usage]
+
+
+        plugin = sys.modules.get(f"{category}.{implementation}")
+                        
+        if plugin:
+            pm = pluggy.PluginManager(category)
+            pm.register(plugin.Mock()) 
+            return pm.hook
+        else:
+            None
+        
 
     def _get_packages(self, key, plugin_name):
             installed_dependencies = []

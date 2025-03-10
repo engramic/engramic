@@ -16,6 +16,8 @@ class EngramProfiles:
     ENGRAM_PROFILE_VERSION = 1.0
 
     def __init__(self) -> None:
+        self.currently_set_profile = None
+
         path = Path(EngramProfiles.DEFAULT_PROFILE_PATH)
         if not path.is_file():
             raise FileNotFoundError(f"TOML file not found: {EngramProfiles.DEFAULT_PROFILE_PATH}")
@@ -27,9 +29,21 @@ class EngramProfiles:
         
         if version != EngramProfiles.ENGRAM_PROFILE_VERSION:
             raise ValueError(f"Incompatible profile version: expected {EngramProfiles.ENGRAM_PROFILE_VERSION}, found {version}")
-            
+        
+    def set_current_profile(self, name:str):
+        profile = self._get_profile(name)
+        self.currently_set_profile = profile
+        return profile
 
-    def get_profile(self, name: str):
+    def get_currently_set_profile(self):
+        return self.currently_set_profile
+    
+    def get_plugin(self,category:str,usage:str):
+        category =self.currently_set_profile.get(category)
+        var = 0
+        return
+
+    def _get_profile(self, name: str):
         """
         Retrieve a TOML table by name.
         - If the table is of type='pointer', follow its ptr until a real profile is found.

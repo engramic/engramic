@@ -16,7 +16,7 @@ def main() -> None:
     retrieve_service = RetrieveService()
     host = Host([retrieve_service],"mock")
 
-    ask = Ask(Prompt('What is your name?'))
+    ask = Ask(Prompt('What is your name?'),host.get_plugin_manager())
     retrieve_service.submit(ask)
 
     host.wait_for_shutdown()

@@ -14,9 +14,9 @@ class RetrieveService(Service):
     def __init__(self) -> None:
         super().__init__()
 
-    def start(self) -> None:
+    def start(self,host) -> None:
         """Start the service and add a background task."""
-        super().start()
+        super().start(host)
 
     def submit(self, retrieval: Retrieval):
         retrieval.get_sources(super())

@@ -17,7 +17,8 @@ class Service:
         self.thread = threading.Thread(target=self._run, daemon=True)
 
 
-    def start(self) -> None:
+    def start(self,host) -> None:
+        self.host = host
         """Start the service thread."""
         self.thread.start()
 
@@ -26,10 +27,16 @@ class Service:
         asyncio.set_event_loop(self.loop)
         self.loop.run_forever()
 
+    async def _shutdown_loop(self):
+        tasks = [t for t in asyncio.all_tasks(self.loop) if t is not asyncio.current_task()]
+        [task.cancel() for task in tasks]
+        await asyncio.gather(*tasks, return_exceptions=True)
+        self.loop.stop()
+
     def stop(self) -> None:
-        """Stop the event loop and wait for the thread to exit."""
-        self.loop.call_soon_threadsafe(self.loop.stop())
+        self.loop.call_soon_threadsafe(asyncio.create_task, self._shutdown_loop())
         self.thread.join()
+
 
     @staticmethod
     def sleep(seconds) -> None:
@@ -66,6 +73,11 @@ class Service:
         """Runs multiple coroutines concurrently and returns results with names."""
         tasks = {name: asyncio.create_task(coro) for name, coro in coros_with_names.items()}
         results = await asyncio.gather(*tasks.values(), return_exceptions=True)
+
+        for name, result in zip(tasks.keys(), results):
+            if isinstance(result, Exception):
+                logging.error(f"Task {name} failed with error: {result}")
+
         return {name: result for name, result in zip(tasks.keys(), results)}
 
     def _get_coro_name(self, coro):

@@ -25,9 +25,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = ["pluggy"]
 
 [tool.hatch.envs.dev]
+template = "default"
 dependencies = ["pre-commit"]
 
 [tool.hatch.envs.dev.scripts]
@@ -42,10 +43,8 @@ Source = "https://github.com/engramic/engramic"
 path = "src/engramic/__about__.py"
 
 [tool.hatch.envs.hatch-test]
-extra-dependencies = ["engramic","debugpy"]
 
-[tool.hatch.envs.remote_debug]
-dependencies = ["pytest","debugpy"]
+extra-dependencies = ["engramic","debugpy"]
 
 [tool.hatch.envs.docs]
 dependencies = [
@@ -57,9 +56,6 @@ dependencies = [
 [tool.hatch.envs.docs.scripts]
 "build" = "mkdocs build"
 "serve" = "mkdocs serve -a 0.0.0.0:8000"
-
-[tool.hatch.envs.remote_debug.scripts]
-debug = "python -m debugpy --listen localhost:5678 --wait-for-client -m pytest tests/"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.9", "3.10","3.11","3.12","3.13"]
