@@ -25,7 +25,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["pluggy"]
+dependencies = ["pluggy","mako","tomli"]
 
 [tool.hatch.envs.dev]
 template = "default"
@@ -42,9 +42,15 @@ Source = "https://github.com/engramic/engramic"
 [tool.hatch.version]
 path = "src/engramic/__about__.py"
 
-[tool.hatch.envs.hatch-test]
+[tool.hatch.envs.test]
+template = "dev"
+dependencies = ["pytest","pytest-asyncio","mypy"]
 
-extra-dependencies = ["engramic","debugpy"]
+[tool.hatch.envs.test.scripts]
+typecheck = "mypy --ignore-missing-imports ."
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = ["engramic","pytest-asyncio"]
 
 [tool.hatch.envs.docs]
 template = "default"
@@ -79,6 +85,8 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+omit = ["*/__init__.py"]
+
 
 
 [tool.ruff.format]

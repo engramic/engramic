@@ -36,8 +36,8 @@ class Service:
         self.thread.join()
 
     @staticmethod
-    def sleep(seconds) -> None:
-        asyncio.sleep(seconds)
+    async def sleep(seconds) -> None:
+        await asyncio.sleep(seconds)
 
     def submit_async_tasks(self, *coros) -> Future:
         """
@@ -50,7 +50,7 @@ class Service:
         coros_with_names = {self._get_coro_name(coro): coro for coro in coros}
         future = asyncio.run_coroutine_threadsafe(self._run_tasks(coros_with_names), self.loop)
 
-        def handle_exception(fut: asyncio.Future) -> None:
+        def handle_exception(fut: Future) -> None:
             try:
                 fut.result()  # Ensures exceptions are logged
             except asyncio.TimeoutError as e:

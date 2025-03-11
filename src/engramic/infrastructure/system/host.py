@@ -13,9 +13,9 @@ class Host:
     def __init__(self, service_list: list[Service], selected_profile: str) -> None:
         """Initialize the host with an empty service list."""
 
-        self.plugin_manager = PluginManager()
+        self.plugin_manager: PluginManager = PluginManager()
 
-        self.services = service_list
+        self.services: list[Service] = service_list
 
         self.plugin_manager.set_profile(selected_profile)
         self.plugin_manager.install_dependencies()
@@ -23,9 +23,10 @@ class Host:
 
         for service in self.services:
             service.start(self)
-        self.stop_event = threading.Event()
 
-    def get_plugin_manager(self):
+        self.stop_event: threading.Event = threading.Event()
+
+    def get_plugin_manager(self) -> PluginManager:
         return self.plugin_manager
 
     def stop_all(self) -> None:

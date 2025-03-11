@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, list
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from context import Context
+    from engramic.core.context import Context
 
 
 @dataclass()

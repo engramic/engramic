@@ -3,7 +3,6 @@
 # See the LICENSE file in the project root for more details.
 
 from dataclasses import dataclass
-from typing import list
 
 
 @dataclass(frozen=True)

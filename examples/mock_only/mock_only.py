@@ -3,22 +3,29 @@
 # See the LICENSE file in the project root for more details.
 
 import logging
+import sys
 
-from engramic.application.retrieve import Ask, RetrieveService
+from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.core import Prompt
 from engramic.infrastructure.system import Host
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def main() -> None:
+    # Envoke the retrieve service.
     retrieve_service = RetrieveService()
+
+    # Add it to the host. Think of the host as a logical server.
+    # Mock is the profile that defines what plugins you are using.
     host = Host([retrieve_service], 'mock')
 
-    ask = Ask(Prompt('What is your name?'), host.get_plugin_manager())
-    retrieve_service.submit(ask)
+    # Submit the prompt.
+    retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))
 
+    # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()
 
 

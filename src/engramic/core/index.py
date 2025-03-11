@@ -3,15 +3,12 @@
 # See the LICENSE file in the project root for more details.
 
 from dataclasses import dataclass
-
-import Generic
-import List
-import TypeVar
+from typing import Generic, TypeVar
 
 T = TypeVar('T')  # Declare a type variable
 
 
 @dataclass(frozen=True)
 class Index(Generic[T]):
-    embedding: List[T]
+    embedding: list[T]
     text: str

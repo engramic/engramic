@@ -20,11 +20,20 @@ class Ask(Retrieval):
         self.service = None
         self.library = library
         self.prompt = prompt
+        self.retrieve_gen_conversation_direction = plugin_manager.get_plugin(
+            'llm', 'retrieve_gen_conversation_direction'
+        )
         self.prompt_analysis_plugin = plugin_manager.get_plugin('llm', 'retrieve_prompt_analysis')
         self.prompt_retrieve_indicies_plugin = plugin_manager.get_plugin('llm', 'retrieve_gen_index')
         self.prompt_query_index_db_plugin = plugin_manager.get_plugin('vector_db', 'query')
 
     def get_sources(self, service: Service) -> None:
+        direction_step = service.submit_async_tasks(self._retrieve_gen_conversation_direction())
+        direction_ret = direction_step.result()
+        direction = direction_ret['_retrieve_gen_conversation_direction']['conversation_direction']
+
+        logging.info('conversation direction: %s', direction)  # We will be using this later for anticipatory retrieval
+
         analyze_step = service.submit_async_tasks(self._analyze_prompt(), self._generate_indicies())
 
         def on_analyze_complete(fut: Future):
@@ -48,17 +57,26 @@ class Ask(Retrieval):
 
         analyze_step.add_done_callback(on_analyze_complete)
 
+    async def _retrieve_gen_conversation_direction(self):
+        plugin = self.retrieve_gen_conversation_direction
+        # add prompt engineering here and submit as the full prompt.
+        ret = plugin['func'].submit(prompt=self.prompt, args=plugin['args'])
+        return ret[0]
+
     async def _analyze_prompt(self):
         plugin = self.prompt_analysis_plugin
-        ret = plugin.submit(prompt=self.prompt)
+        # add prompt engineering here and submit as the full prompt.
+        ret = plugin['func'].submit(prompt=self.prompt, args=plugin['args'])
         return ret[0]
 
     async def _generate_indicies(self):
         plugin = self.prompt_retrieve_indicies_plugin
-        ret = plugin.submit(prompt=self.prompt)
+        # add prompt engineering here and submit as the full prompt.
+        ret = plugin['func'].submit(prompt=self.prompt, args=plugin['args'])
         return ret[0]
 
     async def _query_index_db(self):
         plugin = self.prompt_query_index_db_plugin
-        ret = plugin.query(prompt=self.prompt)
+        # add prompt engineering here and submit as the full prompt.
+        ret = plugin['func'].query(prompt=self.prompt, args=plugin['args'])
         return ret[0]

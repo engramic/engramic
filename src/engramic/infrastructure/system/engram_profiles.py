@@ -4,8 +4,15 @@
 
 import logging
 from pathlib import Path
+from typing import TypedDict
 
-import tomllib
+import tomli
+
+
+class Profile(TypedDict, total=False):  # A TOML profile might have optional fields
+    type: str
+    ptr: str  # If it's a pointer profile
+    # Add other expected fields here if needed
 
 
 class EngramProfiles:
@@ -27,8 +34,10 @@ class EngramProfiles:
             logging.error('TOML file not found: %s', EngramProfiles.DEFAULT_PROFILE_PATH)
             raise FileNotFoundError
 
+        self._data: dict[str, Profile] = {}
+
         with path.open('rb') as f:
-            self._data = tomllib.load(f)
+            self._data = tomli.load(f)
 
         version = self._data.get('version')
 
@@ -36,10 +45,9 @@ class EngramProfiles:
             logging.error('Incompatible profile version: %s %s', EngramProfiles.ENGRAM_PROFILE_VERSION, version)
             raise ValueError
 
-    def set_current_profile(self, name: str):
+    def set_current_profile(self, name: str) -> None:
         profile = self._get_profile(name)
         self.currently_set_profile = profile
-        return profile
 
     def get_currently_set_profile(self):
         return self.currently_set_profile
@@ -49,31 +57,21 @@ class EngramProfiles:
         Retrieve a TOML table by name.
         - If the table is of type='pointer', follow its ptr until a real profile is found.
         """
-        visited = set()
+        visited: set = set()
         return self._resolve_profile(name, visited)
 
-    def _resolve_profile(self, name: str, visited: set):
-        """
-        Internal helper to recursively resolve pointer profiles.
-        Detects cycles to avoid infinite recursion if pointers form a loop.
-        """
-        if name in visited:
-            logging.error('Detected cyclic pointer reference for profile. %s', name)
-            raise ValueError
-        visited.add(name)
+    def _resolve_profile(self, name: str, visited: set[str]) -> Profile:
+        profile: Profile | None = self._data.get(name)
 
-        profile = self._data.get(name)
         if not profile:
             logging.error('No TOML profile found for key %s', name)
             raise KeyError
 
-        # If this profile is a pointer, follow its 'ptr' to find the real profile
         if profile.get('type') == 'pointer':
-            pointer_target = profile.get('ptr')
+            pointer_target: str | None = profile.get('ptr')
             if not pointer_target:
                 logging.error("Pointer profile '%s' does not contain 'ptr' key.", name)
                 raise ValueError
             return self._resolve_profile(pointer_target, visited)
 
-        # It's a real profile (or something that isn't a pointer), so just return it
         return profile

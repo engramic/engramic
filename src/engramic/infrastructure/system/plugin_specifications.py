@@ -2,7 +2,6 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
-from typing import Any
 
 import pluggy
 from engramic.core.prompt import Prompt
@@ -13,8 +12,11 @@ llm_spec = pluggy.HookspecMarker('llm')
 
 class LLMSpec:
     @llm_spec
-    def submit(self, llm_input_prompt: Prompt, **kwargs: Any) -> str:
-        pass
+    def submit(self, llm_input_prompt: Prompt, args: dict) -> dict:
+        del llm_input_prompt, args
+        """Submits an LLM request with the given prompt and arguments."""
+        error_message = 'Subclasses must implement `submit`'
+        raise NotImplementedError(error_message)
 
 
 llm_manager = pluggy.PluginManager('llm')
@@ -28,7 +30,10 @@ vector_db_spec = pluggy.HookspecMarker('vector_db')
 class VectorDBspec:
     @vector_db_spec
     def query(self, prompt: Prompt) -> set:
-        pass
+        del prompt
+        """Submits an LLM request with the given prompt and arguments."""
+        error_message = 'Subclasses must implement `query`'
+        raise NotImplementedError(error_message)
 
 
 vector_manager = pluggy.PluginManager('vector_db')

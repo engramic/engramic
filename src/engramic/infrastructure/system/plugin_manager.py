@@ -5,6 +5,7 @@
 import importlib
 import logging
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -13,7 +14,7 @@ from enum import Enum
 from pathlib import Path
 
 import pluggy
-import tomllib
+import tomli
 from engramic.infrastructure.system.engram_profiles import EngramProfiles
 
 
@@ -32,7 +33,7 @@ class PluginManager:
         detected_dependencies: set[str]
 
     def __init__(self):
-        self.profiles = EngramProfiles()
+        self.profiles: EngramProfiles = EngramProfiles()
 
     def install_dependencies(self) -> PluginManagerResponse:
         """
@@ -59,7 +60,7 @@ class PluginManager:
                 dependencies.update(self._get_packages(row_key, plugin_name))
 
         for dependency in dependencies:
-            if self._is_package_installed(dependency):
+            if not self._is_package_installed(dependency):
                 self._install_package(dependency)
                 installed_dependencies.add(dependency)
             else:
@@ -67,8 +68,8 @@ class PluginManager:
 
         return self.PluginManagerResponse(ResponseType.SUCCESS, installed_dependencies, detected_dependencies)
 
-    def set_profile(self, profile_name: str):
-        return self.profiles.set_current_profile(profile_name)
+    def set_profile(self, profile_name: str) -> None:
+        self.profiles.set_current_profile(profile_name)
 
     def import_plugins(self):
         for category in os.listdir(self.PLUGIN_DEFAULT_ROOT):
@@ -90,19 +91,20 @@ class PluginManager:
     def get_plugin(self, category, usage):
         profile = self.profiles.get_currently_set_profile()
 
-        implementation = profile[category][usage]
+        implementation = profile[category][usage]['name']
+        args = profile[category][usage]
 
         plugin = sys.modules.get(f'{category}.{implementation}')
 
         if plugin:
             pm = pluggy.PluginManager(category)
             pm.register(plugin.Mock())
-            return pm.hook
+            return {'func': pm.hook, 'args': args}
         return None
 
     def _get_packages(self, key, plugin_name):
         system_plugin_root_dir = Path(PluginManager.PLUGIN_DEFAULT_ROOT)
-        plugin_root_dir = system_plugin_root_dir / key / plugin_name
+        plugin_root_dir = system_plugin_root_dir / key / plugin_name['name']
 
         packages = self._parse_plugin_toml(plugin_root_dir)
         return packages
@@ -118,8 +120,9 @@ class PluginManager:
 
         try:
             with open(plugin_toml_path, 'rb') as file:
-                config = tomllib.load(file)
-                return config.get('project', {}).get('dependencies', [])
+                config = tomli.load(file)
+                dependencies = config.get('project', {}).get('dependencies', [])
+                return [dep for dep in dependencies if isinstance(dep, str)]
         except Exception:
             logging.exception('Error reading plugin.toml')
             return []
@@ -129,6 +132,7 @@ class PluginManager:
         Checks if a package is installed.
         """
         try:
+            logging.info('Looking for module in: %s', sys.path)
             importlib.import_module(package)
         except ModuleNotFoundError:  # More specific than ImportError
             return False
@@ -139,6 +143,7 @@ class PluginManager:
         """Installs a package using pip and prints the virtual environment information."""
         # Detect virtual environment
         virtual_env = os.environ.get('VIRTUAL_ENV')
+
         if not virtual_env:
             logging.info('No virtual environment detected. Using system Python.')
             pip_executable = shutil.which('pip')  # Fallback to system pip
@@ -146,17 +151,40 @@ class PluginManager:
             logging.info('Using virtual environment: %s', virtual_env)
 
             # Construct the correct path to the pip executable
-            pip_executable = os.path.join(virtual_env, 'bin', 'pip')  # Linux/macOS
-            if not os.path.exists(pip_executable):  # Windows path
+            if platform.system() == 'Windows':
                 pip_executable = os.path.join(virtual_env, 'Scripts', 'pip.exe')
+            else:  # Linux/macOS (including WSL)
+                pip_executable = os.path.join(virtual_env, 'bin', 'pip')
 
-        # Debugging output
-        logging.info('Python Executable: %s', sys.executable)
-        logging.info('Using pip: %s', pip_executable)
+            # Handle WSL-specific case (if Windows path is needed)
+            if 'microsoft-standard' in platform.uname().release and not os.path.exists(pip_executable):
+                try:
+                    wsl_path = subprocess.check_output(['/usr/bin/wslpath', '-w', virtual_env]).decode().strip()
+                    pip_executable = os.path.join(wsl_path, 'bin', 'pip')
+                except FileNotFoundError:
+                    logging.warning('wslpath not found. Ensure WSL is installed and accessible.')
+                except subprocess.CalledProcessError as e:
+                    logging.warning('Failed to execute wslpath: %s', e.output.decode().strip())
+                except UnicodeDecodeError:
+                    logging.warning('Could not decode wslpath output. Unexpected encoding.')
+
+        # Ensure pip_executable is valid
+        if not pip_executable or not os.path.exists(pip_executable):
+            logging.error('pip not found. Ensure it is installed and accessible.')
+            return False  # Return False instead of proceeding with a None value
+
+        logging.info('Using pip executable: %s', pip_executable)
 
         try:
-            subprocess.check_call([pip_executable, 'install', package])
-        except subprocess.CalledProcessError:
+            result = subprocess.run(
+                [pip_executable, 'install', package],
+                check=True,
+                capture_output=True,  # Simplifies output capturing
+                text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            logging.exception('Failed to install package: %s', e.stderr)
             return False
         else:
+            logging.info('Package installed successfully: %s', result.stdout)
             return True

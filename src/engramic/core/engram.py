@@ -9,8 +9,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from context import Context
-    from index import Index
+    from engramic.core.context import Context
+    from engramic.core.index import Index
 
 
 @dataclass()
@@ -53,9 +53,9 @@ class Engram:
         location_str = f'location: {self.location}'
         context_str = self.context.render_context() if self.context else ''
 
-        indices_str = '<indices>\n'
-        indices_str += '\n'.join(index.text for index in self.indices)
-        indices_str += '</indices>' if self.indices else ''
+        leading = '<indices>\n'
+        trailing = '\n</indices>'
+        indices_str = (leading + ('\n'.join(index.text for index in self.indices)) + trailing) if self.indices else ''
 
         native_text = (
             'The text is directly from the source.'
