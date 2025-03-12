@@ -6,6 +6,7 @@ import logging
 import sys
 
 from engramic.application.retrieve.retrieve_service import RetrieveService
+from engramic.application.message.message_service import MessageService
 from engramic.core import Prompt
 from engramic.infrastructure.system import Host
 
@@ -15,12 +16,16 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def main() -> None:
+    Host.register_service(MessageService)
     Host.register_service(RetrieveService)
+    
+    
     host = Host('standard')
     retrieve_service = host.get_service(RetrieveService)
 
     # Submit the prompt.
     retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))
+
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

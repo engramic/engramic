@@ -3,16 +3,35 @@
 # See the LICENSE file in the project root for more details.
 
 import asyncio
+import json
 import logging
 import threading
 from concurrent.futures import Future
+from enum import Enum
+
+import zmq
+import zmq.asyncio
 
 
 class Service:
+
+    class Topic(Enum):
+        RETRIEVE_COMPLETE = "retrieve_complete"
+
     """Base class for services running in their own thread with an asyncio loop."""
 
-    def __init__(self) -> None:
+    def __init__(self,listener=None) -> None:
         self.loop = asyncio.new_event_loop()
+        
+        self.context = zmq.asyncio.Context()
+        self.sub_socket = self.context.socket(zmq.SUB)
+        self.sub_socket.connect("tcp://127.0.0.1:5557")
+        self.push_socket = self.context.socket(zmq.PUSH)
+        self.push_socket.connect("tcp://127.0.0.1:5556")
+        self.subscriber_callbacks = {}
+        self.listeners = [self.listen_for_messages()]
+        if listener != None:
+                self.listeners.append(listener)
         self.thread = threading.Thread(target=self._run, daemon=True)
 
     def start(self, host) -> None:
@@ -23,7 +42,12 @@ class Service:
     def _run(self) -> None:
         """Run the event loop in a separate thread."""
         asyncio.set_event_loop(self.loop)
+        self.schedule_listeners() 
         self.loop.run_forever()
+
+    def schedule_listeners(self):
+        for listeners in self.listeners:
+            self.loop.call_soon_threadsafe(asyncio.create_task, listeners)
 
     async def _shutdown_loop(self):
         tasks = [t for t in asyncio.all_tasks(self.loop) if t is not asyncio.current_task()]
@@ -32,6 +56,10 @@ class Service:
         self.loop.stop()
 
     def stop(self) -> None:
+        
+        self.sub_socket.close()
+        self.push_socket.close()
+        self.context.term()
         self.loop.call_soon_threadsafe(asyncio.create_task, self._shutdown_loop())
         self.thread.join()
 
@@ -90,3 +118,24 @@ class Service:
             logging.warning('Failed to retrieve coroutine name due to incorrect type.')
 
         return 'unknown_coroutine'
+    
+    def send(self, topic: Topic, message: dict):
+        self.push_socket.send_multipart([bytes(topic.value, encoding="utf-8"), bytes(json.dumps(message), encoding="utf-8")])
+
+    def subscribe(self, topic: Topic, callback):
+        self.sub_socket.setsockopt_string(zmq.SUBSCRIBE, topic.value)
+
+        if topic.value not in self.subscriber_callbacks:
+            self.subscriber_callbacks[topic.value] = []
+        self.subscriber_callbacks[topic.value].append(callback)
+
+    async def listen_for_messages(self):
+        """ Continuously checks for incoming messages """
+        while True:
+            topic, message = await self.sub_socket.recv_multipart()
+            decoded_topic = topic.decode()
+            decoded_message = json.loads(message.decode())
+
+            if decoded_topic in self.subscriber_callbacks:
+                for callback in self.subscriber_callbacks[decoded_topic]:
+                    callback(decoded_message)
