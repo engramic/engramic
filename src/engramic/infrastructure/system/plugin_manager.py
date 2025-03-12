@@ -1,6 +1,7 @@
 # Copyright (c) 2025 Preisz Consulting, LLC.
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
+from __future__ import annotations
 
 import importlib
 import logging
@@ -12,6 +13,7 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 import pluggy
 import tomli
@@ -32,8 +34,24 @@ class PluginManager:
         installed_dependencies: set[str]
         detected_dependencies: set[str]
 
-    def __init__(self):
-        self.profiles: EngramProfiles = EngramProfiles()
+    def __init__(self, profile_name: str):
+        self.profiles: EngramProfiles = None
+
+        """Initialize the host with an empty service list."""
+        try:
+            self.profiles = EngramProfiles()
+            self.set_profile(profile_name)
+        except RuntimeError:
+            logging.exception('[ERROR] Failed to load config.')  # Handle the error
+            return
+        except ValueError:
+            logging.exception('[ERROR] Invalid config file.')  # Handle the error
+            return
+        else:
+            logging.info('[INFO] Config loaded successfully')
+
+        self.install_dependencies()
+        self.import_plugins()
 
     def install_dependencies(self) -> PluginManagerResponse:
         """
@@ -45,26 +63,27 @@ class PluginManager:
         installed_dependencies = set()
         detected_dependencies = set()
 
-        for row_key in current_profile:
-            if row_key == 'type':
-                continue
+        if current_profile:
+            for row_key in current_profile:
+                if row_key == 'type':
+                    continue
 
-            row_value = current_profile[row_key]
+                row_value = current_profile[row_key]
 
-            if isinstance(row_value, dict):
-                for usage in row_value:
-                    plugin_name = row_value[usage]
+                if isinstance(row_value, dict):
+                    for usage in row_value:
+                        plugin_name = row_value[usage]
+                        dependencies.update(self._get_packages(row_key, plugin_name))
+                else:
+                    plugin_name = row_value
                     dependencies.update(self._get_packages(row_key, plugin_name))
-            else:
-                plugin_name = row_value
-                dependencies.update(self._get_packages(row_key, plugin_name))
 
-        for dependency in dependencies:
-            if not self._is_package_installed(dependency):
-                self._install_package(dependency)
-                installed_dependencies.add(dependency)
-            else:
-                detected_dependencies.add(dependency)
+            for dependency in dependencies:
+                if not self._is_package_installed(dependency):
+                    self._install_package(dependency)
+                    installed_dependencies.add(dependency)
+                else:
+                    detected_dependencies.add(dependency)
 
         return self.PluginManagerResponse(ResponseType.SUCCESS, installed_dependencies, detected_dependencies)
 
@@ -72,34 +91,47 @@ class PluginManager:
         self.profiles.set_current_profile(profile_name)
 
     def import_plugins(self):
-        for category in os.listdir(self.PLUGIN_DEFAULT_ROOT):
-            category_path = os.path.join(self.PLUGIN_DEFAULT_ROOT, category)
+        current_profile = self.profiles.get_currently_set_profile()
 
-            if os.path.isdir(category_path):  # Ensure it's a directory
-                for plugin_name in os.listdir(category_path):
-                    plugin_path = os.path.join(category_path, plugin_name)
-                    plugin_file = os.path.join(plugin_path, f'{plugin_name}.py')
+        if current_profile:
+            for category in current_profile:
+                category_path = os.path.join(self.PLUGIN_DEFAULT_ROOT, category)
+                if os.path.isdir(category_path):
+                    usage = current_profile[category]
+                    for items in usage:
+                        plugin_entry = usage[items]
+                        plugin_name = plugin_entry['name']
 
-                    if os.path.isdir(plugin_path) and os.path.isfile(plugin_file):
-                        module_name = f'{category}.{plugin_name}'  # Create a unique module name
-
+                        plugin_path = os.path.join(category_path, plugin_name)
+                        plugin_file = os.path.join(plugin_path, f'{plugin_name}.py')
+                        module_name = f'{category}.{plugin_name}'
                         spec = importlib.util.spec_from_file_location(module_name, plugin_file)
                         module = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(module)  # Load the module
+                        spec.loader.exec_module(module)
                         sys.modules[module_name] = module
 
-    def get_plugin(self, category, usage):
+    def get_plugin(self, category, usage) -> dict[str, Any] | None:
+        if self.profiles is None:
+            return None
+
         profile = self.profiles.get_currently_set_profile()
 
-        implementation = profile[category][usage]['name']
-        args = profile[category][usage]
+        if profile and usage in profile[category]:
+            cat_usage = profile[category][usage]
 
-        plugin = sys.modules.get(f'{category}.{implementation}')
+            if 'name' in cat_usage:
+                implementation = cat_usage['name']
 
-        if plugin:
-            pm = pluggy.PluginManager(category)
-            pm.register(plugin.Mock())
-            return {'func': pm.hook, 'args': args}
+                args = profile[category][usage]
+
+                plugin = sys.modules.get(f'{category}.{implementation}')
+
+                if plugin:
+                    pm = pluggy.PluginManager(category)
+                    pm.register(plugin.Mock())
+                    return {'func': pm.hook, 'args': args}
+
+        logging.error('Plugin %s.%s failed to load.', category, usage)
         return None
 
     def _get_packages(self, key, plugin_name):

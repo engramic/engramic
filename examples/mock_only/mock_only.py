@@ -15,12 +15,9 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def main() -> None:
-    # Envoke the retrieve service.
-    retrieve_service = RetrieveService()
-
-    # Add it to the host. Think of the host as a logical server.
-    # Mock is the profile that defines what plugins you are using.
-    host = Host([retrieve_service], 'mock')
+    Host.register_service(RetrieveService)
+    host = Host('standard')
+    retrieve_service = host.get_service(RetrieveService)
 
     # Submit the prompt.
     retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))

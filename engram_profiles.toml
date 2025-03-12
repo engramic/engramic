@@ -17,3 +17,5 @@ vector_db.query = {name="mock",gpt="gpt4o"}
 llm.retrieve_gen_conversation_direction = {name="mock",hint="retrieve_gen_conversation_direction"}
 llm.retrieve_gen_index = {name="mock",gpt="gpt4o"}
 llm.retrieve_prompt_analysis = {name="mock",gpt="gpt4o"}
+
+

@@ -59,7 +59,7 @@ def mock_service():
 
 @pytest.mark.asyncio
 async def test_get_sources(mock_prompt, mock_plugin_manager, mock_service):
-    ask = Ask(prompt=mock_prompt, plugin_manager=mock_plugin_manager)
+    ask = Ask(prompt=mock_prompt, plugin_manager=mock_plugin_manager, service=mock_service)
 
     with (
         patch.object(Ask, '_retrieve_gen_conversation_direction', new_callable=AsyncMock) as mock_direction,
@@ -80,7 +80,7 @@ async def test_get_sources(mock_prompt, mock_plugin_manager, mock_service):
         mock_query.return_value = [9, 20, 4]
 
         # Run the method
-        ask.get_sources(mock_service)
+        ask.get_sources()
 
         # Allow event loop to process async calls
         await mock_direction()

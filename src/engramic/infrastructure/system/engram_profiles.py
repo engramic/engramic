@@ -36,8 +36,15 @@ class EngramProfiles:
 
         self._data: dict[str, Profile] = {}
 
-        with path.open('rb') as f:
-            self._data = tomli.load(f)
+        try:
+            with path.open('rb') as f:
+                self._data = tomli.load(f)
+        except FileNotFoundError as err:
+            error = f'Config file not found: {path}'
+            raise RuntimeError(error) from err
+        except tomli.TOMLDecodeError as err:
+            error = f'Invalid TOML format in {path}'
+            raise ValueError(error) from err
 
         version = self._data.get('version')
 
@@ -58,13 +65,20 @@ class EngramProfiles:
         - If the table is of type='pointer', follow its ptr until a real profile is found.
         """
         visited: set = set()
-        return self._resolve_profile(name, visited)
+        try:
+            ret_profile = self._resolve_profile(name, visited)
+        except ValueError as err:
+            raise ValueError from err
+        except KeyError as err:
+            raise KeyError from err
+
+        return ret_profile
 
     def _resolve_profile(self, name: str, visited: set[str]) -> Profile:
         profile: Profile | None = self._data.get(name)
 
         if not profile:
-            logging.error('No TOML profile found for key %s', name)
+            logging.error('No TOML profile found for profile="%s".', name)
             raise KeyError
 
         if profile.get('type') == 'pointer':
@@ -73,5 +87,9 @@ class EngramProfiles:
                 logging.error("Pointer profile '%s' does not contain 'ptr' key.", name)
                 raise ValueError
             return self._resolve_profile(pointer_target, visited)
-
+        if profile.get('type') != 'profile':
+            logging.error(
+                "Profile '%s' type must contain 'pointer' or 'type' value. Found %s", name, profile.get('type')
+            )
+            raise ValueError
         return profile

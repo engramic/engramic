@@ -15,50 +15,63 @@ class Ask(Retrieval):
         self,
         prompt: Prompt,
         plugin_manager: PluginManager,
+        service: Service,
         library: Library = None,
     ) -> None:
-        self.service = None
+        self.service = service
         self.library = library
         self.prompt = prompt
-        self.retrieve_gen_conversation_direction = plugin_manager.get_plugin(
+        self.retrieve_gen_conversation_direction_plugin = plugin_manager.get_plugin(
             'llm', 'retrieve_gen_conversation_direction'
         )
         self.prompt_analysis_plugin = plugin_manager.get_plugin('llm', 'retrieve_prompt_analysis')
         self.prompt_retrieve_indicies_plugin = plugin_manager.get_plugin('llm', 'retrieve_gen_index')
         self.prompt_query_index_db_plugin = plugin_manager.get_plugin('vector_db', 'query')
 
-    def get_sources(self, service: Service) -> None:
-        direction_step = service.submit_async_tasks(self._retrieve_gen_conversation_direction())
-        direction_ret = direction_step.result()
+    def get_sources(self) -> None:
+        if (
+            self.retrieve_gen_conversation_direction_plugin is None
+            or self.prompt_analysis_plugin is None
+            or self.prompt_retrieve_indicies_plugin is None
+            or self.prompt_query_index_db_plugin is None
+        ):
+            return None
+
+        direction_step = self.service.submit_async_tasks(self._retrieve_gen_conversation_direction())
+        direction_step.add_done_callback(self.on_direction_ret_complete)
+
+    def on_direction_ret_complete(self, fut: Future):
+        direction_ret = fut.result()
+
         direction = direction_ret['_retrieve_gen_conversation_direction']['conversation_direction']
 
         logging.info('conversation direction: %s', direction)  # We will be using this later for anticipatory retrieval
 
-        analyze_step = service.submit_async_tasks(self._analyze_prompt(), self._generate_indicies())
+        analyze_step = self.service.submit_async_tasks(self._analyze_prompt(), self._generate_indicies())
 
-        def on_analyze_complete(fut: Future):
-            try:
-                prompt = fut.result()  # This will raise an exception if the coroutine fails
-                logging.info('Prompt: %s', prompt)
+        analyze_step.add_done_callback(self.on_analyze_complete)
 
-                query_index_db_future = service.submit_async_tasks(self._query_index_db())
+    def on_analyze_complete(self, fut: Future):
+        try:
+            prompt = fut.result()  # This will raise an exception if the coroutine fails
+            logging.info('Prompt: %s', prompt)
 
-                def on_query_index_db(fut: Future):
-                    try:
-                        set_ret = fut.result()
-                        logging.info('Query Result: %s', set_ret['_query_index_db'])
-                    except Exception:
-                        logging.exception('Error in querying index DB.')
+            query_index_db_future = self.service.submit_async_tasks(self._query_index_db())
 
-                query_index_db_future.add_done_callback(on_query_index_db)
+            query_index_db_future.add_done_callback(self.on_query_index_db)
 
-            except Exception:
-                logging.exception('Error in analyzing prompt.')
+        except Exception:
+            logging.exception('Error in analyzing prompt.')
 
-        analyze_step.add_done_callback(on_analyze_complete)
+    def on_query_index_db(self, fut: Future):
+        try:
+            set_ret = fut.result()
+            logging.info('Query Result: %s', set_ret['_query_index_db'])
+        except Exception:
+            logging.exception('Error in querying index DB.')
 
     async def _retrieve_gen_conversation_direction(self):
-        plugin = self.retrieve_gen_conversation_direction
+        plugin = self.retrieve_gen_conversation_direction_plugin
         # add prompt engineering here and submit as the full prompt.
         ret = plugin['func'].submit(prompt=self.prompt, args=plugin['args'])
         return ret[0]

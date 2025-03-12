@@ -4,35 +4,40 @@
 
 import logging
 import threading
+from typing import ClassVar
 
 from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
 
 class Host:
-    def __init__(self, service_list: list[Service], selected_profile: str) -> None:
-        """Initialize the host with an empty service list."""
+    _services: ClassVar[dict[str, type[Service]]] = {}
 
-        self.plugin_manager: PluginManager = PluginManager()
+    @staticmethod
+    def register_service(cls_in: type[Service]):
+        Host._services[cls_in.__name__] = cls_in
 
-        self.services: list[Service] = service_list
+    def __init__(self, selected_profile: str) -> None:
+        self.plugin_manager: PluginManager = PluginManager(selected_profile)
+        self.services: dict[str, type[Service]] = {}
 
-        self.plugin_manager.set_profile(selected_profile)
-        self.plugin_manager.install_dependencies()
-        self.plugin_manager.import_plugins()
-
-        for service in self.services:
-            service.start(self)
+        for name in Host._services:
+            class_ctr = Host._services[name]
+            self.services[name] = class_ctr(self.plugin_manager)  # Instantiate the class
+            self.services[name].start(self)
 
         self.stop_event: threading.Event = threading.Event()
 
-    def get_plugin_manager(self) -> PluginManager:
-        return self.plugin_manager
+    def get_service(self, cls_in: type[Service]) -> Service:
+        name = cls_in.__name__
+        if name in self.services:
+            return self.services[name]
+        return None
 
     def stop_all(self) -> None:
         """Stop all running services."""
         for service in self.services:
-            service.stop()
+            self.services[service].stop()
 
     def wait_for_shutdown(self) -> None:
         try:
