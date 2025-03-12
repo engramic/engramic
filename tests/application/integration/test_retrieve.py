@@ -1,14 +1,16 @@
-import pytest
 import logging
 import sys
-from engramic.application.retrieve.retrieve_service import RetrieveService
+
+import pytest
 from engramic.application.message.message_service import MessageService
+from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.core import Prompt
 from engramic.infrastructure.system import Host
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('Using Python interpreter:%s', sys.executable)
+
 
 @pytest.fixture
 def host():
@@ -19,10 +21,12 @@ def host():
     yield test_host  # Provide the fixture to the test
     test_host.shutdown()  # Ensure proper cleanup
 
+
 @pytest.fixture
 def retrieve_service(host):
     """Fixture to get the RetrieveService instance."""
     return host.get_service(RetrieveService)
+
 
 def test_retrieve_service_submission(retrieve_service):
     """Integration test to check if RetrieveService submits prompts correctly."""
@@ -31,4 +35,4 @@ def test_retrieve_service_submission(retrieve_service):
     result = fut.result(timeout=5)
     # You might need a way to verify the response, such as checking logs, mock calls, or output.
     # This part depends on how RetrieveService handles submissions.
-    assert result==[9,20,4]  # Placeholder assertion; replace with a meaningful verification
+    assert result == [9, 20, 4]  # Placeholder assertion; replace with a meaningful verification

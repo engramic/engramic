@@ -3,6 +3,7 @@
 # See the LICENSE file in the project root for more details.
 
 import logging
+
 from engramic.application.retrieve.ask import Ask
 from engramic.core import Prompt
 from engramic.infrastructure.system.plugin_manager import PluginManager
@@ -15,7 +16,7 @@ class RetrieveService(Service):
     def __init__(self, plugin_manager: PluginManager) -> None:
         super().__init__()
         self.plugin_manager: PluginManager = plugin_manager
-        self.subscribe(Service.Topic.RETRIEVE_COMPLETE,self.on_retrieve_complete) #just for testing
+        self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)  # just for testing
 
     def start(self, host) -> None:
         super().start(host)
@@ -26,5 +27,5 @@ class RetrieveService(Service):
         self.send(Service.Topic.RETRIEVE_COMPLETE, future.result())
         return future
 
-    def on_retrieve_complete(self,message):
-        logging.info("message recieved. %s",message) #just for testing
+    def on_retrieve_complete(self, message):
+        logging.info('message recieved. %s', message)  # just for testing

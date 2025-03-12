@@ -39,21 +39,22 @@ class Ask(Retrieval):
 
         final_future = Future()
 
-
         def on_direction_ret_complete(fut: Future):
             try:
                 direction_ret = fut.result()
 
                 direction = direction_ret['_retrieve_gen_conversation_direction']['conversation_direction']
 
-                logging.info('conversation direction: %s', direction)  # We will be using this later for anticipatory retrieval
+                logging.info(
+                    'conversation direction: %s', direction
+                )  # We will be using this later for anticipatory retrieval
 
                 analyze_step = self.service.submit_async_tasks(self._analyze_prompt(), self._generate_indicies())
 
                 analyze_step.add_done_callback(on_analyze_complete)
 
             except Exception as e:
-                logging.exception("Error in conversation direction generation")
+                logging.exception('Error in conversation direction generation')
                 final_future.set_exception(e)
 
         def on_analyze_complete(fut: Future):
@@ -72,7 +73,7 @@ class Ask(Retrieval):
         def on_query_index_db(fut: Future):
             try:
                 set_ret = fut.result()
-                final_future.set_result(set_ret["_query_index_db"])
+                final_future.set_result(set_ret['_query_index_db'])
                 logging.info('Query Result: %s', set_ret['_query_index_db'])
             except Exception as e:
                 logging.exception('Error in querying index DB.')

@@ -75,6 +75,9 @@ omit = [
   "src/engramic/__about__.py",
 ]
 
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+
 [tool.coverage.paths]
 engramic = ["src/engramic", "*/engramic/src/engramic"]
 tests = ["tests", "*/engramic/tests"]

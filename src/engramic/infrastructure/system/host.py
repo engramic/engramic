@@ -38,10 +38,9 @@ class Host:
         """Stop all running services."""
         for service in self.services:
             self.services[service].stop()
-        
-        #host ready for shutdown
-        self.stop_event.set()
 
+        # host ready for shutdown
+        self.stop_event.set()
 
     def wait_for_shutdown(self) -> None:
         try:
