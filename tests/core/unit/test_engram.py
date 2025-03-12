@@ -1,4 +1,6 @@
-# test_engram.py
+# Copyright (c) 2025 Preisz Consulting, LLC.
+# This file is part of Engramic, licensed under the Engramic Community License.
+# See the LICENSE file in the project root for more details.
 
 
 import uuid
@@ -47,10 +49,12 @@ def test_render_engram():
         'mocked_context\n'
         '<indices>\n'
         'index1\n'
-        'index2</indices>\n'
+        'index2\n</indices>\n'
         'The text is directly from the source.\n'
         '<text>test_text</text>\n'
         '</end>\n'
     )
 
-    assert engram.render_engram() == expected_output
+    render = engram.render_engram()
+
+    assert render == expected_output

@@ -25,7 +25,14 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = ["pluggy","mako","tomli"]
+
+[tool.hatch.envs.dev]
+template = "default"
+dependencies = ["pre-commit"]
+
+[tool.hatch.envs.dev.scripts]
+post-install = "pre-commit install"
 
 [project.urls]
 Documentation = "https://github.com/engramic/engramic#readme"
@@ -35,13 +42,18 @@ Source = "https://github.com/engramic/engramic"
 [tool.hatch.version]
 path = "src/engramic/__about__.py"
 
-[tool.hatch.envs.hatch-test]
-extra-dependencies = ["engramic","debugpy"]
+[tool.hatch.envs.test]
+template = "dev"
+dependencies = ["pytest","pytest-asyncio","mypy"]
 
-[tool.hatch.envs.remote_debug]
-dependencies = ["pytest","debugpy"]
+[tool.hatch.envs.test.scripts]
+typecheck = "mypy --ignore-missing-imports ."
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = ["engramic","pytest-asyncio"]
 
 [tool.hatch.envs.docs]
+template = "default"
 dependencies = [
   "mkdocs",
   "mkdocs-material",
@@ -51,9 +63,6 @@ dependencies = [
 [tool.hatch.envs.docs.scripts]
 "build" = "mkdocs build"
 "serve" = "mkdocs serve -a 0.0.0.0:8000"
-
-[tool.hatch.envs.remote_debug.scripts]
-debug = "python -m debugpy --listen localhost:5678 --wait-for-client -m pytest tests/"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.9", "3.10","3.11","3.12","3.13"]
@@ -76,6 +85,8 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+omit = ["*/__init__.py"]
+
 
 
 [tool.ruff.format]
@@ -85,11 +96,12 @@ quote-style = "single"
 [tool.ruff.lint]
 preview = true
 extend-select = ["C901"]
-ignore = ["PLC0414","RET504"] 
+ignore = ["PLC0414","RET504","PLR6301"] 
 
 #ignores
 #PLC0414 - redundant "as" in init files
 #RET504 -allowing assignments before a return
+#PLR6301 - not using self in a method. Should add back later.
 
 [tool.ruff.lint.extend-per-file-ignores]
 "docs/.hooks/*" = ["INP001", "T201"]

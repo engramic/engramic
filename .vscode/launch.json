@@ -1,15 +1,37 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "Attach to Hatch Test",
+  "version": "0.2.0",
+  "configurations": [
+  {
+      "name": "Example - Mock Only (hatch env:dev)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/mock_only/mock_only.py",
+      "console": "integratedTerminal"
+  },
+  
+  {
+    "name": "Run Pytest with Debugger (hatch env:test)",
+    "type": "debugpy",
+    "request": "launch",
+    "module": "pytest",
+    "args": [
+        "-s",  // Allows print statements to show in the terminal
+        "-v",  // Increases verbosity for better debugging output
+        "tests/" // Adjust this to the path where your test files are located
+    ],
+    "console": "integratedTerminal",
+    "justMyCode": false,
+    },
+    {
+        "name": "Attach to running Hatch Test ",
         "type": "debugpy",
         "request": "attach",
         "connect": {
-          "host": "localhost",
-          "port": 5678
+            "host": "localhost",
+            "port": 5678
         }
-      }
-    ]
-  }
+    }
+  ]
+}
+
   

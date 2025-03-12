@@ -2,10 +2,11 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
-from dataclasses import dataclass
+import uuid
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
-class Index:
-    embedding: list[float]
-    text: str
+class Prompt:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()), init=False)
+    user_input: str

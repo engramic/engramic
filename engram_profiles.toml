@@ -1,0 +1,21 @@
+version = 1.0
+
+[mock]
+type = "profile"
+vector_db.query = {name="mock"}
+llm.retrieve_gen_conversation_direction = {name="mock",hint="retrieve_gen_conversation_direction"}
+llm.retrieve_gen_index = {name="mock",hint="retrieve_gen_index"}
+llm.retrieve_prompt_analysis = {name="mock",hint="retrieve_prompt_analysis"}
+
+[standard]
+type = "pointer"
+ptr = "standard-2025-03-01"
+
+[standard-2025-03-01]
+type = "profile"
+vector_db.query = {name="mock",gpt="gpt4o"}
+llm.retrieve_gen_conversation_direction = {name="mock",hint="retrieve_gen_conversation_direction"}
+llm.retrieve_gen_index = {name="mock",gpt="gpt4o"}
+llm.retrieve_prompt_analysis = {name="mock",gpt="gpt4o"}
+
+

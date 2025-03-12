@@ -1,0 +1,6 @@
+[project]
+name = "llm_mock"
+version = "0.0.1"
+description = "A simple project with cowsay"
+authors = ["ericp@engramic.org"]
+dependencies = ["cowsay>5.0"]

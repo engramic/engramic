@@ -11,4 +11,4 @@ Restrictions.
 
 2. You may not act on behalf of any person or entity employing 250 or more people worldwide to circumvent Restriction 1.
 
-All derivative works must retain this Small Entity License and these Restrictions.
+All derivative works must retain this Engramic Community License and these Restrictions.

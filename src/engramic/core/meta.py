@@ -1,11 +1,15 @@
+# Copyright (c) 2025 Preisz Consulting, LLC.
+# This file is part of Engramic, licensed under the Engramic Community License.
+# See the LICENSE file in the project root for more details.
+
 from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, list
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from context import Context
+    from engramic.core.context import Context
 
 
 @dataclass()
