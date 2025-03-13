@@ -25,7 +25,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["pluggy","mako","tomli"]
+dependencies = ["pluggy","mako","tomli","pyzmq"]
 
 [tool.hatch.envs.dev]
 template = "default"
@@ -74,6 +74,9 @@ parallel = true
 omit = [
   "src/engramic/__about__.py",
 ]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.coverage.paths]
 engramic = ["src/engramic", "*/engramic/src/engramic"]

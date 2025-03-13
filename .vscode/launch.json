@@ -8,7 +8,14 @@
       "program": "${workspaceFolder}/examples/mock_only/mock_only.py",
       "console": "integratedTerminal"
   },
-  
+  {
+    "name": "Integration Test - Mock Only (hatch env:test)",
+    "type": "debugpy",
+    "request": "launch",
+    "module": "pytest",
+    "args": "${workspaceFolder}/tests/application/integration/test_retrieve.py",
+    "console": "integratedTerminal"
+  },
   {
     "name": "Run Pytest with Debugger (hatch env:test)",
     "type": "debugpy",
