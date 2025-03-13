@@ -13,19 +13,17 @@ from engramic.infrastructure.system.service import Service
 class RetrieveService(Service):
     # ITERATIONS = 3
 
-    def __init__(self, plugin_manager: PluginManager) -> None:
-        super().__init__()
+    def __init__(self, plugin_manager: PluginManager, host) -> None:
+        super().__init__(host)
         self.plugin_manager: PluginManager = plugin_manager
-        self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)  # just for testing
 
-    def start(self, host) -> None:
-        super().start(host)
+    def start(self) -> None:
+        super().start()
+        # self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)  # just for testing
 
     def submit(self, prompt: Prompt) -> None:
         retrieval = Ask(prompt, self.plugin_manager, super())
-        future = retrieval.get_sources()
-        self.send(Service.Topic.RETRIEVE_COMPLETE, future.result())
-        return future
+        retrieval.get_sources()
 
     def on_retrieve_complete(self, message):
         logging.info('message recieved. %s', message)  # just for testing

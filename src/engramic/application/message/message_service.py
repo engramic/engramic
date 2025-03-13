@@ -9,9 +9,6 @@ from engramic.infrastructure.system.plugin_manager import PluginManager
 class MessageService(BaseMessageService):
     # ITERATIONS = 3
 
-    def __init__(self, plugin_manager: PluginManager) -> None:
-        super().__init__()
+    def __init__(self, plugin_manager: PluginManager, event_loop) -> None:
+        super().__init__(event_loop)
         self.plugin_manager: PluginManager = plugin_manager
-
-    def start(self, host) -> None:
-        super().start(host)

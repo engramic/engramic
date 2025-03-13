@@ -2,20 +2,38 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import logging
+
 import zmq
 import zmq.asyncio
 from engramic.infrastructure.system.service import Service
 
 
 class BaseMessageService(Service):
-    def __init__(self):
-        self.pub_pull_context = zmq.asyncio.Context()
-        self.pub_socket = self.pub_pull_context.socket(zmq.PUB)
-        self.pub_socket.bind('tcp://127.0.0.1:5557')
-        self.pull_socket = self.pub_pull_context.socket(zmq.PULL)
-        self.pull_socket.bind('tcp://*:5556')
+    def __init__(self, event_loop):
+        super().__init__(event_loop)
 
-        super().__init__(self.listen_for_push_messages())
+    def init_async(self):
+        self.pub_pull_context = zmq.asyncio.Context()
+        self.pull_socket = self.pub_pull_context.socket(zmq.PULL)
+        try:
+            self.pull_socket.bind('tcp://*:5556')
+        except zmq.error.ZMQError as err:
+            logging.exception('Address 5556 in use. Is another instance running?')
+            error = 'Failed to bind socket'
+            raise OSError(error) from err
+
+        self.pub_socket = self.pub_pull_context.socket(zmq.PUB)
+
+        try:
+            self.pub_socket.bind('tcp://127.0.0.1:5557')
+        except zmq.error.ZMQError as err:
+            logging.exception('Address 5557 in use. Is another instance running?')
+            error = 'Failed to bind socket'
+            raise OSError(error) from err
+
+        self._run_background(self.listen_for_push_messages())
+        super().init_async()
 
     def stop(self) -> None:
         self.pub_socket.close()
@@ -24,11 +42,7 @@ class BaseMessageService(Service):
         super().stop()
 
     def publish_message(self, topic, message):
-        async def send_message_coroutine():
-            await self.pub_socket.send_multipart([topic, message])
-
-        future = self.submit_async_tasks(send_message_coroutine())
-        return future
+        self.pub_socket.send_multipart([topic, message])
 
     async def listen_for_push_messages(self):
         """Continuously checks for incoming messages"""

@@ -15,9 +15,7 @@ logging.info('Using Python interpreter:%s', sys.executable)
 @pytest.fixture
 def host():
     """Fixture to set up and tear down the host."""
-    Host.register_service(MessageService)
-    Host.register_service(RetrieveService)
-    test_host = Host('mock')
+    test_host = Host('mock', [MessageService, RetrieveService])
     yield test_host  # Provide the fixture to the test
     test_host.shutdown()  # Ensure proper cleanup
 
@@ -31,8 +29,10 @@ def retrieve_service(host):
 def test_retrieve_service_submission(retrieve_service):
     """Integration test to check if RetrieveService submits prompts correctly."""
     prompt = Prompt('Give me a recipe for queso, put the ingredients in a table.')
-    fut = retrieve_service.submit(prompt)
-    result = fut.result(timeout=5)
-    # You might need a way to verify the response, such as checking logs, mock calls, or output.
-    # This part depends on how RetrieveService handles submissions.
-    assert result == [9, 20, 4]  # Placeholder assertion; replace with a meaningful verification
+
+    def callback_test(data):
+        assert data == [9, 20, 4]
+
+    retrieve_service.subscribe(RetrieveService.Topic.RETRIEVE_COMPLETE, callback_test)
+
+    retrieve_service.submit(prompt)

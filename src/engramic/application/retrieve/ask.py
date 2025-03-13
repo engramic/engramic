@@ -37,19 +37,19 @@ class Ask(Retrieval):
         ):
             return None
 
-        final_future = Future()
+        final_future: Future = Future()
 
         def on_direction_ret_complete(fut: Future):
             try:
                 direction_ret = fut.result()
 
-                direction = direction_ret['_retrieve_gen_conversation_direction']['conversation_direction']
+                direction = direction_ret['conversation_direction']
 
                 logging.info(
                     'conversation direction: %s', direction
                 )  # We will be using this later for anticipatory retrieval
 
-                analyze_step = self.service.submit_async_tasks(self._analyze_prompt(), self._generate_indicies())
+                analyze_step = self.service.run_tasks([self._analyze_prompt(), self._generate_indicies()])
 
                 analyze_step.add_done_callback(on_analyze_complete)
 
@@ -62,7 +62,7 @@ class Ask(Retrieval):
                 prompt = fut.result()  # This will raise an exception if the coroutine fails
                 logging.info('Prompt: %s', prompt)
 
-                query_index_db_future = self.service.submit_async_tasks(self._query_index_db())
+                query_index_db_future = self.service.run_task(self._query_index_db())
 
                 query_index_db_future.add_done_callback(on_query_index_db)
 
@@ -73,15 +73,17 @@ class Ask(Retrieval):
         def on_query_index_db(fut: Future):
             try:
                 set_ret = fut.result()
-                final_future.set_result(set_ret['_query_index_db'])
-                logging.info('Query Result: %s', set_ret['_query_index_db'])
+                logging.info('Query Result: %s', set_ret)
+                final_future.set_result(set_ret)
+                result = final_future.result()
+                self.service.send_message_async(Service.Topic.RETRIEVE_COMPLETE, result)
+
             except Exception as e:
                 logging.exception('Error in querying index DB.')
                 final_future.set_exception(e)
 
-        direction_step = self.service.submit_async_tasks(self._retrieve_gen_conversation_direction())
+        direction_step = self.service.run_task(self._retrieve_gen_conversation_direction())
         direction_step.add_done_callback(on_direction_ret_complete)
-        return final_future
 
     async def _retrieve_gen_conversation_direction(self):
         plugin = self.retrieve_gen_conversation_direction_plugin

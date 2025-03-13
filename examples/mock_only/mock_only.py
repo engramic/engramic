@@ -16,11 +16,14 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def main() -> None:
-    Host.register_service(MessageService)
-    Host.register_service(RetrieveService)
+    host = Host('mock', [MessageService, RetrieveService])
 
-    host = Host('standard')
     retrieve_service = host.get_service(RetrieveService)
+
+    def callback_test(data):
+        logging.info('Callback result: %s', data)
+
+    retrieve_service.subscribe(RetrieveService.Topic.RETRIEVE_COMPLETE, callback_test)
 
     # Submit the prompt.
     retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))
