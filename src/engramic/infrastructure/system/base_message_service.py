@@ -10,8 +10,8 @@ from engramic.infrastructure.system.service import Service
 
 
 class BaseMessageService(Service):
-    def __init__(self, event_loop):
-        super().__init__(event_loop)
+    def __init__(self,host):
+        super().__init__(host)
 
     def init_async(self):
         self.pub_pull_context = zmq.asyncio.Context()
@@ -32,7 +32,7 @@ class BaseMessageService(Service):
             error = 'Failed to bind socket'
             raise OSError(error) from err
 
-        self._run_background(self.listen_for_push_messages())
+        self.run_background(self.listen_for_push_messages())
         super().init_async()
 
     def stop(self) -> None:
@@ -41,11 +41,9 @@ class BaseMessageService(Service):
         self.pub_pull_context.term()
         super().stop()
 
-    def publish_message(self, topic, message):
-        self.pub_socket.send_multipart([topic, message])
 
     async def listen_for_push_messages(self):
         """Continuously checks for incoming messages"""
         while True:
             topic, message = await self.pull_socket.recv_multipart()
-            self.publish_message(topic, message)
+            self.pub_socket.send_multipart([topic, message])

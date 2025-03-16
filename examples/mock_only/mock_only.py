@@ -4,9 +4,11 @@
 
 import logging
 import sys
+import time
 
 from engramic.application.message.message_service import MessageService
 from engramic.application.retrieve.retrieve_service import RetrieveService
+from engramic.application.response.response_service import ResponseService
 from engramic.core import Prompt
 from engramic.infrastructure.system import Host
 
@@ -14,9 +16,11 @@ from engramic.infrastructure.system import Host
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('Using Python interpreter:%s', sys.executable)
 
+def test_submit():
+    print("Function executed after 10 seconds")
 
 def main() -> None:
-    host = Host('mock', [MessageService, RetrieveService])
+    host = Host('mock', [MessageService, RetrieveService,ResponseService])
 
     retrieve_service = host.get_service(RetrieveService)
 
@@ -24,6 +28,8 @@ def main() -> None:
         logging.info('Callback result: %s', data)
 
     retrieve_service.subscribe(RetrieveService.Topic.RETRIEVE_COMPLETE, callback_test)
+
+    time.sleep(10)
 
     # Submit the prompt.
     retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))

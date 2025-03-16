@@ -116,7 +116,7 @@ class PluginManager:
 
         profile = self.profiles.get_currently_set_profile()
 
-        if profile and usage in profile[category]:
+        if profile and category in profile and usage in profile[category]:
             cat_usage = profile[category][usage]
 
             if 'name' in cat_usage:

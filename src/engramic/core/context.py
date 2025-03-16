@@ -12,3 +12,4 @@ class Context(ABC):
     @abstractmethod
     def render_context(self) -> str:
         """Abstract method that must be implemented by subclasses to render context meaningfully."""
+        pass

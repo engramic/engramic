@@ -4,34 +4,40 @@
 import asyncio
 import logging
 import threading
+import time
 from concurrent.futures import Future
 from threading import Thread
 
 from engramic.infrastructure.system.plugin_manager import PluginManager
+from engramic.infrastructure.system.websocket_manager import WebsocketManager
 from engramic.infrastructure.system.service import Service
+from engramic.core.host import Host
 
-
-class Host:
+class Host(Host):
     def __init__(self, selected_profile: str, services: list[type[Service]]) -> None:
         self.plugin_manager: PluginManager = PluginManager(selected_profile)
+        self.web_socket_manager: WebsocketManager = WebsocketManager(self)
 
         self.services: dict[str, Service] = {}
-
         for ctr in services:
-            self.services[ctr.__name__] = ctr(self.plugin_manager, self)  # Instantiate the class
+            self.services[ctr.__name__] = ctr(self)  # Instantiate the class
 
         self.async_loop_event = threading.Event()
-        self.thread = Thread(target=self._start_async_loop, daemon=True, name='Async Loop')
+        self.thread = Thread(target=self._start_async_loop, daemon=True, name='Async Thread')
         self.thread.start()
-        self.async_loop_event.wait()  # wait for async init to complete.
-
+        ret = self.async_loop_event.wait()
         self.stop_event: threading.Event = threading.Event()
+
+        for ctr in services:
+            self.services[ctr.__name__].start()
+        
 
     def _start_async_loop(self):
         """Run the event loop in a separate thread."""
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self.loop.call_soon_threadsafe(self._init_services_async)
+        self.loop.call_soon_threadsafe(self.web_socket_manager.init_async)
         self.loop.call_soon_threadsafe(self.async_loop_event.set)
         try:
             self.loop.run_forever()
@@ -54,6 +60,7 @@ class Host:
         if not asyncio.iscoroutine(coro):
             error = 'Expected a coroutine'
             raise TypeError(error)
+
         return asyncio.run_coroutine_threadsafe(coro, self.loop)
 
     def run_tasks(self, coros) -> Future:
@@ -98,7 +105,10 @@ class Host:
 
     def wait_for_shutdown(self) -> None:
         try:
-            self.stop_event.wait()
+            while not self.stop_event.is_set():  # Run until stop_event is set
+                for service in self.services.values():  # Iterate over values directly
+                    service.update()  # Call update method
+                time.sleep(0.001)  # Small sleep to prevent busy looping
 
         except KeyboardInterrupt:
             self.shutdown()
