@@ -6,11 +6,12 @@ import logging
 
 import zmq
 import zmq.asyncio
+
 from engramic.infrastructure.system.service import Service
 
 
 class BaseMessageService(Service):
-    def __init__(self,host):
+    def __init__(self, host):
         super().__init__(host)
 
     def init_async(self):
@@ -40,7 +41,6 @@ class BaseMessageService(Service):
         self.pull_socket.close()
         self.pub_pull_context.term()
         super().stop()
-
 
     async def listen_for_push_messages(self):
         """Continuously checks for incoming messages"""

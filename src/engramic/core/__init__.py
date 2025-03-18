@@ -6,4 +6,3 @@ from engramic.core.engram import Engram as Engram
 from engramic.core.library import Library as Library
 from engramic.core.prompt import Prompt as Prompt
 from engramic.core.retrieval import Retrieval as Retrieval
-

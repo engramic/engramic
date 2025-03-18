@@ -2,19 +2,30 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import cProfile
+import logging
+
 from engramic.infrastructure.system.base_message_service import BaseMessageService
-from engramic.infrastructure.system.plugin_manager import PluginManager
+from engramic.infrastructure.system.service import Service
 
 
 class MessageService(BaseMessageService):
-    # ITERATIONS = 3
-
     def __init__(self, host) -> None:
         super().__init__(host)
-        self.plugin_manager: PluginManager = host.plugin_manager
+        self.profiler = None
 
     def start(self):
-        pass
+        self.subscribe(Service.Topic.START_PROFILER, self.start_profiler)
+        self.subscribe(Service.Topic.END_PROFILER, self.end_profiler)
 
-    def update(self) -> None:
-        pass
+    def start_profiler(self, data):
+        del data
+        logging.info('Start Profiler')
+        self.profiler = cProfile.Profile()
+        self.profiler.enable()
+
+    def end_profiler(self, data):
+        del data
+        logging.info('Stop Profiler')
+        self.profiler.disable()
+        self.profiler.dump_stats('profile_output.prof')

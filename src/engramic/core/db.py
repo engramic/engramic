@@ -13,10 +13,20 @@ class DB(ABC):
 
     @abstractmethod
     def connect(self, **kwargs: Any) -> bool:
-        pass
-    
-    def close(self)->bool:
-        pass
+        """Establish a connection to the database."""
+        # or `return False`
 
-    def execute(self, **kwargs: Any):
-        pass
+    @abstractmethod
+    def close(self) -> bool:
+        """Close the connection to the database."""
+        # or `return False`
+
+    @abstractmethod
+    def execute(self, query: str, **kwargs: Any) -> Any:
+        """Execute a query without additional data."""
+        # or `return None`
+
+    @abstractmethod
+    def execute_data(self, query: str, data: dict, **kwargs: Any) -> Any:
+        """Execute a query with additional data."""
+        # or `return None`

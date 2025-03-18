@@ -12,15 +12,15 @@ class LLM(ABC):
     """
     An abstract base class that defines an interface for any Large Language Model.
     """
-    @dataclass()
-    class StreamPacket():
-        packet: str
-        finish:bool
-        finish_reason:str
 
+    @dataclass()
+    class StreamPacket:
+        packet: str
+        finish: bool
+        finish_reason: str
 
     @abstractmethod
-    def submit(self, prompt: str, args:dict ) -> str:
+    def submit(self, prompt: str, args: dict) -> str:
         """
         Submits a prompt to the LLM and returns the model-generated text.
 
@@ -34,7 +34,7 @@ class LLM(ABC):
         """
 
     @abstractmethod
-    def submit_streaming(self, prompt: str, args:dict, websocket_manager:WebsocketManager ) -> str:
+    def submit_streaming(self, prompt: str, args: dict, websocket_manager: WebsocketManager) -> str:
         """
         Submits a prompt to the LLM and returns the model-generated text.
 

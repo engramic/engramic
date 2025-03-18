@@ -93,8 +93,6 @@ exclude_lines = [
 ]
 omit = ["*/__init__.py"]
 
-
-
 [tool.ruff.format]
 preview = true
 quote-style = "single"
@@ -102,15 +100,16 @@ quote-style = "single"
 [tool.ruff.lint]
 preview = true
 extend-select = ["C901"]
-ignore = ["PLC0414","RET504","PLR6301"] 
+ignore = ["PLC0414","RET504","PLR6301","S105"] 
 
 #ignores
 #PLC0414 - redundant "as" in init files
 #RET504 -allowing assignments before a return
 #PLR6301 - not using self in a method. Should add back later.
+#S105 - Hardcoded password assigned
 
 [tool.ruff.lint.extend-per-file-ignores]
 "docs/.hooks/*" = ["INP001", "T201"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["foo", "bar"]
+known-first-party = ["engramic"]
