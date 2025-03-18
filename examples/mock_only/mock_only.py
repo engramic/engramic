@@ -6,8 +6,10 @@ import logging
 import sys
 
 from engramic.application.message.message_service import MessageService
+from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
-from engramic.core import Prompt
+from engramic.application.storage.storage_service import StorageService
+from engramic.core.prompt import Prompt
 from engramic.infrastructure.system import Host
 
 # Configure logging
@@ -16,16 +18,9 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def main() -> None:
-    host = Host('mock', [MessageService, RetrieveService])
+    host = Host('mock', [MessageService, RetrieveService, ResponseService, StorageService])
 
     retrieve_service = host.get_service(RetrieveService)
-
-    def callback_test(data):
-        logging.info('Callback result: %s', data)
-
-    retrieve_service.subscribe(RetrieveService.Topic.RETRIEVE_COMPLETE, callback_test)
-
-    # Submit the prompt.
     retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))
 
     # The host continues to run and waits for a shutdown message to exit.

@@ -17,6 +17,7 @@ from typing import Any
 
 import pluggy
 import tomli
+
 from engramic.infrastructure.system.engram_profiles import EngramProfiles
 
 
@@ -36,6 +37,9 @@ class PluginManager:
 
     def __init__(self, profile_name: str):
         self.profiles: EngramProfiles = None
+
+        if profile_name is None:
+            return
 
         """Initialize the host with an empty service list."""
         try:
@@ -116,7 +120,7 @@ class PluginManager:
 
         profile = self.profiles.get_currently_set_profile()
 
-        if profile and usage in profile[category]:
+        if profile and category in profile and usage in profile[category]:
             cat_usage = profile[category][usage]
 
             if 'name' in cat_usage:

@@ -52,6 +52,9 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Performance benchmark
+*.prof
+
 # Translations
 *.mo
 *.pot

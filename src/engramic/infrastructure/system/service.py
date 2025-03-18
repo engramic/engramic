@@ -3,7 +3,10 @@
 # See the LICENSE file in the project root for more details.
 
 import asyncio
+import inspect
 import json
+import logging
+from abc import ABC, abstractmethod
 from concurrent.futures import Future
 from enum import Enum
 
@@ -11,11 +14,16 @@ import zmq
 import zmq.asyncio
 
 
-class Service:
+class Service(ABC):
     class Topic(Enum):
+        SUBMIT_PROMPT = 'submit_prompt'
         RETRIEVE_COMPLETE = 'retrieve_complete'
+        MAIN_PROMPT_COMPLETE = 'main_prompt_complete'
+        START_PROFILER = 'start_profiler'
+        END_PROFILER = 'end_profiler'
 
     def __init__(self, host):
+        self.init_async_complete = False
         self.host = host
         self.subscriber_callbacks = {}
         self.context = None
@@ -34,7 +42,8 @@ class Service:
         self.sub_socket.connect('tcp://127.0.0.1:5557')
         self.push_socket = self.context.socket(zmq.PUSH)
         self.push_socket.connect('tcp://127.0.0.1:5556')
-        self._run_background(self._listen_for_messages())
+        self.run_background(self._listen_for_published_messages())
+        self.init_async_complete = True
 
     def validate(self):
         validation = {}
@@ -43,21 +52,40 @@ class Service:
         )
         return validation['network']
 
+    @abstractmethod
+    def start(self):
+        pass
+
     def stop(self):
         self.sub_socket.close()
         self.push_socket.close()
         self.context.term()
 
-    def run_task(self, coro) -> Future:
-        return self.host.run_task(coro)
+    def run_task(self, async_coro) -> Future:
+        if inspect.iscoroutinefunction(async_coro):
+            error = 'Coro must be an async function.'
+            raise TypeError(error)
+        return self.host.run_task(async_coro)
 
-    def run_tasks(self, coros) -> Future:
-        return self.host.run_tasks(coros)
+    def run_tasks(self, async_coros) -> Future:
+        if inspect.iscoroutinefunction(async_coros):
+            error = 'Coro must be an async function.'
+            raise TypeError(error)
+        return self.host.run_tasks(async_coros)
 
-    def _run_background(self, coro):
-        self.host.run_background(coro)
+    def run_background(self, async_coro):
+        if inspect.iscoroutinefunction(async_coro):
+            error = 'Coro must be an async function.'
+            raise TypeError(error)
 
-    def send_message_async(self, topic, message):
+        self.host.run_background(async_coro)
+
+    # when sending from a non-async context
+    async def _send_message(self, topic, message=None):
+        self.send_message_async(topic, message)
+
+    # when sending from an async context
+    def send_message_async(self, topic, message=None):
         try:
             asyncio.get_running_loop()
         except RuntimeError as err:
@@ -69,18 +97,26 @@ class Service:
             bytes(json.dumps(message), encoding='utf-8'),
         ])
 
-    def subscribe(self, topic: Topic, callback):
-        async def subscribe_coro(topic):
-            await self.sub_socket.setsockopt_string(zmq.SUBSCRIBE, topic.value)
+    def subscribe(self, topic: Topic, no_async_callback):
+        if inspect.iscoroutinefunction(no_async_callback):
+            error = 'Subscribe callback must not be async.'
+            raise TypeError(error)
 
-        if topic.value not in self.subscriber_callbacks:
-            self.subscriber_callbacks[topic.value] = []
+        if not self.init_async_complete:
+            error = 'Cannot call subscribe until async is initialized.'
+            raise RuntimeError(error)
 
-        self.subscriber_callbacks[topic.value].append(callback)
+        try:
+            if topic.value not in self.subscriber_callbacks:
+                self.subscriber_callbacks[topic.value] = []
 
-        self.run_task(subscribe_coro(topic))
+            self.subscriber_callbacks[topic.value].append(no_async_callback)
 
-    async def _listen_for_messages(self):
+            self.sub_socket.setsockopt_string(zmq.SUBSCRIBE, topic.value)
+        except Exception:
+            logging.exception('Run task failed in service:subscribe')
+
+    async def _listen_for_published_messages(self):
         """Continuously checks for incoming messages"""
         while True:
             topic, message = await self.sub_socket.recv_multipart()
@@ -88,4 +124,7 @@ class Service:
             decoded_message = json.loads(message.decode())
 
             for callbacks in self.subscriber_callbacks[decoded_topic]:
-                await callbacks(decoded_message)
+                try:
+                    callbacks(decoded_message)
+                except Exception:
+                    logging.exception('Exception while listening to published message. TOPIC: %s', decoded_topic)

@@ -25,7 +25,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["pluggy","mako","tomli","pyzmq"]
+dependencies = ["pluggy","mako","tomli","pyzmq","cachetools","websockets"]
 
 [tool.hatch.envs.dev]
 template = "default"
@@ -33,6 +33,7 @@ dependencies = ["pre-commit"]
 
 [tool.hatch.envs.dev.scripts]
 post-install = "pre-commit install"
+web_server = "python -m http.server 8000 --directory ./web/"
 
 [project.urls]
 Documentation = "https://github.com/engramic/engramic#readme"
@@ -57,12 +58,14 @@ template = "default"
 dependencies = [
   "mkdocs",
   "mkdocs-material",
-  "mkdocstrings[python]"
+  "mkdocstrings[python]",
+  "pylint"
 ]
 
 [tool.hatch.envs.docs.scripts]
 "build" = "mkdocs build"
 "serve" = "mkdocs serve -a 0.0.0.0:8000"
+"generate_uml" = "pyreverse -o pdf -p my_project ."
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.9", "3.10","3.11","3.12","3.13"]
@@ -90,8 +93,6 @@ exclude_lines = [
 ]
 omit = ["*/__init__.py"]
 
-
-
 [tool.ruff.format]
 preview = true
 quote-style = "single"
@@ -99,15 +100,16 @@ quote-style = "single"
 [tool.ruff.lint]
 preview = true
 extend-select = ["C901"]
-ignore = ["PLC0414","RET504","PLR6301"] 
+ignore = ["PLC0414","RET504","PLR6301","S105"] 
 
 #ignores
 #PLC0414 - redundant "as" in init files
 #RET504 -allowing assignments before a return
 #PLR6301 - not using self in a method. Should add back later.
+#S105 - Hardcoded password assigned
 
 [tool.ruff.lint.extend-per-file-ignores]
 "docs/.hooks/*" = ["INP001", "T201"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["foo", "bar"]
+known-first-party = ["engramic"]

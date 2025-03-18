@@ -7,36 +7,40 @@ import threading
 from concurrent.futures import Future
 from threading import Thread
 
+from engramic.core.host_base import HostBase
 from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
 
-class Host:
+class Host(HostBase):
     def __init__(self, selected_profile: str, services: list[type[Service]]) -> None:
         self.plugin_manager: PluginManager = PluginManager(selected_profile)
 
         self.services: dict[str, Service] = {}
-
         for ctr in services:
-            self.services[ctr.__name__] = ctr(self.plugin_manager, self)  # Instantiate the class
+            self.services[ctr.__name__] = ctr(self)  # Instantiate the class
 
         self.async_loop_event = threading.Event()
-        self.thread = Thread(target=self._start_async_loop, daemon=True, name='Async Loop')
+        self.thread = Thread(target=self._start_async_loop, daemon=True, name='Async Thread')
         self.thread.start()
-        self.async_loop_event.wait()  # wait for async init to complete.
-
+        self.async_loop_event.wait()
         self.stop_event: threading.Event = threading.Event()
+
+        for ctr in services:
+            self.services[ctr.__name__].start()
 
     def _start_async_loop(self):
         """Run the event loop in a separate thread."""
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-        self.loop.call_soon_threadsafe(self._init_services_async)
-        self.loop.call_soon_threadsafe(self.async_loop_event.set)
         try:
+            self.loop.call_soon_threadsafe(self._init_services_async)
+            self.loop.call_soon_threadsafe(self.async_loop_event.set)
             self.loop.run_forever()
-        except RuntimeError:
-            logging.exception('Runtime error on async loop.')
+        except Exception:
+            logging.exception('Unhandled exception in async event loop')
+        finally:
+            self.async_loop_event.set()  # Ensure the event is set even on failure
 
     def _init_services_async(
         self,
@@ -54,7 +58,17 @@ class Host:
         if not asyncio.iscoroutine(coro):
             error = 'Expected a coroutine'
             raise TypeError(error)
-        return asyncio.run_coroutine_threadsafe(coro, self.loop)
+
+        future = asyncio.run_coroutine_threadsafe(coro, self.loop)
+
+        # Ensure exceptions are logged
+        def handle_future_exception(f: Future):
+            exc = f.exception()  # Fetch exception, if any
+            if exc:
+                logging.exception('Unhandled exception in run_task(): FUNCTION: %s, ERROR: %s', {coro.__name__}, {exc})
+
+        future.add_done_callback(handle_future_exception)  # Attach exception handler
+        return future
 
     def run_tasks(self, coros) -> Future:
         """Runs multiple async tasks simultaneously and returns a Future with the results."""
@@ -63,21 +77,46 @@ class Host:
             raise TypeError(error)
 
         async def gather_tasks():
-            gather = await asyncio.gather(*coros)
-            coros_with_names = {self._get_coro_name(coro): coro for coro in coros}
-            ret = {}
-            for i, name in enumerate(coros_with_names):
-                ret[name] = gather[i]
-            return ret
+            try:
+                gather = await asyncio.gather(*coros, return_exceptions=True)
+                coros_with_names = {self._get_coro_name(coro): coro for coro in coros}
+                ret = {}
+                for i, name in enumerate(coros_with_names):
+                    ret[name] = gather[i]
+            except Exception:
+                logging.exception('Unexpected error in gather_tasks()')
+                raise
+            else:
+                return ret
 
-        return asyncio.run_coroutine_threadsafe(gather_tasks(), self.loop)
+        future = asyncio.run_coroutine_threadsafe(gather_tasks(), self.loop)
+
+        # Handle future exceptions to avoid swallowing errors
+        def handle_future_exception(f):
+            exc = f.exception()
+            if exc:
+                logging.exception('Unhandled exception in run_tasks():  ERROR: %s', {exc})
+
+        future.add_done_callback(handle_future_exception)
+
+        return future
 
     def run_background(self, coro):
         """Runs an async task in the background without waiting for its result."""
         if not asyncio.iscoroutine(coro):
             error = 'Expected a coroutine'
             raise TypeError(error)
-        asyncio.run_coroutine_threadsafe(coro, self.loop)
+        future = asyncio.run_coroutine_threadsafe(coro, self.loop)
+
+        # Ensure background exceptions are logged
+        def handle_future_exception(f):
+            exc = f.exception()
+            if exc:
+                logging.exception(
+                    'Unhandled exception in run_background(): FUNCTION: %s, ERROR: %s', {coro.__name__}, {exc}
+                )
+
+        future.add_done_callback(handle_future_exception)
 
     def get_service(self, cls_in: type[Service]) -> Service:
         name = cls_in.__name__

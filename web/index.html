@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #messages { border: 1px solid #ddd; padding: 10px; margin-top: 20px; width: 50%; margin: auto; }
+    </style>
+</head>
+<body>
+    <h2>WebSocket Client</h2>
+    <p>Status: <span id="status">Connecting...</span></p>
+    <div id="messages"></div>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8765/");
+
+        socket.onopen = () => {
+            document.getElementById("status").innerText = "Connected";
+            // Send a single message when the connection opens
+            socket.send("Hello from client!");
+        };
+
+        socket.onmessage = (event) => {
+            console.log("test")
+            const messageDiv = document.createElement("div");
+            messageDiv.textContent = event.data;
+            document.getElementById("messages").appendChild(messageDiv);
+        };
+
+        socket.onclose = () => {
+            document.getElementById("status").innerText = "Disconnected";
+        };
+
+        socket.onerror = (error) => {
+            console.error("WebSocket Error:", error);
+        };
+    </script>
+</body>
+</html>
+
