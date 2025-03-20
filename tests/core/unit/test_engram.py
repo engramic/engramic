@@ -18,12 +18,12 @@ class MockIndex:
         self.text = text
 
 
-def test_engram_initialization():
+def test_engram_initialization() -> None:
     """Test that an Engram object is initialized correctly."""
-    engram = Engram(location='test_location', source_id='test_source', content='test_text', is_native_source=True)
+    engram = Engram(locations=['test_location'], source_ids=['test_source'], content='test_text', is_native_source=True)
 
-    assert engram.location == 'test_location'
-    assert engram.source_id == 'test_source'
+    assert engram.locations == ['test_location']
+    assert engram.source_ids == ['test_source']
     assert engram.content == 'test_text'
     assert engram.is_native_source is True
     assert engram.context is None
@@ -32,11 +32,11 @@ def test_engram_initialization():
     assert uuid.UUID(engram.id)  # Ensure valid UUID
 
 
-def test_render_engram():
+def test_render_engram() -> None:
     """Test the render_engram method."""
     engram = Engram(
-        location='test_location',
-        source_id='test_source',
+        locations=['test_location'],
+        source_ids=['test_source'],
         content='test_text',
         is_native_source=True,
         context=MockContext(),
@@ -45,7 +45,7 @@ def test_render_engram():
 
     expected_output = (
         '<begin>\n'
-        'location: test_location\n'
+        '<location>\ntest_location</location>\n'
         'mocked_context\n'
         '<indices>\n'
         'index1\n'
@@ -56,5 +56,4 @@ def test_render_engram():
     )
 
     render = engram.render_engram()
-
     assert render == expected_output

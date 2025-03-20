@@ -15,7 +15,7 @@ llm_spec = pluggy.HookspecMarker('llm')
 
 class LLMSpec:
     @llm_spec
-    def submit(self, llm_input_prompt: Prompt, args: dict, **kwargs) -> dict:
+    def submit(self, llm_input_prompt: Prompt, args: dict[str, str], **kwargs: dict[str, Any]) -> dict[str, str]:
         del llm_input_prompt, args, kwargs
         """Submits an LLM request with the given prompt and arguments."""
         error_message = 'Subclasses must implement `submit`'
@@ -32,7 +32,7 @@ vector_db_spec = pluggy.HookspecMarker('vector_db')
 
 class VectorDBspec:
     @vector_db_spec
-    def query(self, prompt: Prompt) -> set:
+    def query(self, prompt: Prompt) -> set[str]:
         del prompt
         error_message = 'Subclasses must implement `query`'
         raise NotImplementedError(error_message)
@@ -54,19 +54,18 @@ class DBspec:
         raise NotImplementedError(error_message)
 
     @db_spec
-    def close(self, close) -> bool:
-        del close
+    def close(self) -> bool:
         error_message = 'Subclasses must implement `close`'
         raise NotImplementedError(error_message)
 
     @db_spec
-    def execute(self, query: str) -> dict:
+    def execute(self, query: str) -> dict[Any, Any]:
         del query
         error_message = 'Subclasses must implement `execute`'
         raise NotImplementedError(error_message)
 
     @db_spec
-    def execute_data(self, query: str, data: dict) -> bool:
+    def execute_data(self, query: str, data: dict[Any, Any]) -> bool:
         del query, data
         error_message = 'Subclasses must implement `execute`'
         raise NotImplementedError(error_message)

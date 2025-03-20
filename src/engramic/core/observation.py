@@ -4,14 +4,12 @@
 
 from dataclasses import dataclass
 
-from engramic.core import Prompt, PromptAnalysis
-from engramic.core.retrieve_result import RetrieveResult
+from engramic.core.engram import Engram
+from engramic.core.meta import Meta
 
 
 @dataclass
-class Response:
+class Observation:
     id: str
-    response: str
-    retrieve_result: RetrieveResult
-    prompt: Prompt
-    analysis: PromptAnalysis
+    meta: Meta
+    engram: list[Engram]

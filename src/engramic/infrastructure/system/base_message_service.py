@@ -7,14 +7,16 @@ import logging
 import zmq
 import zmq.asyncio
 
-from engramic.infrastructure.system.service import Service
+from engramic.core.host_base import HostBase
+from engramic.infrastructure.system import Service
 
 
 class BaseMessageService(Service):
-    def __init__(self, host):
+    def __init__(self, host: HostBase) -> None:
         super().__init__(host)
 
-    def init_async(self):
+    def init_async(self) -> None:
+        super().init_async()
         self.pub_pull_context = zmq.asyncio.Context()
         self.pull_socket = self.pub_pull_context.socket(zmq.PULL)
         try:
@@ -34,7 +36,6 @@ class BaseMessageService(Service):
             raise OSError(error) from err
 
         self.run_background(self.listen_for_push_messages())
-        super().init_async()
 
     def stop(self) -> None:
         self.pub_socket.close()
@@ -42,7 +43,7 @@ class BaseMessageService(Service):
         self.pub_pull_context.term()
         super().stop()
 
-    async def listen_for_push_messages(self):
+    async def listen_for_push_messages(self) -> None:
         """Continuously checks for incoming messages"""
         while True:
             topic, message = await self.pull_socket.recv_multipart()

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import pluggy
 
@@ -10,7 +11,7 @@ from engramic.infrastructure.system.websocket_manager import WebsocketManager
 
 class Mock(LLM):
     @llm_impl
-    def submit(self, prompt: Prompt, args: dict) -> dict:
+    def submit(self, prompt: Prompt, args: dict[str, str]) -> dict[str, Any]:
         hint = args.get('hint')
         logging.info('user prompt: %.25s...', prompt.user_input)
 
@@ -34,10 +35,60 @@ class Mock(LLM):
                 full_string += token
             return {'llm_response': full_string}
 
+        if hint == 'validate':
+            full_string = """
+[[meta]]
+id = ""
+locations = []
+source_ids = []
+keywords = ["inflation", "investors", "biotech", "medicine"]
+summary_initial = "The AllIn podcast discusses the current state of the market, biotech, and the role of government in venture capital funding."
+summary_full = "The AllIn podcast discusses the current state of the market, biotech, and the role of government in venture capital funding."
+
+[[engram]]
+accuracy = 4
+relevance = 4
+indicies = []
+meta_ids = ["a1b2c3d4-e5f6-4711-8097-92a8c3f6d5e7","c3d4e5f6-a7b8-5911-8097-92a8c3f6d5e7"]
+locations = ["file:///Users/allin_podcast/episodes/167.csv","file:///Users/allin_podcast/episodes/169.csv"]
+source_ids = ["770g0612-f4ab-63e5-d927-778877663333", "660f9511-e39b-52d5-c817-667766552222"]
+content = "The podcast is about politics."
+context = {"Title"="What is this podcast about."}
+library_ids = ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"]
+is_native_source = false
+
+[[engram]]
+accuracy = 2
+relevance = 1
+indicies = []
+meta_ids = ["b2c3d4e5-f6a7-4811-8097-92a8c3f6d5e7","a1b2c3d4-e5f6-4711-8097-92a8c3f6d5e7"]
+locations = ["file:///Users/allin_podcast/episodes/168.csv","file:///Users/allin_podcast/episodes/167.csv"]
+source_ids = ["660f9511-e39b-52d5-c817-667766552222", "550e8400-e29b-41d4-a716-446655440000"]
+content = "The podcast is about tigers."
+context = {"Title"="What is this podcast about."}
+library_ids = ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"]
+is_native_source = false
+
+[[engram]]
+accuracy = 4
+relevance = 4
+indicies = []
+meta_ids = ["c3d4e5f6-a7b8-5911-8097-92a8c3f6d5e7"]
+locations = ["file:///Users/allin_podcast/episodes/169.csv"]
+source_ids = ["770g0612-f4ab-63e5-d927-778877663333"]
+context = {"Title"="What is this podcast about."}
+content = "The podcast is about technology."
+library_ids = ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"]
+is_native_source = false
+"""
+            return {'llm_response': full_string}
+
         return {}
 
     @llm_impl
-    def submit_streaming(self, prompt: Prompt, args: dict, websocket_manager: WebsocketManager) -> dict:
+    def submit_streaming(
+        self, prompt: Prompt, args: dict[str, str], websocket_manager: WebsocketManager
+    ) -> dict[str, str]:
         hint = args.get('hint')
 
         if hint == 'response_main':
