@@ -48,7 +48,7 @@ template = "dev"
 dependencies = ["pytest","pytest-asyncio","mypy"]
 
 [tool.hatch.envs.test.scripts]
-typecheck = "mypy --ignore-missing-imports ."
+typecheck = "mypy --strict --ignore-missing-imports -p engramic"
 
 [tool.hatch.envs.hatch-test]
 extra-dependencies = ["engramic","pytest-asyncio"]
@@ -100,13 +100,14 @@ quote-style = "single"
 [tool.ruff.lint]
 preview = true
 extend-select = ["C901"]
-ignore = ["PLC0414","RET504","PLR6301","S105"] 
+ignore = ["PLC0414","RET504","PLR6301","S105","TRY301"] 
 
 #ignores
 #PLC0414 - redundant "as" in init files
 #RET504 -allowing assignments before a return
 #PLR6301 - not using self in a method. Should add back later.
 #S105 - Hardcoded password assigned
+#TRY301 - Make an inner function for raising. Incompatible with mypy.
 
 [tool.ruff.lint.extend-per-file-ignores]
 "docs/.hooks/*" = ["INP001", "T201"]

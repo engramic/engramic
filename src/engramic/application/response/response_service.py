@@ -4,11 +4,13 @@
 
 import uuid
 from dataclasses import asdict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from engramic.core import Engram, Prompt
+from engramic.core import Engram, Prompt, PromptAnalysis
 from engramic.core.response import Response
+from engramic.core.retrieve_result import RetrieveResult
 from engramic.infrastructure.repository.engram_repository import EngramRepository
+from engramic.infrastructure.system.host import Host
 from engramic.infrastructure.system.service import Service
 from engramic.infrastructure.system.websocket_manager import WebsocketManager
 
@@ -17,33 +19,42 @@ if TYPE_CHECKING:
 
 
 class ResponseService(Service):
-    def __init__(self, host) -> None:
+    def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.web_socket_manager: WebsocketManager = WebsocketManager(host)
         self.engram_repository: EngramRepository = EngramRepository(self.plugin_manager)
         self.llm_main = self.plugin_manager.get_plugin('llm', 'response_main')
-        self.prompt = Prompt('Placeholder for prompt engineering for main prompt.')
+        self.instructions: Prompt = Prompt('Placeholder for prompt engineering for main prompt.')
         ##
         # Many methods are not ready to be until their async component is running.
         # Do not call async context methods in the constructor.
 
-    def start(self):
+    def start(self) -> None:
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
         self.web_socket_manager.init_async()
 
-    def on_retrieve_complete(self, engram_ids: list[uuid.UUID]):
-        self.run_task(self.fetch_engrams(engram_ids=engram_ids))
+    def on_retrieve_complete(self, retrieve_result_in: dict[str, Any]) -> None:
+        prompt = Prompt(**retrieve_result_in['prompt'])
+        prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
+        retrieve_result = RetrieveResult(**retrieve_result_in['retrieve_response'])
+        self.run_task(self.fetch_engrams(prompt=prompt, analysis=prompt_analysis, retrieve_result=retrieve_result))
 
-    async def submit_llm(self, engram_array):
+    async def main_prompt(
+        self, prompt: Prompt, analysis: PromptAnalysis, engram_array: list[Engram], retrieve_result: RetrieveResult
+    ) -> None:
+        # build main prompt here
+        del engram_array
+
         mock_response = self.llm_main['func'].submit_streaming(
-            prompt=self.prompt, args=self.llm_main['args'], websocket_manager=self.web_socket_manager
+            prompt=self.instructions, args=self.llm_main['args'], websocket_manager=self.web_socket_manager
         )
-        response = Response(mock_response[0], engram_array)
+
+        response = Response(str(uuid.uuid4()), mock_response[0], retrieve_result, prompt, analysis)
+
         self.send_message_async(Service.Topic.MAIN_PROMPT_COMPLETE, asdict(response))
 
-    async def fetch_engrams(self, engram_ids: list[uuid.UUID]):
-        engram_array: list[Engram] = self.engram_repository.load_batch(engram_ids)
-        del engram_array  # to be replaced.
+    async def fetch_engrams(self, prompt: Prompt, analysis: PromptAnalysis, retrieve_result: RetrieveResult) -> None:
+        engram_array: list[Engram] = self.engram_repository.load_batch_retrieve_result(retrieve_result)
         # assembled main_prompt, render engrams.
-        self.run_task(self.submit_llm(engram_ids))
+        self.run_task(self.main_prompt(prompt, analysis, engram_array, retrieve_result))

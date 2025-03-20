@@ -4,7 +4,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Any
 
+from engramic.core.prompt import Prompt
 from engramic.infrastructure.system.websocket_manager import WebsocketManager
 
 
@@ -20,7 +22,7 @@ class LLM(ABC):
         finish_reason: str
 
     @abstractmethod
-    def submit(self, prompt: str, args: dict) -> str:
+    def submit(self, prompt: Prompt, args: dict[Any, Any]) -> dict[str, Any]:
         """
         Submits a prompt to the LLM and returns the model-generated text.
 
@@ -34,7 +36,9 @@ class LLM(ABC):
         """
 
     @abstractmethod
-    def submit_streaming(self, prompt: str, args: dict, websocket_manager: WebsocketManager) -> str:
+    def submit_streaming(
+        self, prompt: Prompt, args: dict[Any, Any], websocket_manager: WebsocketManager
+    ) -> dict[str, Any]:
         """
         Submits a prompt to the LLM and returns the model-generated text.
 

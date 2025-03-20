@@ -2,17 +2,13 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+from __future__ import annotations
+
 import logging
 from pathlib import Path
-from typing import TypedDict
+from typing import Any
 
 import tomli
-
-
-class Profile(TypedDict, total=False):  # A TOML profile might have optional fields
-    type: str
-    ptr: str  # If it's a pointer profile
-    # Add other expected fields here if needed
 
 
 class EngramProfiles:
@@ -27,14 +23,14 @@ class EngramProfiles:
     ENGRAM_PROFILE_VERSION = 1.0
 
     def __init__(self) -> None:
-        self.currently_set_profile = None
+        self.currently_set_profile: dict[Any, Any] | None = None
 
         path = Path(EngramProfiles.DEFAULT_PROFILE_PATH)
         if not path.is_file():
             logging.error('TOML file not found: %s', EngramProfiles.DEFAULT_PROFILE_PATH)
             raise FileNotFoundError
 
-        self._data: dict[str, Profile] = {}
+        self._data: dict[str, dict[Any, Any]] = {}
 
         try:
             with path.open('rb') as f:
@@ -48,6 +44,11 @@ class EngramProfiles:
 
         version = self._data.get('version')
 
+        if not isinstance(version, (float, int)):  # Ensure version is a numeric type
+            logging.error('Invalid profile version type: %s', type(version))
+            error = 'Invalid profile version'
+            raise TypeError(error)
+
         if version != EngramProfiles.ENGRAM_PROFILE_VERSION:
             logging.error('Incompatible profile version: %s %s', EngramProfiles.ENGRAM_PROFILE_VERSION, version)
             raise ValueError
@@ -56,15 +57,18 @@ class EngramProfiles:
         profile = self._get_profile(name)
         self.currently_set_profile = profile
 
-    def get_currently_set_profile(self):
+    def get_currently_set_profile(self) -> dict[Any, Any]:
+        if self.currently_set_profile is None:
+            error = 'No profile is currently set.'
+            raise ValueError(error)  # Avoid returning None
         return self.currently_set_profile
 
-    def _get_profile(self, name: str):
+    def _get_profile(self, name: str) -> dict[Any, Any]:
         """
         Retrieve a TOML table by name.
         - If the table is of type='pointer', follow its ptr until a real profile is found.
         """
-        visited: set = set()
+        visited: set[str] = set()
         try:
             ret_profile = self._resolve_profile(name, visited)
         except ValueError as err:
@@ -74,8 +78,8 @@ class EngramProfiles:
 
         return ret_profile
 
-    def _resolve_profile(self, name: str, visited: set[str]) -> Profile:
-        profile: Profile | None = self._data.get(name)
+    def _resolve_profile(self, name: str, visited: set[str]) -> dict[Any, Any]:
+        profile: dict[Any, Any] | None = self._data.get(name)
 
         if not profile:
             logging.error('No TOML profile found for profile="%s".', name)

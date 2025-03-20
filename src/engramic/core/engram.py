@@ -34,14 +34,14 @@ class Engram:
         render_engram(): Returns a structured string representation of the engram to be used by the LLM.
     """
 
-    location: str
-    source_id: str
+    locations: list[str]
+    source_ids: list[str]
     content: str
     is_native_source: bool
     context: Context | None = None
-    indices: list[Index] | None = field(default=None)
-    meta_id: str | None = None
-    library_id: str | None = None
+    indices: list[Index] | None = None
+    meta_ids: list[str] | None = None
+    library_ids: list[str] | None = None
     id: str = field(default_factory=lambda: str(uuid.uuid4()), init=False)
 
     def render_engram(self) -> str:
@@ -50,7 +50,12 @@ class Engram:
         Returns:
             str: A formatted string containing the engram's context and text."""
         header = '<begin>'
-        location_str = f'location: {self.location}'
+
+        leading = '<location>\n'
+        trailing = '</location>'
+
+        location_str = leading + ('\n'.join(location for location in self.locations)) + trailing
+
         context_str = self.context.render_context() if self.context else ''
 
         leading = '<indices>\n'
@@ -67,4 +72,5 @@ class Engram:
         footer = '</end>'
 
         ret_string = f'{header}\n{location_str}\n{context_str}\n{indices_str}\n{native_text}\n{content_str}\n{footer}\n'
+
         return ret_string

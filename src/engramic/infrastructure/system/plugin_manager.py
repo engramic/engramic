@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for more details.
 from __future__ import annotations
 
-import importlib
+import importlib.util
 import logging
 import os
 import platform
@@ -36,21 +36,20 @@ class PluginManager:
         detected_dependencies: set[str]
 
     def __init__(self, profile_name: str):
-        self.profiles: EngramProfiles = None
-
         if profile_name is None:
-            return
+            error = 'Profile name empty'
+            raise RuntimeError(error)
 
         """Initialize the host with an empty service list."""
         try:
             self.profiles = EngramProfiles()
             self.set_profile(profile_name)
-        except RuntimeError:
-            logging.exception('[ERROR] Failed to load config.')  # Handle the error
-            return
-        except ValueError:
-            logging.exception('[ERROR] Invalid config file.')  # Handle the error
-            return
+        except RuntimeError as err:
+            error = '[ERROR] Failed to load config.'
+            raise RuntimeError(error) from err
+        except ValueError as err:
+            error = '[ERROR] Invalid config file.'
+            raise RuntimeError(error) from err
         else:
             logging.info('[INFO] Config loaded successfully')
 
@@ -63,23 +62,21 @@ class PluginManager:
         """
         current_profile = self.profiles.get_currently_set_profile()
 
+        if current_profile is None:
+            error = 'Current profile not set.'
+            raise RuntimeError(error)
+
         dependencies = set()
         installed_dependencies = set()
         detected_dependencies = set()
 
         if current_profile:
-            for row_key in current_profile:
+            for row_key, row_value in current_profile.items():
                 if row_key == 'type':
                     continue
 
-                row_value = current_profile[row_key]
-
-                if isinstance(row_value, dict):
-                    for usage in row_value:
-                        plugin_name = row_value[usage]
-                        dependencies.update(self._get_packages(row_key, plugin_name))
-                else:
-                    plugin_name = row_value
+                for usage in row_value:
+                    plugin_name = row_value[usage]
                     dependencies.update(self._get_packages(row_key, plugin_name))
 
             for dependency in dependencies:
@@ -94,7 +91,7 @@ class PluginManager:
     def set_profile(self, profile_name: str) -> None:
         self.profiles.set_current_profile(profile_name)
 
-    def import_plugins(self):
+    def import_plugins(self) -> None:
         current_profile = self.profiles.get_currently_set_profile()
 
         if current_profile:
@@ -110,11 +107,12 @@ class PluginManager:
                         plugin_file = os.path.join(plugin_path, f'{plugin_name}.py')
                         module_name = f'{category}.{plugin_name}'
                         spec = importlib.util.spec_from_file_location(module_name, plugin_file)
-                        module = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(module)
-                        sys.modules[module_name] = module
+                        if spec is not None and spec.loader is not None:
+                            module = importlib.util.module_from_spec(spec)
+                            spec.loader.exec_module(module)
+                            sys.modules[module_name] = module
 
-    def get_plugin(self, category, usage) -> dict[str, Any] | None:
+    def get_plugin(self, category: str, usage: str) -> dict[str, Any]:
         if self.profiles is None:
             return None
 
@@ -136,13 +134,14 @@ class PluginManager:
                     return {'func': pm.hook, 'args': args}
 
         logging.error('Plugin %s.%s failed to load.', category, usage)
-        return None
+        error = 'Plugin failed to load'
+        raise RuntimeError(error)
 
-    def _get_packages(self, key, plugin_name):
+    def _get_packages(self, key: str, plugin_name: dict[str, str]) -> list[str]:
         system_plugin_root_dir = Path(PluginManager.PLUGIN_DEFAULT_ROOT)
         plugin_root_dir = system_plugin_root_dir / key / plugin_name['name']
 
-        packages = self._parse_plugin_toml(plugin_root_dir)
+        packages = self._parse_plugin_toml(str(plugin_root_dir))
         return packages
 
     def _parse_plugin_toml(self, plugin_root_dir: str) -> list[str]:

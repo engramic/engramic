@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 
 class Context(ABC):
-    def __init__(self, context_dict: dict):
+    def __init__(self, context_dict: dict[str, str]):
         self.context_dict = context_dict
 
     @abstractmethod

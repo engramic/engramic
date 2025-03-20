@@ -6,9 +6,10 @@ vector_db.query = {name="mock"}
 llm.retrieve_gen_conversation_direction = {name="mock",hint="retrieve_gen_conversation_direction"}
 llm.retrieve_gen_index = {name="mock",hint="retrieve_gen_index"}
 llm.retrieve_prompt_analysis = {name="mock",hint="retrieve_prompt_analysis"}
-db.response = {name="mock"}
+db.document = {name="mock"}
 llm.response_main = {name="mock",hint="response_main"}
-db.history = {name="mock"}
+llm.validate = {name="mock",hint="validate"}
+
 
 [standard]
 type = "pointer"

@@ -10,7 +10,7 @@ from engramic.infrastructure.system.plugin_specifications import vector_db_impl
 
 class Mock(VectorDB):
     @vector_db_impl
-    def query(self, prompt: Prompt, **kwargs: Any) -> list:
+    def query(self, prompt: Prompt, **kwargs: Any) -> list[str]:
         logging.info('Vector DB mock.%s %s', prompt, kwargs)
         return [
             'd1b847da-04eb-4846-a503-512aad2706c6',

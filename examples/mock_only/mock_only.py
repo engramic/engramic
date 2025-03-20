@@ -5,6 +5,7 @@
 import logging
 import sys
 
+from engramic.application.codify.codify_service import CodifyService
 from engramic.application.message.message_service import MessageService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
@@ -18,7 +19,7 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def main() -> None:
-    host = Host('mock', [MessageService, RetrieveService, ResponseService, StorageService])
+    host = Host('mock', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService])
 
     retrieve_service = host.get_service(RetrieveService)
     retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))

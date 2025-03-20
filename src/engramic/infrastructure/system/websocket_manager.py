@@ -2,29 +2,34 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
-import websockets
+import websockets.asyncio.server
+from websockets.asyncio.server import Server, ServerConnection  # noqa: TCH002
 
-from engramic.core.host_base import HostBase
+if TYPE_CHECKING:
+    from engramic.core.host_base import HostBase
+    from engramic.core.llm import LLM
 
 
 class WebsocketManager:
     def __init__(self, host: HostBase):
-        self.websocket = None
+        self.websocket_server: Server | None = None
+        self.active_connection: ServerConnection | None = None
         self.host = host
-        self.active_connections = None
 
-    def init_async(self):
+    def init_async(self) -> None:
         self.host.run_background(self.run_server())
 
-    async def run_server(self):
+    async def run_server(self) -> None:
         self.websocket = await websockets.serve(self.handler, 'localhost', 8765)
         await self.websocket.wait_closed()
 
-    async def handler(self, websocket):
-        self.active_connections = websocket
+    async def handler(self, websocket: ServerConnection) -> None:
+        self.active_connection = websocket
 
         try:
             # Listen for incoming messages
@@ -34,11 +39,11 @@ class WebsocketManager:
         except websockets.exceptions.ConnectionClosed:
             logging.info('Client disconnected')
         finally:
-            self.active_connections = None
+            self.active_connection = None
 
-    async def message_task(self, message):
-        if self.active_connections:
-            await self.active_connections.send(str(message.packet))
+    async def message_task(self, message: LLM.StreamPacket) -> None:
+        if self.active_connection:
+            await self.active_connection.send(str(message.packet))
 
-    def send_message(self, message):
+    def send_message(self, message: LLM.StreamPacket) -> None:
         self.host.run_task(self.message_task(message))
