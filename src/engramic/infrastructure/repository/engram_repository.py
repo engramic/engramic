@@ -5,7 +5,7 @@
 
 from typing import Any
 
-from cachetools import LRUCache  # type: ignore
+from cachetools import LRUCache
 
 from engramic.core.engram import Engram
 from engramic.core.retrieve_result import RetrieveResult
@@ -18,18 +18,13 @@ class EngramRepository:
         self.is_connected = self.db_document_plugin['func'].connect()
 
         # LRU Cache to store Engram objects
-        self.cache = LRUCache(maxsize=cache_size)
+        self.cache: LRUCache[str, Engram] = LRUCache(maxsize=cache_size)
+
+    def save_engram(self, engram: Engram) -> None:
+        self.db_document_plugin['func'].execute_data(query='save_engram', data=engram)
 
     def load_dict(self, engram_dict: dict[str, Any]) -> Engram:
-        return Engram(
-            engram_dict['locations'],
-            engram_dict['source_ids'],
-            engram_dict['content'],
-            engram_dict['context'],
-            engram_dict['indicies'],
-            engram_dict['meta_ids'],
-            engram_dict['library_ids'],
-        )
+        return Engram(**engram_dict)
 
     def load_batch_dict(self, dict_list: list[dict[str, str]]) -> list[Engram]:
         return [self.load_dict(engram_dict) for engram_dict in dict_list]
@@ -57,15 +52,7 @@ class EngramRepository:
         # Convert database results to Engram objects
         new_engrams = []
         for engram_data in engram_data_array:
-            engram = Engram(
-                engram_data['locations'],
-                engram_data['source_ids'],
-                engram_data['content'],
-                engram_data['is_native_source'],
-                engram_data['context'],
-                engram_data['meta_ids'],
-                engram_data['library_ids'],
-            )
+            engram = Engram(**engram_data)
             new_engrams.append(engram)
 
             # Store the new Engram in the cache

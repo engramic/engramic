@@ -28,13 +28,15 @@ class Mock(DB):
   "engram": [
     {
       "locations": ["file:///Users/allin_podcast/episodes/167.csv"],
+      "accuracy":0,
+      "relevancy":0,
       "source_ids": ["550e8400-e29b-41d4-a716-446655440000"],
       "content": "Chamath explains his take on the latest inflation report and what it means for investors.",
       "is_native_source": true,
       "meta_ids": ["a1b2c3d4-e5f6-4711-8097-92a8c3f6d5e7"],
       "library_ids": ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"],
       "id": "c1d2e3f4-a5b6-4c78-9d0e-1f2a3b4c5d6e",
-      "indicies":[{"text":"What is this about","embeddings":"43243"}],
+      "indices":[{"text":"What is this about","embeddings":"43243"}],
       "context": {
         "episode": 167,
         "segment": "Economic Trends",
@@ -45,13 +47,15 @@ class Mock(DB):
     },
     {
       "locations": ["file:///Users/allin_podcast/episodes/168.csv"],
+      "accuracy":0,
+      "relevancy":0,
       "source_ids": ["660f9511-e39b-52d5-c817-667766552222"],
       "content": "David Friedberg discusses AI-driven biotech startups and their impact on medicine.",
       "is_native_source": false,
       "meta_ids": ["b2c3d4e5-f6a7-4811-8097-92a8c3f6d5e7"],
       "library_ids": ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"],
       "id": "d2e3f4g5-h6i7-5c78-9d0e-1f2a3b4c5d6e",
-      "indicies":[{"text":"What is this about","embeddings":"43243"}],
+      "indices":[{"text":"What is this about","embeddings":"43243"}],
       "context": {
         "episode": 168,
         "segment": "Tech & Innovation",
@@ -62,13 +66,15 @@ class Mock(DB):
     },
     {
       "locations": ["file:///Users/allin_podcast/episodes/169.csv"],
+      "accuracy":0,
+      "relevancy":0,
       "source_ids": ["770g0612-f4ab-63e5-d927-778877663333"],
       "content": "Jason and Sacks debate the role of government in venture capital funding.",
       "is_native_source": true,
       "meta_ids": ["c3d4e5f6-a7b8-5911-8097-92a8c3f6d5e7"],
       "library_ids": ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"],
       "id": "e3f4g5h6-i7j8-6c78-9d0e-1f2a3b4c5d6e",
-      "indicies":{"text":"What is this about","embeddings":"43243"},
+      "indices":{"text":"What is this about","embeddings":"43243"},
       "context": {
         "episode": 169,
         "segment": "Startup & VC",

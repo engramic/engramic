@@ -9,4 +9,4 @@ from typing import Any
 @dataclass
 class PromptAnalysis:
     prompt_analysis: dict[str, Any]
-    indicies: dict[str, Any]
+    indices: dict[str, Any]

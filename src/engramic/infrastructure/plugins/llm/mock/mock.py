@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+from uuid import uuid4
 
 import pluggy
 
@@ -36,9 +37,9 @@ class Mock(LLM):
             return {'llm_response': full_string}
 
         if hint == 'validate':
-            full_string = """
-[[meta]]
-id = ""
+            full_string = f"""
+[meta]
+id = "{uuid4()}"
 locations = []
 source_ids = []
 keywords = ["inflation", "investors", "biotech", "medicine"]
@@ -46,43 +47,51 @@ summary_initial = "The AllIn podcast discusses the current state of the market, 
 summary_full = "The AllIn podcast discusses the current state of the market, biotech, and the role of government in venture capital funding."
 
 [[engram]]
+id = "{uuid4()}"
 accuracy = 4
-relevance = 4
-indicies = []
+relevancy = 4
+indices = []
 meta_ids = ["a1b2c3d4-e5f6-4711-8097-92a8c3f6d5e7","c3d4e5f6-a7b8-5911-8097-92a8c3f6d5e7"]
 locations = ["file:///Users/allin_podcast/episodes/167.csv","file:///Users/allin_podcast/episodes/169.csv"]
 source_ids = ["770g0612-f4ab-63e5-d927-778877663333", "660f9511-e39b-52d5-c817-667766552222"]
 content = "The podcast is about politics."
-context = {"Title"="What is this podcast about."}
+context = {{Title="What is this podcast about."}}
 library_ids = ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"]
 is_native_source = false
 
 [[engram]]
+id = "{uuid4()}"
 accuracy = 2
-relevance = 1
-indicies = []
+relevancy = 1
+indices = []
 meta_ids = ["b2c3d4e5-f6a7-4811-8097-92a8c3f6d5e7","a1b2c3d4-e5f6-4711-8097-92a8c3f6d5e7"]
 locations = ["file:///Users/allin_podcast/episodes/168.csv","file:///Users/allin_podcast/episodes/167.csv"]
 source_ids = ["660f9511-e39b-52d5-c817-667766552222", "550e8400-e29b-41d4-a716-446655440000"]
 content = "The podcast is about tigers."
-context = {"Title"="What is this podcast about."}
+context = {{Title="What is this podcast about."}}
 library_ids = ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"]
 is_native_source = false
 
 [[engram]]
+id = "{uuid4()}"
 accuracy = 4
-relevance = 4
-indicies = []
+relevancy = 4
+indices = []
 meta_ids = ["c3d4e5f6-a7b8-5911-8097-92a8c3f6d5e7"]
 locations = ["file:///Users/allin_podcast/episodes/169.csv"]
 source_ids = ["770g0612-f4ab-63e5-d927-778877663333"]
-context = {"Title"="What is this podcast about."}
+context = {{Title="What is this podcast about."}}
 content = "The podcast is about technology."
 library_ids = ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"]
 is_native_source = false
 """
             return {'llm_response': full_string}
 
+        if hint == 'summary':
+            return {'llm_response': 'The podcast is about politics.'}
+
+        if hint == 'gen_indices':
+            return {'llm_response': ['index1', 'index2', 'index3']}
         return {}
 
     @llm_impl

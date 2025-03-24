@@ -4,12 +4,10 @@
 
 from __future__ import annotations
 
-import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from engramic.core.context import Context
     from engramic.core.index import Index
 
 
@@ -34,43 +32,52 @@ class Engram:
         render_engram(): Returns a structured string representation of the engram to be used by the LLM.
     """
 
+    id: str
     locations: list[str]
     source_ids: list[str]
     content: str
     is_native_source: bool
-    context: Context | None = None
+    context: dict[str, str] | None = None
     indices: list[Index] | None = None
     meta_ids: list[str] | None = None
     library_ids: list[str] | None = None
-    id: str = field(default_factory=lambda: str(uuid.uuid4()), init=False)
+    accuracy: int = 0
+    relevancy: int = 0
 
-    def render_engram(self) -> str:
-        """Generates a structured string representation of the engram, including its context and content.
+    def render(self) -> str:
+        def toml_escape(value: str) -> str:
+            return f'"{value}"'
 
-        Returns:
-            str: A formatted string containing the engram's context and text."""
-        header = '<begin>'
+        def toml_list(values: list[str]) -> str:
+            return '[' + ', '.join(toml_escape(v) for v in values) + ']'
 
-        leading = '<location>\n'
-        trailing = '</location>'
+        lines = [
+            f'id = {toml_escape(self.id)}',
+            f'content = {toml_escape(self.content)}',
+            f'is_native_source = {str(self.is_native_source).lower()}',
+            f'locations = {toml_list(self.locations)}',
+            f'source_ids = {toml_list(self.source_ids)}',
+        ]
 
-        location_str = leading + ('\n'.join(location for location in self.locations)) + trailing
+        if self.meta_ids:
+            lines.append(f'meta_ids = {toml_list(self.meta_ids)}')
 
-        context_str = self.context.render_context() if self.context else ''
+        if self.library_ids:
+            lines.append(f'library_ids = {toml_list(self.library_ids)}')
 
-        leading = '<indices>\n'
-        trailing = '\n</indices>'
-        indices_str = (leading + ('\n'.join(index.text for index in self.indices)) + trailing) if self.indices else ''
+        if self.context:
+            # Assuming context has a render_toml() method or can be represented as a dict
+            inline = ', '.join(f'{k} = {toml_escape(v)}' for k, v in self.context.items())
+            lines.append(f'context = {{ {inline} }}')
 
-        native_text = (
-            'The text is directly from the source.'
-            if self.is_native_source
-            else 'The text is derived from one or more sources.'
-        )
+        if self.indices:
+            # Flatten the index section
+            for index in self.indices:
+                # Assuming index has `text` and `embedding` attributes
+                lines.extend([
+                    '[[indices]]',
+                    f'text = {toml_escape(index.text)}',
+                    f'embedding = {toml_escape(index.embedding)}',
+                ])
 
-        content_str = f'<text>{self.content}</text>'
-        footer = '</end>'
-
-        ret_string = f'{header}\n{location_str}\n{context_str}\n{indices_str}\n{native_text}\n{content_str}\n{footer}\n'
-
-        return ret_string
+        return '\n'.join(lines)

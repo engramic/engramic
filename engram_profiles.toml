@@ -2,13 +2,16 @@ version = 1.0
 
 [mock]
 type = "profile"
-vector_db.query = {name="mock"}
+vector_db.db = {name="mock"}
 llm.retrieve_gen_conversation_direction = {name="mock",hint="retrieve_gen_conversation_direction"}
 llm.retrieve_gen_index = {name="mock",hint="retrieve_gen_index"}
 llm.retrieve_prompt_analysis = {name="mock",hint="retrieve_prompt_analysis"}
 db.document = {name="mock"}
 llm.response_main = {name="mock",hint="response_main"}
 llm.validate = {name="mock",hint="validate"}
+llm.summary = {name="mock",hint="summary"}
+llm.gen_indices = {name="mock",hint="gen_indices"}
+embedding.gen_embedding = {name="mock",hint="gen_embedding"}
 
 
 [standard]
@@ -17,7 +20,7 @@ ptr = "standard-2025-03-01"
 
 [standard-2025-03-01]
 type = "profile"
-vector_db.query = {name="mock",gpt="gpt4o"}
+vector_db.db = {name="mock",gpt="gpt4o"}
 llm.retrieve_gen_conversation_direction = {name="mock",hint="retrieve_gen_conversation_direction"}
 llm.retrieve_gen_index = {name="mock",gpt="gpt4o"}
 llm.retrieve_prompt_analysis = {name="mock",gpt="gpt4o"}

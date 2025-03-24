@@ -1,0 +1,6 @@
+[project]
+name = "embedding_mock"
+version = "0.0.1"
+description = "A mock of an embedding api."
+authors = ["ericp@engramic.org"]
+dependencies = []

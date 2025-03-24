@@ -8,19 +8,21 @@ import uuid
 from engramic.core import Engram
 
 
-class MockContext:
-    def render_context(self) -> str:
-        return 'mocked_context'
-
-
 class MockIndex:
     def __init__(self, text: str):
         self.text = text
+        self.embedding = 'fdsfdasfds'
 
 
 def test_engram_initialization() -> None:
     """Test that an Engram object is initialized correctly."""
-    engram = Engram(locations=['test_location'], source_ids=['test_source'], content='test_text', is_native_source=True)
+    engram = Engram(
+        id='3702e0f0-3aac-4df9-8c33-78cf162f9cfd',
+        locations=['test_location'],
+        source_ids=['test_source'],
+        content='test_text',
+        is_native_source=True,
+    )
 
     assert engram.locations == ['test_location']
     assert engram.source_ids == ['test_source']
@@ -39,21 +41,15 @@ def test_render_engram() -> None:
         source_ids=['test_source'],
         content='test_text',
         is_native_source=True,
-        context=MockContext(),
+        id='3702e0f0-3aac-4df9-8c33-78cf162f9cfd',
+        accuracy=0,
+        relevancy=0,
+        context={'title': 'Title of Paragraph'},
         indices=[MockIndex('index1'), MockIndex('index2')],
     )
 
-    expected_output = (
-        '<begin>\n'
-        '<location>\ntest_location</location>\n'
-        'mocked_context\n'
-        '<indices>\n'
-        'index1\n'
-        'index2\n</indices>\n'
-        'The text is directly from the source.\n'
-        '<text>test_text</text>\n'
-        '</end>\n'
-    )
+    expected_output = 'id = "3702e0f0-3aac-4df9-8c33-78cf162f9cfd"\ncontent = "test_text"\nis_native_source = true\nlocations = ["test_location"]\nsource_ids = ["test_source"]\ncontext = { title = "Title of Paragraph" }\n[[indices]]\ntext = "index1"\nembedding = "fdsfdasfds"\n[[indices]]\ntext = "index2"\nembedding = "fdsfdasfds"'
 
-    render = engram.render_engram()
+    render = engram.render()
+
     assert render == expected_output

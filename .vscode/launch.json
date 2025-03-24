@@ -13,8 +13,8 @@
     "type": "debugpy",
     "request": "launch",
     "module": "pytest",
-    "args": "${workspaceFolder}/tests/application/integration/test_retrieve.py",
-    //"args": "${workspaceFolder}/tests/core/unit/test_engram.py",
+    //"args": "${workspaceFolder}/tests/application/integration/test_retrieve.py",
+    "args": "${workspaceFolder}/tests/core/unit/test_engram.py",
     "console": "integratedTerminal"
   },
   {

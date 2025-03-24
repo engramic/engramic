@@ -5,18 +5,16 @@
 import uuid
 from typing import Any
 
-from cachetools import LRUCache  # type: ignore
+from cachetools import LRUCache
 
 from engramic.core.observation import Observation
 from engramic.infrastructure.repository.engram_repository import EngramRepository
 from engramic.infrastructure.repository.meta_repository import MetaRepository
+from engramic.infrastructure.system.observation_system import ObservationSystem
 from engramic.infrastructure.system.plugin_manager import PluginManager
 
 
 class ObservationRepository:
-    RELEVANCE_CONSTANT = 3
-    ACCURACY_CONSTANT = 3
-
     def __init__(self, plugin_manager: PluginManager, cache_size: int = 1000) -> None:
         self.db_plugin = plugin_manager.get_plugin('db', 'document')
         self.is_connected = self.db_plugin['func'].connect()
@@ -24,31 +22,20 @@ class ObservationRepository:
         self.engram_repository = EngramRepository(plugin_manager)
 
         # LRU Cache to store Engram objects
-        self.cache = LRUCache(maxsize=cache_size)
+        self.cache: LRUCache[str, Observation] = LRUCache(maxsize=cache_size)
 
-    def load_toml_file(self, toml_data: dict[str, Any]) -> Observation:
-        filtered_engrams_dict = [
-            {
-                key: value
-                for key, value in {**m, 'is_native_source': False}.items()
-                if key not in {'accuracy', 'relevance'}
-            }
-            for m in toml_data['engram']
-            if m['accuracy'] > ObservationRepository.ACCURACY_CONSTANT
-            and m['relevance'] > ObservationRepository.RELEVANCE_CONSTANT
-        ]
+    def load_dict(self, dict_data: dict[str, Any]) -> Observation:
+        engram_list = self.engram_repository.load_batch_dict(dict_data['engram_list'])
+        meta = self.meta_repository.load(dict_data['meta'])
 
-        combined_source_ids = list({source_id for m in filtered_engrams_dict for source_id in m['source_ids']})
-        combined_locations = list({location for m in filtered_engrams_dict for location in m['locations']})
+        observation = ObservationSystem(str(uuid.uuid4()), meta, engram_list)
+        return observation
 
-        toml_data['meta'][0]['id'] = str(uuid.uuid4())
-        toml_data['meta'][0]['source_ids'] = combined_source_ids
-        toml_data['meta'][0]['locations'] = combined_locations
+    def load_toml_dict(self, toml_data: dict[str, Any]) -> ObservationSystem:
+        engram_list = self.engram_repository.load_batch_dict(toml_data['engram'])
+        meta = self.meta_repository.load(toml_data['meta'])
 
-        filtered_engram_list = self.engram_repository.load_batch_dict(filtered_engrams_dict)
-        meta = self.meta_repository.load(toml_data['meta'][0])
-
-        observation = Observation(str(uuid.uuid4()), meta, filtered_engram_list)
+        observation = ObservationSystem(str(uuid.uuid4()), meta, engram_list)
         return observation
 
     def save(self, observation: Observation) -> bool:

@@ -7,7 +7,7 @@ from typing import Any
 
 import pluggy
 
-from engramic.core.prompt import Prompt
+from engramic.core import Index, Prompt
 
 llm_impl = pluggy.HookimplMarker('llm')
 llm_spec = pluggy.HookspecMarker('llm')
@@ -35,6 +35,12 @@ class VectorDBspec:
     def query(self, prompt: Prompt) -> set[str]:
         del prompt
         error_message = 'Subclasses must implement `query`'
+        raise NotImplementedError(error_message)
+
+    @vector_db_spec
+    def insert(self, index_list: list[Index]) -> set[str]:
+        del index_list
+        error_message = 'Subclasses must implement `index`'
         raise NotImplementedError(error_message)
 
 
@@ -73,3 +79,19 @@ class DBspec:
 
 db_manager = pluggy.PluginManager('db')
 db_manager.add_hookspecs(DBspec)
+
+
+embedding_impl = pluggy.HookimplMarker('embedding')
+embedding_spec = pluggy.HookspecMarker('embedding')
+
+
+class EmbeddingSpec:
+    @embedding_spec
+    def gen_embed(self, prompt: Prompt) -> set[str]:
+        del prompt
+        error_message = 'Subclasses must implement `embed`'
+        raise NotImplementedError(error_message)
+
+
+vector_manager = pluggy.PluginManager('embedding')
+vector_manager.add_hookspecs(EmbeddingSpec)

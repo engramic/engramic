@@ -45,7 +45,7 @@ path = "src/engramic/__about__.py"
 
 [tool.hatch.envs.test]
 template = "dev"
-dependencies = ["pytest","pytest-asyncio","mypy"]
+dependencies = ["pytest","pytest-asyncio","mypy","types-cachetools"]
 
 [tool.hatch.envs.test.scripts]
 typecheck = "mypy --strict --ignore-missing-imports -p engramic"
