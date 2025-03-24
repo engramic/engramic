@@ -2,7 +2,6 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
-import logging
 from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
@@ -23,6 +22,9 @@ if TYPE_CHECKING:
 
 
 class CodifyService(Service):
+    ACCURACY_CONSTANT = 3
+    RELEVANCY_CONSTANT = 3
+
     def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
@@ -48,14 +50,16 @@ class CodifyService(Service):
         del meta_array
         del response
 
-        mock_response = self.llm_validate['func'].submit(prompt=self.prompt, args=self.llm_validate['args'])
+        validate_response = self.llm_validate['func'].submit(prompt=self.prompt, args=self.llm_validate['args'])
 
-        memories = tomli.loads(mock_response[0]['llm_response'])
-        observation = self.observation_repository.load_toml_file(memories)
+        toml_data = tomli.loads(validate_response[0]['llm_response'])
 
-        logging.info('Codify complete. %s', observation.meta)
+        observation = self.observation_repository.load_toml_dict(toml_data)
+        merged_observation = observation.merge_observation(
+            observation, CodifyService.ACCURACY_CONSTANT, CodifyService.RELEVANCY_CONSTANT, self.engram_repository
+        )
 
-        self.send_message_async(Service.Topic.CODIFY_COMPLETE, asdict(observation))
+        self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(merged_observation))
 
     async def fetch_meta(self, engram_array: list[Engram], meta_id_array: list[str], response: Response) -> None:
         meta_array: list[Meta] = self.meta_repository.load_batch(meta_id_array)
@@ -65,9 +69,9 @@ class CodifyService(Service):
     async def fetch_engrams(self, response: Response) -> None:
         engram_array: list[Engram] = self.engram_repository.load_batch_retrieve_result(response.retrieve_result)
 
-        meta_array: list[str] = []
+        meta_array: set[str] = set()
         for engram in engram_array:
             if engram.meta_ids is not None:
-                meta_array.extend(engram.meta_ids)
+                meta_array.add(engram.meta_ids[0])
 
-        self.run_task(self.fetch_meta(engram_array, meta_array, response))
+        self.run_task(self.fetch_meta(engram_array, list(meta_array), response))

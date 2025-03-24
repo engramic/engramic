@@ -29,7 +29,10 @@ class Service(ABC):
         MAIN_PROMPT_COMPLETE = 'main_prompt_complete'
         START_PROFILER = 'start_profiler'
         END_PROFILER = 'end_profiler'
-        CODIFY_COMPLETE = 'end_codify'
+        OBSERVATION_COMPLETE = 'end_codify'
+        ENGRAM_COMPLETE = 'engram_complete'
+        META_COMPLETE = 'meta_complete'
+        INDEX_COMPLETE = 'index_complete'
 
     def __init__(self, host: HostBase) -> None:
         self.init_async_complete = False

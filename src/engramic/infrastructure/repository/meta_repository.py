@@ -5,7 +5,7 @@
 
 from typing import Any
 
-from cachetools import LRUCache  # type: ignore[import-untyped]
+from cachetools import LRUCache
 
 from engramic.core.meta import Meta
 from engramic.infrastructure.system.plugin_manager import PluginManager
@@ -17,7 +17,10 @@ class MetaRepository:
         self.is_connected = self.db_plugin['func'].connect()
 
         # LRU Cache to store Engram objects
-        self.cache = LRUCache(maxsize=cache_size)
+        self.cache: LRUCache[str, Meta] = LRUCache(maxsize=cache_size)
+
+    def save(self, meta: Meta) -> None:
+        self.db_plugin['func'].execute_data(query='save_meta', data=meta)
 
     def load(self, meta_dict: dict[str, Any]) -> Meta:
         return Meta(**meta_dict)

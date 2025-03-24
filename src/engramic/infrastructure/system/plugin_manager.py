@@ -35,26 +35,27 @@ class PluginManager:
         installed_dependencies: set[str]
         detected_dependencies: set[str]
 
-    def __init__(self, profile_name: str):
-        if profile_name is None:
+    def __init__(self, profile_name: str, *, ignore_profile: bool = False):
+        if profile_name is None and not ignore_profile:
             error = 'Profile name empty'
             raise RuntimeError(error)
 
-        """Initialize the host with an empty service list."""
-        try:
-            self.profiles = EngramProfiles()
-            self.set_profile(profile_name)
-        except RuntimeError as err:
-            error = '[ERROR] Failed to load config.'
-            raise RuntimeError(error) from err
-        except ValueError as err:
-            error = '[ERROR] Invalid config file.'
-            raise RuntimeError(error) from err
-        else:
-            logging.info('[INFO] Config loaded successfully')
+        if not ignore_profile:
+            """Initialize the host with an empty service list."""
+            try:
+                self.profiles = EngramProfiles()
+                self.set_profile(profile_name)
+            except RuntimeError as err:
+                error = '[ERROR] Failed to load config.'
+                raise RuntimeError(error) from err
+            except ValueError as err:
+                error = '[ERROR] Invalid config file.'
+                raise RuntimeError(error) from err
+            else:
+                logging.info('[INFO] Config loaded successfully')
 
-        self.install_dependencies()
-        self.import_plugins()
+            self.install_dependencies()
+            self.import_plugins()
 
     def install_dependencies(self) -> PluginManagerResponse:
         """

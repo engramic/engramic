@@ -2,14 +2,22 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from engramic.core.engram import Engram
-from engramic.core.meta import Meta
+if TYPE_CHECKING:
+    from engramic.core import Engram, Meta
 
 
-@dataclass
-class Observation:
+@dataclass()
+class Observation(ABC):
     id: str
     meta: Meta
-    engram: list[Engram]
+    engram_list: list[Engram]
+
+    @abstractmethod
+    def render(self) -> str:
+        pass

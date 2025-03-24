@@ -16,8 +16,8 @@ from engramic.infrastructure.system.service import Service
 
 
 class Host(HostBase):
-    def __init__(self, selected_profile: str, services: list[type[Service]]) -> None:
-        self.plugin_manager: PluginManager = PluginManager(selected_profile)
+    def __init__(self, selected_profile: str, services: list[type[Service]], *, ignore_profile: bool = False) -> None:
+        self.plugin_manager: PluginManager = PluginManager(selected_profile, ignore_profile=ignore_profile)
 
         self.services: dict[str, Service] = {}
         for ctr in services:
@@ -56,7 +56,7 @@ class Host(HostBase):
     def run_task(self, coro: Awaitable[None]) -> Future[Any]:
         """Runs an async task and returns a Future that can be awaited later."""
         if not asyncio.iscoroutine(coro):
-            error = 'Expected a coroutine'
+            error = 'Expected a single coroutine. Add () to the coroutines when you add them to run_task (e.g. my_func() not my_func ). Must be async.'
             raise TypeError(error)
 
         future = asyncio.run_coroutine_threadsafe(coro, self.loop)
@@ -73,16 +73,22 @@ class Host(HostBase):
     def run_tasks(self, coros: Sequence[Awaitable[Any]]) -> Future[dict[str, Any]]:
         """Runs multiple async tasks simultaneously and returns a Future with the results."""
         if not all(asyncio.iscoroutine(c) for c in coros):
-            error = 'Expected a list of coroutines'
+            error = 'Expected a list of coroutines. Add () to the coroutines when you add them to run_tasks (e.g. my_func() not my_func ). Must be async.'
             raise TypeError(error)
 
         async def gather_tasks() -> dict[str, Any]:
             try:
                 gather = await asyncio.gather(*coros, return_exceptions=True)
-                coros_with_names = {self._get_coro_name(coro): coro for coro in coros}
-                ret = {}
-                for i, name in enumerate(coros_with_names):
-                    ret[name] = gather[i]
+                ret: dict[str, Any] = {}
+                for i, coro in enumerate(coros):
+                    name = self._get_coro_name(coro)
+                    if name in ret:
+                        if isinstance(ret[name], list):
+                            ret[name].append(gather[i])
+                        else:
+                            ret[name] = [ret[name], gather[i]]
+                    else:
+                        ret[name] = gather[i]
             except Exception:
                 logging.exception('Unexpected error in gather_tasks()')
                 raise

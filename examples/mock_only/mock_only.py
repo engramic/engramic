@@ -6,6 +6,7 @@ import logging
 import sys
 
 from engramic.application.codify.codify_service import CodifyService
+from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
@@ -14,12 +15,15 @@ from engramic.core.prompt import Prompt
 from engramic.infrastructure.system import Host
 
 # Configure logging
+# logging.basicConfig(filename='output.log',level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def main() -> None:
-    host = Host('mock', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService])
+    host = Host(
+        'mock', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService]
+    )
 
     retrieve_service = host.get_service(RetrieveService)
     retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))

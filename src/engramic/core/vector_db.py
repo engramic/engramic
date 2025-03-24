@@ -5,7 +5,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from engramic.core import Prompt
+from engramic.core import Index, Prompt
 
 
 class VectorDB(ABC):
@@ -26,3 +26,7 @@ class VectorDB(ABC):
         Returns:
             str: The model-generated response.
         """
+
+    @abstractmethod
+    def insert(self, index: list[Index]) -> None:
+        pass

@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 
 @dataclass()
@@ -14,8 +14,26 @@ class Meta:
     """
 
     id: str
-    locations: str
+    locations: list[str]
     source_ids: list[str]
     keywords: list[str]
     summary_initial: str | None = None
     summary_full: str | None = None
+
+    def render(self) -> str:
+        def toml_escape(value: str) -> str:
+            return f'"{value}"'
+
+        def toml_list(values: list[str]) -> str:
+            return f"[{', '.join(toml_escape(v) for v in values)}]"
+
+        output = ['[meta]']
+        data = asdict(self)
+        for key, value in data.items():
+            if isinstance(value, list):
+                output.append(f'{key} = {toml_list(value)}')
+            elif value is None:
+                continue  # skip None values
+            else:
+                output.append(f'{key} = {toml_escape(value)}')
+        return '\n'.join(output)

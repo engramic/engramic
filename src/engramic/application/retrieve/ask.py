@@ -31,15 +31,15 @@ class Ask(Retrieval):
             'llm', 'retrieve_gen_conversation_direction'
         )
         self.prompt_analysis_plugin = plugin_manager.get_plugin('llm', 'retrieve_prompt_analysis')
-        self.prompt_retrieve_indicies_plugin = plugin_manager.get_plugin('llm', 'retrieve_gen_index')
-        self.prompt_query_index_db_plugin = plugin_manager.get_plugin('vector_db', 'query')
+        self.prompt_retrieve_indices_plugin = plugin_manager.get_plugin('llm', 'retrieve_gen_index')
+        self.prompt_db_plugin = plugin_manager.get_plugin('vector_db', 'db')
 
     def get_sources(self) -> None:
         if (
             self.retrieve_gen_conversation_direction_plugin is None
             or self.prompt_analysis_plugin is None
-            or self.prompt_retrieve_indicies_plugin is None
-            or self.prompt_query_index_db_plugin is None
+            or self.prompt_retrieve_indices_plugin is None
+            or self.prompt_db_plugin is None
         ):
             return None
 
@@ -55,7 +55,7 @@ class Ask(Retrieval):
                     'conversation direction: %s', direction
                 )  # We will be using this later for anticipatory retrieval
 
-                analyze_step = self.service.run_tasks([self._analyze_prompt(), self._generate_indicies()])
+                analyze_step = self.service.run_tasks([self._analyze_prompt(), self._generate_indices()])
 
                 analyze_step.add_done_callback(on_analyze_complete)
 
@@ -67,7 +67,7 @@ class Ask(Retrieval):
             try:
                 analysis = fut.result()  # This will raise an exception if the coroutine fails
 
-                self.prompt_analysis = PromptAnalysis(analysis['_analyze_prompt'], analysis['_generate_indicies'])
+                self.prompt_analysis = PromptAnalysis(analysis['_analyze_prompt'], analysis['_generate_indices'])
 
                 query_index_db_future = self.service.run_task(self._query_index_db())
 
@@ -128,8 +128,8 @@ class Ask(Retrieval):
 
         return ret[0]
 
-    async def _generate_indicies(self) -> dict[str, str]:
-        plugin = self.prompt_retrieve_indicies_plugin
+    async def _generate_indices(self) -> dict[str, str]:
+        plugin = self.prompt_retrieve_indices_plugin
         # add prompt engineering here and submit as the full prompt.
         ret = plugin['func'].submit(prompt=self.prompt, args=plugin['args'])
 
@@ -140,7 +140,7 @@ class Ask(Retrieval):
         return ret[0]
 
     async def _query_index_db(self) -> list[str]:
-        plugin = self.prompt_query_index_db_plugin
+        plugin = self.prompt_db_plugin
         # add prompt engineering here and submit as the full prompt.
         ret = plugin['func'].query(prompt=self.prompt, args=plugin['args'])
 
