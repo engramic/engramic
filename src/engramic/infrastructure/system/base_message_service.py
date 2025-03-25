@@ -3,17 +3,25 @@
 # See the LICENSE file in the project root for more details.
 
 import logging
+from enum import Enum
 
 import zmq
 import zmq.asyncio
 
 from engramic.core.host_base import HostBase
+from engramic.core.metrics_tracker import MetricsTracker
 from engramic.infrastructure.system import Service
+
+
+class MessageMetric(Enum):
+    MESSAGE_RECIEVED = 'message_recieved'
+    MESSAGE_SENT = 'message_sent'
 
 
 class BaseMessageService(Service):
     def __init__(self, host: HostBase) -> None:
         super().__init__(host)
+        self.metrics_tracker: MetricsTracker[MessageMetric] = MetricsTracker[MessageMetric]()
 
     def init_async(self) -> None:
         super().init_async()
@@ -47,4 +55,6 @@ class BaseMessageService(Service):
         """Continuously checks for incoming messages"""
         while True:
             topic, message = await self.pull_socket.recv_multipart()
+            self.metrics_tracker.increment(MessageMetric.MESSAGE_RECIEVED)
             self.pub_socket.send_multipart([topic, message])
+            self.metrics_tracker.increment(MessageMetric.MESSAGE_SENT)

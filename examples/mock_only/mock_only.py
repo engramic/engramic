@@ -26,7 +26,7 @@ def main() -> None:
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))
+    retrieve_service.submit(Prompt('Tell me about the podcast?'))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

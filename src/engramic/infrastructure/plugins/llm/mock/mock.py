@@ -24,9 +24,9 @@ class Mock(LLM):
 
         if hint == 'retrieve_gen_index':
             return {
-                'simplified_prompt': 'User wants a recipe for queso',
-                'keyword_prompt': 'recipe for queso',
-                'indices': ['a recipe for queso'],
+                'simplified_prompt': 'User wants to know what this podcast is about.',
+                'keyword_prompt': 'podcast is about',
+                'indices': ['Who is in the podcast?', 'What is the podcast about?'],
             }
 
         if hint == 'response_main':
