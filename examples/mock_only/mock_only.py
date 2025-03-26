@@ -11,8 +11,8 @@ from engramic.application.message.message_service import MessageService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.storage.storage_service import StorageService
+from engramic.core.host import Host
 from engramic.core.prompt import Prompt
-from engramic.infrastructure.system import Host
 
 # Configure logging
 # logging.basicConfig(filename='output.log',level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -26,7 +26,7 @@ def main() -> None:
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Give me a recepie for queso, put the ingredients in a table.'))
+    retrieve_service.submit(Prompt('Tell me about the podcast?'))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

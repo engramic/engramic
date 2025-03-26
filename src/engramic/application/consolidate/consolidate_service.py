@@ -2,18 +2,29 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import time
 from concurrent.futures import Future
 from dataclasses import asdict
+from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from engramic.core import Engram, Index, Meta, Prompt
+from engramic.core.host import Host
+from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.observation import Observation
 from engramic.infrastructure.repository.observation_repository import ObservationRepository
-from engramic.infrastructure.system.host import Host
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
     from engramic.infrastructure.system.plugin_manager import PluginManager
+
+
+class ConsolidateMetric(Enum):
+    OBSERVATIONS_RECIEVED = 'observations_recieved'
+    SUMMARIES_GENERATED = 'summaries_generated'
+    ENGRAMS_GENERATED = 'engrams_generated'
+    INDICES_GENERATED = 'indices_generated'
+    EMBEDDINGS_GENERATED = 'embeddings_generated'
 
 
 class ConsolidateService(Service):
@@ -26,9 +37,11 @@ class ConsolidateService(Service):
         self.observation_repository = ObservationRepository(self.plugin_manager)
         self.engram_builder: dict[str, Engram] = {}
         self.index_builder: dict[str, Index] = {}
+        self.metrics_tracker: MetricsTracker[ConsolidateMetric] = MetricsTracker[ConsolidateMetric]()
 
     def start(self) -> None:
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observer_complete)
+        self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
 
     def on_observer_complete(self, observation_dict: dict[str, Any]) -> None:
         """
@@ -36,6 +49,7 @@ class ConsolidateService(Service):
         We run summary + engram pipeline tasks asynchronously.
         """
         observation = self.observation_repository.load_dict(observation_dict)
+        self.metrics_tracker.increment(ConsolidateMetric.OBSERVATIONS_RECIEVED)
 
         summary_observation = self.run_task(self.generate_summary(observation))
         summary_observation.add_done_callback(self.on_summary)
@@ -51,6 +65,9 @@ class ConsolidateService(Service):
         args = self.llm_summary['args']
         args.update({'observation': observation.render()})
         summary = self.llm_summary['func'].submit(prompt=prompt, args=args)
+
+        self.metrics_tracker.increment(ConsolidateMetric.SUMMARIES_GENERATED)
+
         observation.meta.summary_full = summary
         return observation.meta
 
@@ -63,6 +80,8 @@ class ConsolidateService(Service):
         """
         Will procedurally generate engrams from other elements in an observation.
         """
+        self.metrics_tracker.increment(ConsolidateMetric.ENGRAMS_GENERATED, len(observation.engram_list))
+
         return observation.engram_list
 
     def on_engrams(self, engram_list_fut: Future[Any]) -> None:
@@ -119,6 +138,7 @@ class ConsolidateService(Service):
         prompt = Prompt('Generate indicies.')
         args = self.llm_gen_indices['args']
         indices = self.llm_gen_indices['func'].submit(prompt=prompt, args=args)
+        self.metrics_tracker.increment(ConsolidateMetric.INDICES_GENERATED, len(indices))
         return {'id': id_in, 'indices': indices[0]['llm_response']}
 
     async def gen_embeddings(self, id_and_index_dict: dict[str, Any]) -> str:
@@ -128,9 +148,9 @@ class ConsolidateService(Service):
         indices = id_and_index_dict['indices']
         id_val: str = id_and_index_dict['id']
 
-        prompt = Prompt('Generate embeddings.')
         args = self.embedding_gen_embed['args']
-        embedding = self.embedding_gen_embed['func'].gen_embed(prompt=prompt, indices=indices, args=args)
+        embedding = self.embedding_gen_embed['func'].gen_embed(strings=indices, args=args)
+        self.metrics_tracker.increment(ConsolidateMetric.EMBEDDINGS_GENERATED, len(embedding))
 
         # Convert raw embeddings to Index objects and attach them
         index_array: list[Index] = []
@@ -146,3 +166,13 @@ class ConsolidateService(Service):
 
         # Return the ID so we know which engram was updated
         return id_val
+
+    def on_acknowledge(self, message_in: str) -> None:
+        del message_in
+
+        metrics_packet: MetricPacket = self.metrics_tracker.get_and_reset_packet()
+
+        self.send_message_async(
+            Service.Topic.STATUS,
+            {'id': self.id, 'name': self.__class__.__name__, 'timestamp': time.time(), 'metrics': metrics_packet},
+        )

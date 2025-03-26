@@ -4,18 +4,16 @@
 import asyncio
 import logging
 import threading
-import time
 from collections.abc import Awaitable, Sequence
 from concurrent.futures import Future
 from threading import Thread
 from typing import Any
 
-from engramic.core.host_base import HostBase
 from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
 
-class Host(HostBase):
+class Host:
     def __init__(self, selected_profile: str, services: list[type[Service]], *, ignore_profile: bool = False) -> None:
         self.plugin_manager: PluginManager = PluginManager(selected_profile, ignore_profile=ignore_profile)
 
@@ -23,11 +21,11 @@ class Host(HostBase):
         for ctr in services:
             self.services[ctr.__name__] = ctr(self)  # Instantiate the class
 
-        self.async_loop_event = threading.Event()
+        self.init_async_done_event = threading.Event()
 
         self.thread = Thread(target=self._start_async_loop, daemon=True, name='Async Thread')
         self.thread.start()
-        time.sleep(1)  # OK, this isn't pretty but it works. Need to fix.
+        self.init_async_done_event.wait()
 
         self.stop_event: threading.Event = threading.Event()
 
@@ -38,13 +36,24 @@ class Host(HostBase):
         """Run the event loop in a separate thread."""
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-        self.loop.call_soon_threadsafe(self._init_services_async)
+
+        future = asyncio.run_coroutine_threadsafe(self._init_services_async(), self.loop)
+
+        def on_done(_fut: Future[None]) -> None:
+            # If there's an error, log it; either way, we set the event
+            exc = _fut.exception()
+            if exc:
+                logging.exception('Unhandled exception during init_services_async: %s', exc)
+            self.init_async_done_event.set()
+
+        future.add_done_callback(on_done)
+
         try:
             self.loop.run_forever()
         except Exception:
             logging.exception('Unhandled exception in async event loop')
 
-    def _init_services_async(self) -> None:
+    async def _init_services_async(self) -> None:
         if 'MessageService' in self.services:
             self.services['MessageService'].init_async()
 
@@ -107,7 +116,7 @@ class Host(HostBase):
 
         return future
 
-    def run_background(self, coro: Awaitable[None]) -> None:
+    def run_background(self, coro: Awaitable[None]) -> Future[None]:
         """Runs an async task in the background without waiting for its result."""
         if not asyncio.iscoroutine(coro):
             error = 'Expected a coroutine'
@@ -123,6 +132,7 @@ class Host(HostBase):
                 )
 
         future.add_done_callback(handle_future_exception)
+        return future
 
     def get_service(self, cls_in: type[Service]) -> Service:
         name = cls_in.__name__

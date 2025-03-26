@@ -8,16 +8,16 @@ from typing import Any
 
 class DB(ABC):
     """
-    An abstract base class that defines an interface for any Large Language Model.
+    An abstract base class that defines an interface for any database. This de
     """
 
     @abstractmethod
-    def connect(self, **kwargs: Any) -> bool:
+    def connect(self) -> None:
         """Establish a connection to the database."""
         # or `return False`
 
     @abstractmethod
-    def close(self) -> bool:
+    def close(self) -> None:
         """Close the connection to the database."""
         # or `return False`
 
@@ -27,6 +27,6 @@ class DB(ABC):
         # or `return None`
 
     @abstractmethod
-    def execute_data(self, query: str, data: dict[str, Any]) -> bool:
+    def execute_data(self, query: str, data: dict[str, Any]) -> None:
         """Execute a query with additional data."""
         # or `return None`

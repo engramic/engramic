@@ -4,7 +4,7 @@ import sys
 from engramic.application.message.message_service import MessageService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.core import Prompt
-from engramic.infrastructure.system import Host
+from engramic.core.host import Host
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

@@ -4,14 +4,16 @@
 
 from abc import ABC, abstractmethod
 
+from engramic.core import Index, Prompt
 
-class Embedding(ABC):
+
+class VectorDB(ABC):
     """
     An abstract base class that defines an interface for any Large Language Model.
     """
 
     @abstractmethod
-    def gen_embed(self, indices: list[str]) -> dict[str, list[str]]:
+    def query(self, prompt: Prompt) -> set[str]:
         """
         Submits a prompt to the LLM and returns the model-generated text.
 
@@ -23,3 +25,7 @@ class Embedding(ABC):
         Returns:
             str: The model-generated response.
         """
+
+    @abstractmethod
+    def insert(self, index: list[Index]) -> None:
+        pass

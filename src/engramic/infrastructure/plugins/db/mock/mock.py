@@ -3,7 +3,7 @@ from typing import Any, cast
 
 import pluggy
 
-from engramic.core.db import DB
+from engramic.core.interface.db import DB
 from engramic.infrastructure.system.plugin_specifications import db_impl
 
 
@@ -13,13 +13,12 @@ class Mock(DB):
         self.history: dict[str, Any] = {}
 
     @db_impl
-    def connect(self, **kwargs: Any) -> bool:
-        del kwargs
-        return True
+    def connect(self) -> None:
+        return None
 
     @db_impl
-    def close(self) -> bool:
-        return True
+    def close(self) -> None:
+        return None
 
     @db_impl
     def execute(self, query: str) -> dict[str, Any]:
@@ -121,14 +120,13 @@ class Mock(DB):
         return {'error': 'error'}
 
     @db_impl
-    def execute_data(self, query: str, data: dict[str, Any]) -> bool:
+    def execute_data(self, query: str, data: dict[str, Any]) -> None:
         if query == 'save_history':
             self.history[data['id']] = data
-            return True
+            return None
         if query == 'save_observation':
             self.observations[data['id']] = data
-            return True
-        return False
+            return None
 
 
 pm = pluggy.PluginManager('llm')

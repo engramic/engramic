@@ -1,13 +1,13 @@
 import pluggy
 
-from engramic.core.embedding import Embedding
+from engramic.core.interface.embedding import Embedding
 from engramic.infrastructure.system.plugin_specifications import embedding_impl
 
 
 class Mock(Embedding):
     @embedding_impl
-    def gen_embed(self, indices: list[str]) -> dict[str, list[str]]:
-        del indices
+    def gen_embed(self, strings: list[str]) -> dict[str, list[str]]:
+        del strings
         return {
             'embedding_response': [
                 'fdasfdsfasfdsafdfdsafdvfadsfdafvd',

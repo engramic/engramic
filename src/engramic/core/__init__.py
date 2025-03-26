@@ -4,9 +4,8 @@
 
 from engramic.core.engram import Engram as Engram
 from engramic.core.index import Index as Index
-from engramic.core.library import Library as Library
+from engramic.core.interface.retrieval import Retrieval as Retrieval
 from engramic.core.meta import Meta as Meta
 from engramic.core.prompt import Prompt as Prompt
 from engramic.core.prompt_analysis import PromptAnalysis as PromptAnalysis
 from engramic.core.response import Response as Response
-from engramic.core.retrieval import Retrieval as Retrieval

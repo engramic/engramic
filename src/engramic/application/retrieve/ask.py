@@ -7,12 +7,16 @@ from __future__ import annotations
 import logging
 from concurrent.futures import Future
 from dataclasses import asdict
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from engramic.core import Library, Prompt, PromptAnalysis, Retrieval
+import engramic.application.retrieve.retrieve_service
+from engramic.core import Prompt, PromptAnalysis, Retrieval
 from engramic.core.retrieve_result import RetrieveResult
 from engramic.infrastructure.system.plugin_manager import PluginManager  # noqa: TCH001
 from engramic.infrastructure.system.service import Service
+
+if TYPE_CHECKING:
+    from engramic.core.metrics_tracker import MetricsTracker
 
 
 class Ask(Retrieval):
@@ -20,10 +24,14 @@ class Ask(Retrieval):
         self,
         prompt: Prompt,
         plugin_manager: PluginManager,
+        metrics_tracker: MetricsTracker[engramic.application.retrieve.retrieve_service.RetrieveMetric],
         service: Service,
-        library: Library | None = None,
+        library: str | None = None,
     ) -> None:
         self.service = service
+        self.metrics_tracker: MetricsTracker[engramic.application.retrieve.retrieve_service.RetrieveMetric] = (
+            metrics_tracker
+        )
         self.library = library
         self.prompt = prompt
         self.prompt_analysis: PromptAnalysis | None = None
@@ -83,14 +91,14 @@ class Ask(Retrieval):
                 logging.info('Query Result: %s', set_ret)
                 final_future.set_result(set_ret)
                 result = final_future.result()
-                retrieve_result = RetrieveResult(engram_id_array=result)
+                retrieve_result = RetrieveResult(engram_id_array=list(result))
 
                 if self.prompt_analysis is None:
                     error = 'Prompt analysis None in on_query_index_db'
                     raise RuntimeError(error)
 
                 retrieve_response = {
-                    'query': result,
+                    'query': list(result),
                     'analysis': asdict(self.prompt_analysis),
                     'prompt': asdict(self.prompt),
                     'retrieve_response': asdict(retrieve_result),
@@ -111,6 +119,10 @@ class Ask(Retrieval):
         # add prompt engineering here and submit as the full prompt.
         ret = plugin['func'].submit(prompt=self.prompt, args=plugin['args'])
 
+        self.metrics_tracker.increment(
+            engramic.application.retrieve.retrieve_service.RetrieveMetric.CONVERSATION_DIRECTION_CALCULATED
+        )
+
         if not isinstance(ret[0], dict):
             error = f'Expected dict[str, str], got {type(ret[0])}'
             raise TypeError(error)
@@ -122,6 +134,8 @@ class Ask(Retrieval):
         # add prompt engineering here and submit as the full prompt.
         ret = plugin['func'].submit(prompt=self.prompt, args=plugin['args'])
 
+        self.metrics_tracker.increment(engramic.application.retrieve.retrieve_service.RetrieveMetric.PROMPTS_ANALYZED)
+
         if not isinstance(ret[0], dict):
             error = f'Expected dict[str, str], got {type(ret[0])}'
             raise TypeError(error)
@@ -132,6 +146,10 @@ class Ask(Retrieval):
         plugin = self.prompt_retrieve_indices_plugin
         # add prompt engineering here and submit as the full prompt.
         ret = plugin['func'].submit(prompt=self.prompt, args=plugin['args'])
+        count = len(ret[0]['indices'])
+        self.metrics_tracker.increment(
+            engramic.application.retrieve.retrieve_service.RetrieveMetric.DYNAMIC_INDICES_GENERATED, count
+        )
 
         if not isinstance(ret[0], dict):
             error = f'Expected dict[str, str], got {type(ret[0])}'
@@ -139,12 +157,16 @@ class Ask(Retrieval):
 
         return ret[0]
 
-    async def _query_index_db(self) -> list[str]:
+    async def _query_index_db(self) -> set[str]:
         plugin = self.prompt_db_plugin
         # add prompt engineering here and submit as the full prompt.
         ret = plugin['func'].query(prompt=self.prompt, args=plugin['args'])
+        num_queries = len(ret[0])
+        self.metrics_tracker.increment(
+            engramic.application.retrieve.retrieve_service.RetrieveMetric.VECTOR_DB_QUERIES, num_queries
+        )
 
-        if not isinstance(ret[0], list):
+        if not isinstance(ret[0], set):
             error = f'Expected dict[str, str], got {type(ret[0])}'
             raise TypeError(error)
 
