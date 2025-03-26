@@ -13,7 +13,7 @@ from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.response import Response
 from engramic.core.retrieve_result import RetrieveResult
 from engramic.infrastructure.repository.engram_repository import EngramRepository
-from engramic.infrastructure.system.host import Host
+from engramic.infrastructure.system.host_system import HostSystem
 from engramic.infrastructure.system.service import Service
 from engramic.infrastructure.system.websocket_manager import WebsocketManager
 
@@ -28,7 +28,7 @@ class ResponseMetric(Enum):
 
 
 class ResponseService(Service):
-    def __init__(self, host: Host) -> None:
+    def __init__(self, host: HostSystem) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.web_socket_manager: WebsocketManager = WebsocketManager(host)

@@ -7,19 +7,17 @@ from abc import ABC, abstractmethod
 
 class Embedding(ABC):
     """
-    An abstract base class that defines an interface for any Large Language Model.
+    An abstract base class that defines an interface for any embedding API.
     """
 
     @abstractmethod
-    def gen_embed(self, indices: list[str]) -> dict[str, list[str]]:
+    def gen_embed(self, strings: list[str]) -> dict[str, list[str]]:
         """
-        Submits a prompt to the LLM and returns the model-generated text.
+        Submits a prompt to the embedding API and returns the model-generated text.
 
         Args:
-            prompt (str): The prompt or input text for the LLM.
-            **kwargs (Any): Optional keyword arguments for provider-specific settings,
-                such as model name, temperature, max tokens, etc.
+            indices list[str] a list of strings to be embedded.
 
         Returns:
-            str: The model-generated response.
+            str: The model-generated embedding.
         """

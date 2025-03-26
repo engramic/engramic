@@ -4,7 +4,7 @@ from concurrent.futures import Future
 from typing import Any
 
 
-class HostBase(abc.ABC):
+class Host(abc.ABC):
     @abc.abstractmethod
     def run_task(self, coro: Awaitable[Any]) -> Future[Any]:
         """Runs an async task and returns a Future."""

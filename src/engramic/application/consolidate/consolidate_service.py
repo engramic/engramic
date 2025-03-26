@@ -12,7 +12,7 @@ from engramic.core import Engram, Index, Meta, Prompt
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.observation import Observation
 from engramic.infrastructure.repository.observation_repository import ObservationRepository
-from engramic.infrastructure.system.host import Host
+from engramic.infrastructure.system.host_system import HostSystem
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ class ConsolidateMetric(Enum):
 
 
 class ConsolidateService(Service):
-    def __init__(self, host: Host) -> None:
+    def __init__(self, host: HostSystem) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.llm_summary: dict[str, Any] = self.plugin_manager.get_plugin('llm', 'summary')
@@ -148,9 +148,8 @@ class ConsolidateService(Service):
         indices = id_and_index_dict['indices']
         id_val: str = id_and_index_dict['id']
 
-        prompt = Prompt('Generate embeddings.')
         args = self.embedding_gen_embed['args']
-        embedding = self.embedding_gen_embed['func'].gen_embed(prompt=prompt, indices=indices, args=args)
+        embedding = self.embedding_gen_embed['func'].gen_embed(strings=indices, args=args)
         self.metrics_tracker.increment(ConsolidateMetric.EMBEDDINGS_GENERATED, len(embedding))
 
         # Convert raw embeddings to Index objects and attach them

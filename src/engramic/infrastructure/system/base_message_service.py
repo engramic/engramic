@@ -8,7 +8,7 @@ from enum import Enum
 import zmq
 import zmq.asyncio
 
-from engramic.core.host_base import HostBase
+from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricsTracker
 from engramic.infrastructure.system import Service
 
@@ -19,7 +19,7 @@ class MessageMetric(Enum):
 
 
 class BaseMessageService(Service):
-    def __init__(self, host: HostBase) -> None:
+    def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.metrics_tracker: MetricsTracker[MessageMetric] = MetricsTracker[MessageMetric]()
 

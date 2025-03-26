@@ -4,7 +4,7 @@ import sys
 from engramic.application.message.message_service import MessageService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.core import Prompt
-from engramic.infrastructure.system import Host
+from engramic.infrastructure.system import HostSystem
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -12,7 +12,7 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def test_retrieve_service_submission() -> None:
-    host = Host('mock', [MessageService, RetrieveService])
+    host = HostSystem('mock', [MessageService, RetrieveService])
 
     """Integration test to check if RetrieveService submits prompts correctly."""
     prompt = Prompt('Give me a recipe for queso, put the ingredients in a table.')

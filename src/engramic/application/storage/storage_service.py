@@ -14,7 +14,7 @@ from engramic.infrastructure.repository.engram_repository import EngramRepositor
 from engramic.infrastructure.repository.history_repository import HistoryRepository
 from engramic.infrastructure.repository.meta_repository import MetaRepository
 from engramic.infrastructure.repository.observation_repository import ObservationRepository
-from engramic.infrastructure.system.host import Host
+from engramic.infrastructure.system.host_system import HostSystem
 from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
@@ -30,7 +30,7 @@ class StorageMetric(Enum):
 
 
 class StorageService(Service):
-    def __init__(self, host: Host) -> None:
+    def __init__(self, host: HostSystem) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.history_repository: HistoryRepository = HistoryRepository(self.plugin_manager)

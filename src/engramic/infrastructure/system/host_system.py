@@ -10,12 +10,12 @@ from concurrent.futures import Future
 from threading import Thread
 from typing import Any
 
-from engramic.core.host_base import HostBase
+from engramic.core.host import Host
 from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
 
-class Host(HostBase):
+class HostSystem(Host):
     def __init__(self, selected_profile: str, services: list[type[Service]], *, ignore_profile: bool = False) -> None:
         self.plugin_manager: PluginManager = PluginManager(selected_profile, ignore_profile=ignore_profile)
 

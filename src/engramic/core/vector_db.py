@@ -3,7 +3,6 @@
 # See the LICENSE file in the project root for more details.
 
 from abc import ABC, abstractmethod
-from typing import Any
 
 from engramic.core import Index, Prompt
 
@@ -14,7 +13,7 @@ class VectorDB(ABC):
     """
 
     @abstractmethod
-    def query(self, prompt: Prompt, **kwargs: Any) -> list[str]:
+    def query(self, prompt: Prompt) -> set[str]:
         """
         Submits a prompt to the LLM and returns the model-generated text.
 

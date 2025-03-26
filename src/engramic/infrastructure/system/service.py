@@ -20,7 +20,7 @@ import zmq.asyncio
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Sequence
 
-    from engramic.core.host_base import HostBase
+    from engramic.core.host import Host
 
 T = TypeVar('T', bound=Enum)
 
@@ -39,7 +39,7 @@ class Service(ABC):
         ACKNOWLEDGE = 'acknowledge'
         STATUS = 'status'
 
-    def __init__(self, host: HostBase) -> None:
+    def __init__(self, host: Host) -> None:
         self.id = str(uuid.uuid4())
         self.init_async_complete = False
         self.host = host

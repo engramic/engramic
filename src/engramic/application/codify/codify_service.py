@@ -16,7 +16,7 @@ from engramic.core.retrieve_result import RetrieveResult
 from engramic.infrastructure.repository.engram_repository import EngramRepository
 from engramic.infrastructure.repository.meta_repository import MetaRepository
 from engramic.infrastructure.repository.observation_repository import ObservationRepository
-from engramic.infrastructure.system.host import Host
+from engramic.infrastructure.system.host_system import HostSystem
 from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
@@ -34,7 +34,7 @@ class CodifyService(Service):
     ACCURACY_CONSTANT = 3
     RELEVANCY_CONSTANT = 3
 
-    def __init__(self, host: Host) -> None:
+    def __init__(self, host: HostSystem) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.engram_repository: EngramRepository = EngramRepository(self.plugin_manager)
