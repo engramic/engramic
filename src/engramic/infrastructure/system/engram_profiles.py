@@ -5,10 +5,12 @@
 from __future__ import annotations
 
 import logging
+import tomli
+import shutil
 from pathlib import Path
 from typing import Any
 
-import tomli
+
 
 
 class EngramProfiles:
@@ -19,27 +21,37 @@ class EngramProfiles:
       by following the 'ptr' value to the actual profile.
     """
 
-    DEFAULT_PROFILE_PATH = 'engram_profiles.toml'
+    DEFAULT_PROFILE_PATH = 'default_engram_profiles.toml'
+    LOCAL_PROFILE_PATH = 'engram_profiles.toml'
     ENGRAM_PROFILE_VERSION = 1.0
 
     def __init__(self) -> None:
         self.currently_set_profile: dict[Any, Any] | None = None
 
-        path = Path(EngramProfiles.DEFAULT_PROFILE_PATH)
-        if not path.is_file():
-            logging.error('TOML file not found: %s', EngramProfiles.DEFAULT_PROFILE_PATH)
+        default_path = Path(EngramProfiles.DEFAULT_PROFILE_PATH)
+        if not default_path.is_file():
+            logging.error('Default TOML file not found: %s', EngramProfiles.DEFAULT_PROFILE_PATH)
             raise FileNotFoundError
+        
+        local_path = Path(EngramProfiles.LOCAL_PROFILE_PATH)
+        if not local_path.is_file():
+            try:
+                shutil.copy(default_path, local_path)
+                logging.info('Created local config from default: %s', local_path)
+            except Exception as e:
+                logging.error('Failed to copy default to local config: %s', e)
+                raise
 
         self._data: dict[str, dict[Any, Any]] = {}
 
         try:
-            with path.open('rb') as f:
+            with local_path.open('rb') as f:
                 self._data = tomli.load(f)
         except FileNotFoundError as err:
-            error = f'Config file not found: {path}'
+            error = f'Config file not found: {local_path}'
             raise RuntimeError(error) from err
         except tomli.TOMLDecodeError as err:
-            error = f'Invalid TOML format in {path}'
+            error = f'Invalid TOML format in {local_path}'
             raise ValueError(error) from err
 
         version = self._data.get('version')

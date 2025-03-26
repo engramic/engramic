@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pluggy
 
-from engramic.core.llm import LLM
+from engramic.core.interface.llm import LLM
 from engramic.core.prompt import Prompt
 from engramic.infrastructure.system.plugin_specifications import llm_impl
 from engramic.infrastructure.system.websocket_manager import WebsocketManager

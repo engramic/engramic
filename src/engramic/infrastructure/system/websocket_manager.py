@@ -12,7 +12,7 @@ from websockets.asyncio.server import Server, ServerConnection  # noqa: TCH002
 
 if TYPE_CHECKING:
     from engramic.core.host import Host
-    from engramic.core.llm import LLM
+    from engramic.core.interface.llm import LLM
 
 
 class WebsocketManager:
