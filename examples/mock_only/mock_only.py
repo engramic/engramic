@@ -11,8 +11,8 @@ from engramic.application.message.message_service import MessageService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.storage.storage_service import StorageService
+from engramic.core.host import Host
 from engramic.core.prompt import Prompt
-from engramic.infrastructure.system.host_system import HostSystem
 
 # Configure logging
 # logging.basicConfig(filename='output.log',level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -21,7 +21,7 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 def main() -> None:
-    host = HostSystem(
+    host = Host(
         'mock', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService]
     )
 

@@ -9,10 +9,10 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from engramic.core import Engram, Index, Meta, Prompt
+from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.observation import Observation
 from engramic.infrastructure.repository.observation_repository import ObservationRepository
-from engramic.infrastructure.system.host_system import HostSystem
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ class ConsolidateMetric(Enum):
 
 
 class ConsolidateService(Service):
-    def __init__(self, host: HostSystem) -> None:
+    def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.llm_summary: dict[str, Any] = self.plugin_manager.get_plugin('llm', 'summary')

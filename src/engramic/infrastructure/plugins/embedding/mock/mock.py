@@ -1,6 +1,6 @@
 import pluggy
 
-from engramic.core.embedding import Embedding
+from engramic.core.interface.embedding import Embedding
 from engramic.infrastructure.system.plugin_specifications import embedding_impl
 
 

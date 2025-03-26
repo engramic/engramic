@@ -10,15 +10,15 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from engramic.infrastructure.system.base_message_service import BaseMessageService
-from engramic.infrastructure.system.host_system import HostSystem  # noqa: TCH001
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
+    from engramic.core.host import Host
     from engramic.core.metrics_tracker import MetricPacket
 
 
 class MessageService(BaseMessageService):
-    def __init__(self, host: HostSystem) -> None:
+    def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.profiler: cProfile.Profile | None = None
 

@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 from engramic.application.retrieve.ask import Ask
 from engramic.core import Index, Prompt
+from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
-from engramic.infrastructure.system.host_system import HostSystem
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class RetrieveMetric(Enum):
 class RetrieveService(Service):
     # ITERATIONS = 3
 
-    def __init__(self, host: HostSystem) -> None:
+    def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.vector_db_plugin = self.plugin_manager.get_plugin('vector_db', 'db')

@@ -8,13 +8,13 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from engramic.core import Engram, Meta, Response
+from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.observation import Observation
 from engramic.infrastructure.repository.engram_repository import EngramRepository
 from engramic.infrastructure.repository.history_repository import HistoryRepository
 from engramic.infrastructure.repository.meta_repository import MetaRepository
 from engramic.infrastructure.repository.observation_repository import ObservationRepository
-from engramic.infrastructure.system.host_system import HostSystem
 from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
@@ -30,7 +30,7 @@ class StorageMetric(Enum):
 
 
 class StorageService(Service):
-    def __init__(self, host: HostSystem) -> None:
+    def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.history_repository: HistoryRepository = HistoryRepository(self.plugin_manager)

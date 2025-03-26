@@ -4,7 +4,7 @@ from typing import Any
 import pluggy
 
 from engramic.core import Index, Prompt
-from engramic.core.vector_db import VectorDB
+from engramic.core.interface.vector_db import VectorDB
 from engramic.infrastructure.system.plugin_specifications import vector_db_impl
 
 

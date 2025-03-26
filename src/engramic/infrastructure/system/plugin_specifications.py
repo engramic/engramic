@@ -8,10 +8,10 @@ from typing import Any
 import pluggy
 
 from engramic.core import Index, Prompt
-from engramic.core.db import DB
-from engramic.core.embedding import Embedding
+from engramic.core.interface.db import DB
+from engramic.core.interface.embedding import Embedding
+from engramic.core.interface.vector_db import VectorDB
 from engramic.core.llm import LLM
-from engramic.core.vector_db import VectorDB
 
 llm_impl = pluggy.HookimplMarker('llm')
 llm_spec = pluggy.HookspecMarker('llm')

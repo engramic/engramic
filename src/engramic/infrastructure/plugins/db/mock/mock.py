@@ -3,7 +3,7 @@ from typing import Any, cast
 
 import pluggy
 
-from engramic.core.db import DB
+from engramic.core.interface.db import DB
 from engramic.infrastructure.system.plugin_specifications import db_impl
 
 
