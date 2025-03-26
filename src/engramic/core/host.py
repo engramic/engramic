@@ -116,7 +116,7 @@ class Host:
 
         return future
 
-    def run_background(self, coro: Awaitable[None]) -> None:
+    def run_background(self, coro: Awaitable[None]) -> Future[None]:
         """Runs an async task in the background without waiting for its result."""
         if not asyncio.iscoroutine(coro):
             error = 'Expected a coroutine'
@@ -132,6 +132,7 @@ class Host:
                 )
 
         future.add_done_callback(handle_future_exception)
+        return future
 
     def get_service(self, cls_in: type[Service]) -> Service:
         name = cls_in.__name__
