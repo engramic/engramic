@@ -5,12 +5,11 @@
 from __future__ import annotations
 
 import logging
-import tomli
 import shutil
 from pathlib import Path
 from typing import Any
 
-
+import tomli
 
 
 class EngramProfiles:
@@ -32,14 +31,14 @@ class EngramProfiles:
         if not default_path.is_file():
             logging.error('Default TOML file not found: %s', EngramProfiles.DEFAULT_PROFILE_PATH)
             raise FileNotFoundError
-        
+
         local_path = Path(EngramProfiles.LOCAL_PROFILE_PATH)
         if not local_path.is_file():
             try:
                 shutil.copy(default_path, local_path)
                 logging.info('Created local config from default: %s', local_path)
-            except Exception as e:
-                logging.error('Failed to copy default to local config: %s', e)
+            except Exception:
+                logging.exception('Failed to copy default to local config.')
                 raise
 
         self._data: dict[str, dict[Any, Any]] = {}

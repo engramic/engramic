@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 import pluggy
 
@@ -10,8 +9,8 @@ from engramic.infrastructure.system.plugin_specifications import vector_db_impl
 
 class Mock(VectorDB):
     @vector_db_impl
-    def query(self, prompt: Prompt, **kwargs: Any) -> set[str]:
-        logging.info('Vector DB mock.%s %s', prompt, kwargs)
+    def query(self, prompt: Prompt) -> set[str]:
+        logging.info('Vector DB mock.%s', prompt)
         ret_list = ['d1b847da-04eb-4846-a503-512aad2706c6', '83c5f4bb-65b1-4422-80b9-45ba43d91c21']
         return set(ret_list)
 

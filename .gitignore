@@ -1,3 +1,6 @@
+# Default Config
+engram_profiles.toml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
