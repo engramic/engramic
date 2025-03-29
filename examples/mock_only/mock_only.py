@@ -22,11 +22,11 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 def main() -> None:
     host = Host(
-        'mock', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService]
+        'google', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService]
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Tell me about the podcast?'))
+    retrieve_service.submit(Prompt('Tell me about the All In podcast.'))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

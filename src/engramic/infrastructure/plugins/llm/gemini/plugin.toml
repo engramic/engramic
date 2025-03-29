@@ -1,6 +1,6 @@
 [project]
-name = "mock"
+name = "gemini"
 version = "0.0.1"
 description = "A simple plugin test with cowsay dependency."
 authors = ["ericp@engramic.org"]
-dependencies = ["cowsay>5.0"]
+dependencies = ["google-genai"]

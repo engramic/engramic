@@ -33,10 +33,11 @@ class StorageService(Service):
     def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
-        self.history_repository: HistoryRepository = HistoryRepository(self.plugin_manager)
-        self.observation_repository: ObservationRepository = ObservationRepository(self.plugin_manager)
-        self.engram_repository: EngramRepository = EngramRepository(self.plugin_manager)
-        self.meta_repository: MetaRepository = MetaRepository(self.plugin_manager)
+        self.db_document_plugin = self.plugin_manager.get_plugin('db', 'document')
+        self.history_repository: HistoryRepository = HistoryRepository(self.db_document_plugin)
+        self.observation_repository: ObservationRepository = ObservationRepository(self.db_document_plugin)
+        self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
+        self.meta_repository: MetaRepository = MetaRepository(self.db_document_plugin)
         self.metrics_tracker: MetricsTracker[StorageMetric] = MetricsTracker[StorageMetric]()
 
     def start(self) -> None:
@@ -45,6 +46,10 @@ class StorageService(Service):
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engram_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
+
+    def init_async(self) -> None:
+        self.db_document_plugin['func'].connect()
+        return super().init_async()
 
     def on_engram_complete(self, engram_dict: dict[str, Any]) -> None:
         engram = self.engram_repository.load_dict(engram_dict)

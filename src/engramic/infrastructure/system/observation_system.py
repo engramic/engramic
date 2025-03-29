@@ -6,7 +6,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from typing import cast
 
-from engramic.core.meta import Meta
+from engramic.core import Index, Meta
 from engramic.core.observation import Observation
 from engramic.infrastructure.repository.engram_repository import EngramRepository
 
@@ -42,13 +42,14 @@ class ObservationSystem(Observation):
             location: str for m in filtered_engrams_dict for location in m['locations']
         })
 
+        index = Index(**observation_dict['meta']['summary_full'])
         new_meta = Meta(
             str(uuid.uuid4()),
             combined_source_ids,
             combined_locations,
             observation_dict['meta']['keywords'],
             observation_dict['meta']['summary_initial'],
-            observation_dict['meta']['summary_full'],
+            index,
         )
 
         engram_list = engram_repository.load_batch_dict(filtered_engrams_dict)

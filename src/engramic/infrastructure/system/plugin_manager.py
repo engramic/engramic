@@ -102,7 +102,7 @@ class PluginManager:
                     usage = current_profile[category]
                     for items in usage:
                         plugin_entry = usage[items]
-                        plugin_name = plugin_entry['name']
+                        plugin_name = plugin_entry['name'].lower()
 
                         plugin_path = os.path.join(category_path, plugin_name)
                         plugin_file = os.path.join(plugin_path, f'{plugin_name}.py')
@@ -112,6 +112,8 @@ class PluginManager:
                             module = importlib.util.module_from_spec(spec)
                             spec.loader.exec_module(module)
                             sys.modules[module_name] = module
+                            # pm = pluggy.PluginManager(category)
+                            # pm.register(Gemini())
 
     def get_plugin(self, category: str, usage: str) -> dict[str, Any]:
         if self.profiles is None:
@@ -123,16 +125,22 @@ class PluginManager:
             cat_usage = profile[category][usage]
 
             if 'name' in cat_usage:
-                implementation = cat_usage['name']
-
+                name = cat_usage['name']
+                module_name = name.lower()
                 args = profile[category][usage]
 
-                plugin = sys.modules.get(f'{category}.{implementation}')
+                plugin = sys.modules.get(f'{category}.{module_name}')
 
-                if plugin:
-                    pm = pluggy.PluginManager(category)
-                    pm.register(plugin.Mock())
-                    return {'func': pm.hook, 'args': args}
+                plugin_class = getattr(plugin, name, None)
+
+                if not plugin_class:
+                    # If it's not found, raise an error
+                    runtime_error = f'Class {name} not found in module {category}.{module_name}'
+                    raise RuntimeError(runtime_error)
+
+                pm = pluggy.PluginManager(category)
+                pm.register(plugin_class())
+                return {'func': pm.hook, 'args': args}
 
         logging.error('Plugin %s.%s failed to load.', category, usage)
         error = 'Plugin failed to load'
@@ -140,7 +148,7 @@ class PluginManager:
 
     def _get_packages(self, key: str, plugin_name: dict[str, str]) -> list[str]:
         system_plugin_root_dir = Path(PluginManager.PLUGIN_DEFAULT_ROOT)
-        plugin_root_dir = system_plugin_root_dir / key / plugin_name['name']
+        plugin_root_dir = system_plugin_root_dir / key / plugin_name['name'].lower()
 
         packages = self._parse_plugin_toml(str(plugin_root_dir))
         return packages

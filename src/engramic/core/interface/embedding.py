@@ -11,7 +11,7 @@ class Embedding(ABC):
     """
 
     @abstractmethod
-    def gen_embed(self, strings: list[str]) -> dict[str, list[str]]:
+    def gen_embed(self, strings: list[str], args: dict[str, str]) -> dict[str, list[list[float]]]:
         """
         Submits a prompt to the embedding API and returns the model-generated text.
 

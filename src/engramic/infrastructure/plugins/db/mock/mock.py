@@ -21,8 +21,9 @@ class Mock(DB):
         return None
 
     @db_impl
-    def execute(self, query: str) -> dict[str, Any]:
-        if query == 'load_batch':
+    def fetch(self, table: DB.DBTables, ids: list[str]) -> dict[str, list[dict[str, Any]]]:
+        del ids
+        if table.value == 'engram':
             return_string = """{
   "engram": [
     {
@@ -35,7 +36,7 @@ class Mock(DB):
       "meta_ids": ["a1b2c3d4-e5f6-4711-8097-92a8c3f6d5e7"],
       "library_ids": ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"],
       "id": "c1d2e3f4-a5b6-4c78-9d0e-1f2a3b4c5d6e",
-      "indices":[{"text":"What is this about","embeddings":"43243"}],
+      "indices":[{"text":"What is this about","embedding":"43243"}],
       "context": {
         "episode": 167,
         "segment": "Economic Trends",
@@ -54,7 +55,7 @@ class Mock(DB):
       "meta_ids": ["b2c3d4e5-f6a7-4811-8097-92a8c3f6d5e7"],
       "library_ids": ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"],
       "id": "d2e3f4g5-h6i7-5c78-9d0e-1f2a3b4c5d6e",
-      "indices":[{"text":"What is this about","embeddings":"43243"}],
+      "indices":[{"text":"What is this about","embedding":"43243"}],
       "context": {
         "episode": 168,
         "segment": "Tech & Innovation",
@@ -73,7 +74,7 @@ class Mock(DB):
       "meta_ids": ["c3d4e5f6-a7b8-5911-8097-92a8c3f6d5e7"],
       "library_ids": ["f1e2d3c4-b5a6-4f78-9a0b-1c2d3e4f5a6b"],
       "id": "e3f4g5h6-i7j8-6c78-9d0e-1f2a3b4c5d6e",
-      "indices":{"text":"What is this about","embeddings":"43243"},
+      "indices":[{"text":"What is this about","embedding":"43243"}],
       "context": {
         "episode": 169,
         "segment": "Startup & VC",
@@ -87,7 +88,7 @@ class Mock(DB):
 """
             return cast(dict[str, Any], json.loads(return_string))
 
-        if query == 'load_batch_meta':
+        if table.value == 'meta':
             return_string = """{"meta":[
             {
                 "id":"a1b2c3d4-e5f6-4711-8097-92a8c3f6d5e7",
@@ -95,7 +96,7 @@ class Mock(DB):
                 "source_id": ["550e8400-e29b-41d4-a716-446655440000"],
                 "keywords": ["inflation", "investors"],
                 "summary_initial": "The AllIn podcast talk about the current state of the market",
-                "summary_full": "The AllIn podcast talk about the current state of the market"
+                "summary_full": {"embedding":None,"text":"The AllIn podcast talk about the current state of the market"}
             },
             {
                 "id": "b2c3d4e5-f6a7-4811-8097-92a8c3f6d5e7",
@@ -103,7 +104,7 @@ class Mock(DB):
                 "source_id": ["660f9511-e39b-52d5-c817-667766552222"],
                 "keywords": ["biotech", "medicine"],
                 "summary_initial": "The AllIn podcast talk about biotech.",
-                "summary_full": "The AllIn podcast talk about biotech."
+                "summary_full": {"embedding":None,"text":"The AllIn podcast talk about biotech."}
             },
             {
                 "id": "c3d4e5f6-a7b8-5911-8097-92a8c3f6d5e7",
@@ -111,21 +112,24 @@ class Mock(DB):
                 "source_id": ["770g0612-f4ab-63e5-d927-778877663333"],
                 "keywords": ["inflation", "investors"],
                 "summary_initial": "The AllIn podcast talk about the role of government in venture capital funding.",
-                "summary_full": "The AllIn podcast talk about the role of government in venture capital funding."
+                "summary_full": {"embedding":None,"text":"The AllIn podcast talk about the role of government in venture capital funding."}
             }
         ]}"""
 
             return cast(dict[str, Any], json.loads(return_string))
 
-        return {'error': 'error'}
+        error = 'Table type not known.'
+        raise ValueError(error)
 
     @db_impl
-    def execute_data(self, query: str, data: dict[str, Any]) -> None:
-        if query == 'save_history':
-            self.history[data['id']] = data
+    def insert_documents(self, table: DB.DBTables, docs: list[dict[str, Any]]) -> None:
+        if table.value == 'history':
+            for doc in docs:
+                self.history[doc['id']] = doc
             return None
-        if query == 'save_observation':
-            self.observations[data['id']] = data
+        if table.value == 'observation':
+            for doc in docs:
+                self.history[doc['id']] = doc
             return None
 
 

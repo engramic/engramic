@@ -5,6 +5,10 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from engramic.core.index import Index
 
 
 @dataclass()
@@ -18,7 +22,7 @@ class Meta:
     source_ids: list[str]
     keywords: list[str]
     summary_initial: str | None = None
-    summary_full: str | None = None
+    summary_full: Index | None = None
 
     def render(self) -> str:
         def toml_escape(value: str) -> str:

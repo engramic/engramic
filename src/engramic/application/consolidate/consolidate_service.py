@@ -2,12 +2,14 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import json
 import time
 from concurrent.futures import Future
 from dataclasses import asdict
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+from engramic.application.consolidate.prompt_gen_indices import PromptGenIndices
 from engramic.core import Engram, Index, Meta, Prompt
 from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
@@ -33,17 +35,18 @@ class ConsolidateService(Service):
         self.plugin_manager: PluginManager = host.plugin_manager
         self.llm_summary: dict[str, Any] = self.plugin_manager.get_plugin('llm', 'summary')
         self.llm_gen_indices: dict[str, Any] = self.plugin_manager.get_plugin('llm', 'gen_indices')
-        self.embedding_gen_embed: dict[str, Any] = self.plugin_manager.get_plugin('embedding', 'gen_embedding')
-        self.observation_repository = ObservationRepository(self.plugin_manager)
+        self.embedding_gen_embed: dict[str, Any] = self.plugin_manager.get_plugin('embedding', 'gen_embed')
+        self.db_document: dict[str, Any] = self.plugin_manager.get_plugin('db', 'document')
+        self.observation_repository = ObservationRepository(self.db_document)
         self.engram_builder: dict[str, Engram] = {}
         self.index_builder: dict[str, Index] = {}
         self.metrics_tracker: MetricsTracker[ConsolidateMetric] = MetricsTracker[ConsolidateMetric]()
 
     def start(self) -> None:
-        self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observer_complete)
+        self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
 
-    def on_observer_complete(self, observation_dict: dict[str, Any]) -> None:
+    def on_observation_complete(self, observation_dict: dict[str, Any]) -> None:
         """
         Callback invoked once an observation is complete.
         We run summary + engram pipeline tasks asynchronously.
@@ -61,20 +64,39 @@ class ConsolidateService(Service):
         """
         Asynchronously call your LLM to create a summary of the observation.
         """
-        prompt = Prompt('Make me a summary')
-        args = self.llm_summary['args']
-        args.update({'observation': observation.render()})
-        summary = self.llm_summary['func'].submit(prompt=prompt, args=args)
 
-        self.metrics_tracker.increment(ConsolidateMetric.SUMMARIES_GENERATED)
+        if (
+            observation.meta.summary_full is not None and not observation.meta.summary_full.text
+        ):  # native LLM observations have a summary already.
+            not_test = 'not tested yet'
+            raise NotImplementedError(not_test)
+            prompt = Prompt('Make me a summary')
+            args = self.llm_summary['args']
+            args.update({'observation': observation.render()})
+            summary = self.llm_summary['func'].submit(prompt=prompt, args=args)
 
-        observation.meta.summary_full = summary
+            self.metrics_tracker.increment(ConsolidateMetric.SUMMARIES_GENERATED)
+
+            observation.meta.summary_full.text = summary
+
         return observation.meta
 
     def on_summary(self, summary_fut: Future[Any]) -> None:
         """Callback after `generate_summary` completes."""
         result = summary_fut.result()
-        self.send_message_async(Service.Topic.META_COMPLETE, asdict(result))
+        self.run_task(self.generate_summary_embeddings(result))
+
+    async def generate_summary_embeddings(self, meta: Meta) -> None:
+        if meta.summary_full is None:
+            error = 'Summary full is none.'
+            raise ValueError(error)
+
+        args = self.embedding_gen_embed['args']
+        embedding_list_ret = self.embedding_gen_embed['func'].gen_embed(strings=[meta.summary_full.text], args=args)
+        embedding_list = embedding_list_ret[0]['embeddings_list']
+        meta.summary_full.embedding = embedding_list[0]
+
+        self.send_message_async(Service.Topic.META_COMPLETE, asdict(meta))
 
     async def generate_engrams(self, observation: Observation) -> list[Engram]:
         """
@@ -134,38 +156,49 @@ class ConsolidateService(Service):
 
     async def gen_indices(self, id_in: str, engram_render: str) -> dict[str, Any]:
         """Generate the 'indices' for one engram via an LLM plugin."""
-        del engram_render  # not used in your snippet, but presumably in the future
-        prompt = Prompt('Generate indicies.')
+
+        data_input = {'engram_render': engram_render}
+
+        prompt = PromptGenIndices(input_data=data_input)
         args = self.llm_gen_indices['args']
-        indices = self.llm_gen_indices['func'].submit(prompt=prompt, args=args)
+
+        response_schema = {'index_text_array': list[str]}
+
+        indices = self.llm_gen_indices['func'].submit(prompt=prompt, structured_schema=response_schema, args=args)
         self.metrics_tracker.increment(ConsolidateMetric.INDICES_GENERATED, len(indices))
-        return {'id': id_in, 'indices': indices[0]['llm_response']}
+
+        response_json = json.loads(indices[0]['llm_response'])
+
+        return {'id': id_in, 'indices': response_json['index_text_array']}
 
     async def gen_embeddings(self, id_and_index_dict: dict[str, Any]) -> str:
         """
         Called after `gen_indices`; now we have the engram ID plus the new indices to embed.
         """
         indices = id_and_index_dict['indices']
-        id_val: str = id_and_index_dict['id']
+        engram_id: str = id_and_index_dict['id']
 
         args = self.embedding_gen_embed['args']
-        embedding = self.embedding_gen_embed['func'].gen_embed(strings=indices, args=args)
-        self.metrics_tracker.increment(ConsolidateMetric.EMBEDDINGS_GENERATED, len(embedding))
+
+        embedding_list_ret = self.embedding_gen_embed['func'].gen_embed(strings=indices, args=args)
+        embedding_list = embedding_list_ret[0]['embeddings_list']
+
+        self.metrics_tracker.increment(ConsolidateMetric.EMBEDDINGS_GENERATED, len(embedding_list))
 
         # Convert raw embeddings to Index objects and attach them
         index_array: list[Index] = []
-        for i, vec in enumerate(embedding[0]['embedding_response']):
-            index = Index(vec, indices[i])
+        for i, vec in enumerate(embedding_list):
+            index = Index(indices[i], vec)
             index_array.append(index)
 
-        self.engram_builder[id_val].indices = index_array
+        self.engram_builder[engram_id].indices = index_array
         serialized_index_array = [asdict(index) for index in index_array]
 
         # We can optionally notify about newly attached indices
-        self.send_message_async(Service.Topic.INDEX_COMPLETE, {'index': serialized_index_array})
+        self.send_message_async(Service.Topic.INDEX_COMPLETE, {'index': serialized_index_array, 'engram_id': engram_id})
 
         # Return the ID so we know which engram was updated
-        return id_val
+        return engram_id
 
     def on_acknowledge(self, message_in: str) -> None:
         del message_in

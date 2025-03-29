@@ -4,7 +4,7 @@
 
 from abc import ABC, abstractmethod
 
-from engramic.core import Index, Prompt
+from engramic.core import Index
 
 
 class VectorDB(ABC):
@@ -13,7 +13,7 @@ class VectorDB(ABC):
     """
 
     @abstractmethod
-    def query(self, prompt: Prompt) -> set[str]:
+    def query(self, collection_name: str, embedding: list[float]) -> set[str]:
         """
         Submits a prompt to the LLM and returns the model-generated text.
 
@@ -27,5 +27,5 @@ class VectorDB(ABC):
         """
 
     @abstractmethod
-    def insert(self, index: list[Index]) -> None:
+    def insert(self, collection_name: str, index_list: list[Index], obj_id: str) -> None:
         pass

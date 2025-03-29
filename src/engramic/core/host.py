@@ -3,6 +3,7 @@
 # See the LICENSE file in the project root for more details.
 import asyncio
 import logging
+import os
 import threading
 from collections.abc import Awaitable, Sequence
 from concurrent.futures import Future
@@ -15,6 +16,14 @@ from engramic.infrastructure.system.service import Service
 
 class Host:
     def __init__(self, selected_profile: str, services: list[type[Service]], *, ignore_profile: bool = False) -> None:
+        path = '.env'
+        if os.path.exists(path):
+            with open(path, encoding='utf-8') as f:
+                for line in f:
+                    if line.strip() and not line.startswith('#'):
+                        key, value = line.strip().split('=', 1)
+                        os.environ[key] = value
+
         self.plugin_manager: PluginManager = PluginManager(selected_profile, ignore_profile=ignore_profile)
 
         self.services: dict[str, Service] = {}
