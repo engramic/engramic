@@ -22,7 +22,7 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 def main() -> None:
     host = Host(
-        'google', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService]
+        'mock', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService]
     )
 
     retrieve_service = host.get_service(RetrieveService)

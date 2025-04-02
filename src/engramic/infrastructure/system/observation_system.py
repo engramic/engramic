@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import time
 import uuid
 from dataclasses import asdict, dataclass
 from typing import cast
@@ -45,8 +46,8 @@ class ObservationSystem(Observation):
         index = Index(**observation_dict['meta']['summary_full'])
         new_meta = Meta(
             str(uuid.uuid4()),
-            combined_source_ids,
             combined_locations,
+            combined_source_ids,
             observation_dict['meta']['keywords'],
             observation_dict['meta']['summary_initial'],
             index,
@@ -54,6 +55,6 @@ class ObservationSystem(Observation):
 
         engram_list = engram_repository.load_batch_dict(filtered_engrams_dict)
 
-        merged_observation = ObservationSystem(str(uuid.uuid4()), new_meta, engram_list)
+        merged_observation: Observation = ObservationSystem(str(uuid.uuid4()), new_meta, engram_list, time.time())
 
         return merged_observation

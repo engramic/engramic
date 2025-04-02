@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import time
 import uuid
 from typing import Any
 
@@ -30,7 +31,7 @@ class ObservationRepository:
         engram_list = self.engram_repository.load_batch_dict(dict_data['engram_list'])
         meta = self.meta_repository.load(dict_data['meta'])
 
-        observation = ObservationSystem(str(uuid.uuid4()), meta, engram_list)
+        observation: Observation = ObservationSystem(str(uuid.uuid4()), meta, engram_list, time.time())
         return observation
 
     def load_toml_dict(self, toml_data: dict[str, Any]) -> ObservationSystem:
@@ -40,9 +41,40 @@ class ObservationRepository:
         observation = ObservationSystem(str(uuid.uuid4()), meta, engram_list)
         return observation
 
+    def validate_toml_dict(self, toml_data: dict[str, Any]) -> bool:
+        if toml_data is None:
+            return False
+
+        engrams = toml_data.get('engram')
+        if not isinstance(engrams, list):
+            return False
+
+        return all(self._validate_engram(engram) for engram in engrams)
+
+    def _validate_engram(self, engram: dict[str, Any]) -> bool:
+        if not isinstance(engram.get('content'), str):
+            return False
+        if not isinstance(engram.get('is_native_source'), bool):
+            return False
+
+        if not engram['is_native_source']:
+            if not isinstance(engram.get('locations'), list):
+                return False
+            if not isinstance(engram.get('source_ids'), list):
+                return False
+            if not isinstance(engram.get('meta_ids'), list):
+                return False
+            if not isinstance(engram.get('accuracy'), int):
+                return False
+            if not isinstance(engram.get('relevancy'), int):
+                return False
+
+        return True
+
     def normalize_toml_dict(self, toml_data: dict[str, Any], response: Response) -> dict[str, Any]:
+        meta_id = str(uuid.uuid4())
         if toml_data['meta'].get('id') is None:
-            toml_data['meta']['id'] = str(uuid.uuid4())
+            toml_data['meta']['id'] = meta_id
 
         if toml_data['meta'].get('source_ids') is None:
             toml_data['meta']['source_ids'] = [response.hash]
@@ -54,17 +86,21 @@ class ObservationRepository:
         toml_data['meta']['summary_full'] = Index(text, None)
 
         for engram_dict in toml_data['engram']:
+            if engram_dict.get('id') is None:
+                engram_dict['id'] = str(uuid.uuid4())
+
+            if engram_dict.get('created_date') is None:
+                engram_dict['created_date'] = int(time.time())
+
             if engram_dict['is_native_source'] is True:
-                if engram_dict.get('id') is None:
-                    engram_dict['id'] = str(uuid.uuid4())
-                    engram_dict['source_ids'] = [response.hash]
-                if engram_dict.get('locations') is None:
-                    engram_dict['locations'] = [f'llm://{response.model}']
+                engram_dict['source_ids'] = [response.hash]
+                engram_dict['locations'] = [f'llm://{response.model}']
+                engram_dict['meta_ids'] = [meta_id]
 
         return toml_data
 
     def save(self, observation: Observation) -> bool:
         ret: bool = self.db_plugin['func'].insert_documents(
-            table=DB.DBTables.OBSERVATION, query='save_observation', docs=[observation]
+            table=DB.DBTables.OBSERVATION, query='save_observation', docs=[observation], args=None
         )
         return ret

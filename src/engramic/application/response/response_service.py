@@ -49,26 +49,26 @@ class ResponseService(Service):
         self.web_socket_manager.init_async()
 
     def init_async(self) -> None:
-        self.db_document_plugin['func'].connect()
+        self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
 
     def on_retrieve_complete(self, retrieve_result_in: dict[str, Any]) -> None:
-        prompt = Prompt(**retrieve_result_in['prompt'])
+        prompt_str = retrieve_result_in['prompt_str']
         prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
         retrieve_result = RetrieveResult(**retrieve_result_in['retrieve_response'])
         self.metrics_tracker.increment(ResponseMetric.RETRIEVES_RECIEVED)
         fetch_engrams_task = self.run_task(
-            self.fetch_engrams(prompt=prompt, analysis=prompt_analysis, retrieve_result=retrieve_result)
+            self.fetch_engrams(prompt_str=prompt_str, analysis=prompt_analysis, retrieve_result=retrieve_result)
         )
         fetch_engrams_task.add_done_callback(self.on_fetch_engrams_complete)
 
     async def fetch_engrams(
-        self, prompt: Prompt, analysis: PromptAnalysis, retrieve_result: RetrieveResult
+        self, prompt_str: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult
     ) -> dict[str, Any]:
         engram_array: list[Engram] = self.engram_repository.load_batch_retrieve_result(retrieve_result)
         # assembled main_prompt, render engrams.
         return {
-            'prompt': prompt,
+            'prompt_str': prompt_str,
             'analysis': analysis,
             'retrieve_result': retrieve_result,
             'engram_array': engram_array,
@@ -78,29 +78,37 @@ class ResponseService(Service):
         result = fut.result()
 
         main_prompt_task = self.run_task(
-            self.main_prompt(result['prompt'], result['analysis'], result['engram_array'], result['retrieve_result'])
+            self.main_prompt(
+                result['prompt_str'], result['analysis'], result['engram_array'], result['retrieve_result']
+            )
         )
         main_prompt_task.add_done_callback(self.on_main_prompt_complete)
 
     async def main_prompt(
-        self, prompt: Prompt, analysis: PromptAnalysis, engram_array: list[Engram], retrieve_result: RetrieveResult
+        self, prompt_str: str, analysis: PromptAnalysis, engram_array: list[Engram], retrieve_result: RetrieveResult
     ) -> Response:
         self.metrics_tracker.increment(ResponseMetric.ENGRAMS_FETCHED, len(engram_array))
 
         engram_dict_list = [asdict(engram) for engram in engram_array]
 
         # build main prompt here
-        prompt = PromptMainPrompt(prompt_str=prompt.prompt_str, input_data={'engram_list': engram_dict_list})
+        prompt = PromptMainPrompt(prompt_str=prompt_str, input_data={'engram_list': engram_dict_list})
 
-        response = self.llm_main['func'].submit_streaming(
-            prompt=prompt, args=self.llm_main['args'], websocket_manager=self.web_socket_manager
+        plugin = self.llm_main
+
+        response = plugin['func'].submit_streaming(
+            prompt=prompt, websocket_manager=self.web_socket_manager, args=self.host.mock_update_args(plugin)
         )
+        self.host.update_mock_data(self.llm_main, response)
 
-        model = self.llm_main['args']['model']
+        model = ''
+        if plugin['args'].get('model'):
+            model = plugin['args']['model']
 
         response_inst = Response(
-            str(uuid.uuid4()), response[0]['llm_response'], retrieve_result, prompt, analysis, model
+            str(uuid.uuid4()), response[0]['llm_response'], retrieve_result, prompt.prompt_str, analysis, model
         )
+
         return response_inst
 
     def on_main_prompt_complete(self, fut: Future[Any]) -> None:

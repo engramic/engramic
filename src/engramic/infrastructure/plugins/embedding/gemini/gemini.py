@@ -4,8 +4,8 @@
 
 
 import os
+from typing import Any
 
-import pluggy
 from google import genai
 from google.genai import types
 
@@ -19,7 +19,7 @@ class Gemini(Embedding):
         self._api_client = genai.Client(api_key=api_key)
 
     @embedding_impl
-    def gen_embed(self, strings: list[str], args: dict[str, str]) -> dict[str, list[list[float]]]:
+    def gen_embed(self, strings: list[str], args: dict[str, Any]) -> dict[str, list[list[float]]]:
         del args
         result = self._api_client.models.embed_content(
             model='text-embedding-004', contents=strings, config=types.EmbedContentConfig(task_type='RETRIEVAL_QUERY')
@@ -28,7 +28,3 @@ class Gemini(Embedding):
         float_ret_array = [float_array.values for float_array in result.embeddings]
 
         return {'embeddings_list': float_ret_array}
-
-
-pm = pluggy.PluginManager('embedding')
-pm.register(Gemini())

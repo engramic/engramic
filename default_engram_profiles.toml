@@ -2,33 +2,32 @@ version = 1.0
 
 [mock]
 type = "profile"
-vector_db.db = {name="mock"}
-llm.retrieve_gen_conversation_direction = {name="mock",hint="retrieve_gen_conversation_direction"}
-llm.retrieve_gen_index = {name="mock",hint="retrieve_gen_index"}
-llm.retrieve_prompt_analysis = {name="mock",hint="retrieve_prompt_analysis"}
-db.document = {name="mock"}
-llm.response_main = {name="mock",hint="response_main"}
-llm.validate = {name="mock",hint="validate"}
-llm.summary = {name="mock",hint="summary"}
-llm.gen_indices = {name="mock",hint="gen_indices"}
-embedding.gen_embedding = {name="mock",hint="gen_embedding"}
-
+vector_db.db = {name="Mock"}
+llm.retrieve_gen_conversation_direction = {name="Mock"}
+llm.retrieve_gen_index = {name="Mock"}
+llm.retrieve_prompt_analysis = {name="Mock"}
+db.document = {name="Mock"}
+llm.response_main = {name="Mock"}
+llm.validate = {name="Mock"}
+llm.summary = {name="Mock"}
+llm.gen_indices = {name="Mock"}
+embedding.gen_embed = {name="Mock"}
 
 [standard]
 type = "pointer"
-ptr = "standard-2025-03-01"
+ptr = "standard-2025-04-01"
 
-[standard-2025-03-01]
+[standard-2025-04-01]
 type = "profile"
-vector_db.db = {name="mock"}
-llm.retrieve_gen_conversation_direction = {name="mock",hint="retrieve_gen_conversation_direction"}
-llm.retrieve_gen_index = {name="mock",hint="retrieve_gen_index"}
-llm.retrieve_prompt_analysis = {name="mock",hint="retrieve_prompt_analysis"}
-db.document = {name="mock"}
-llm.response_main = {name="mock",hint="response_main"}
-llm.validate = {name="mock",hint="validate"}
-llm.summary = {name="mock",hint="summary"}
-llm.gen_indices = {name="mock",hint="gen_indices"}
-embedding.gen_embedding = {name="mock",hint="gen_embedding"}
+vector_db.db = {name="ChromaDB"}
+llm.retrieve_gen_conversation_direction = {name="Gemini",model="gemini-2.0-flash"}
+llm.retrieve_gen_index = {name="Gemini",model="gemini-2.0-flash"}
+llm.retrieve_prompt_analysis = {name="Gemini",model="gemini-2.0-flash"}
+db.document = {name="Sqlite"}
+llm.response_main = {name="Gemini",model="gemini-2.0-flash"}
+llm.validate = {name="Gemini",model="gemini-2.0-flash"}
+llm.summary = {name="Gemini",model="gemini-2.0-flash"}
+llm.gen_indices = {name="Gemini",model="gemini-2.0-flash"}
+embedding.gen_embed = {name="Gemini",model="text-embedding-004"}
 
 

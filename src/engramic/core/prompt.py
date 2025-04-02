@@ -9,11 +9,13 @@ from typing import Any
 
 @dataclass
 class Prompt:
-    prompt_str: str | None = None
+    prompt_str: str
     input_data: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        self.input_data.update({'prompt_str': self.prompt_str})
+        self.input_data.update({
+            'prompt_str': self.prompt_str
+        })  # include the prompt_str as input_data to be used in mako rendering.
 
     def render_prompt(self) -> str:
         return self.prompt_str or ''

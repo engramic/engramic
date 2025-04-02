@@ -48,7 +48,7 @@ class StorageService(Service):
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
 
     def init_async(self) -> None:
-        self.db_document_plugin['func'].connect()
+        self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
 
     def on_engram_complete(self, engram_dict: dict[str, Any]) -> None:

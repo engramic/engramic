@@ -3,6 +3,7 @@
 # See the LICENSE file in the project root for more details.
 
 import os
+import re
 from typing import Any, cast, no_type_check
 
 from google import genai
@@ -26,8 +27,15 @@ class Gemini(LLM):
         model: Any = create_model(name, **model_fields)
         return cast(type[BaseModel], model)
 
+    def extract_toml_block(self, ret_string: str) -> str:
+        # Match content between ```toml and the next ```
+        match = re.search(r'```toml\s*(.*?)\s*```', ret_string, re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        return ret_string.strip()
+
     @llm_impl
-    def submit(self, prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, str]) -> dict[str, Any]:
+    def submit(self, prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
         model = args['model']
 
         contents = [
@@ -67,17 +75,13 @@ class Gemini(LLM):
 
         ret_string = response.text
 
-        if ret_string.startswith('```toml') and ret_string.endswith('```'):
-            ret_string = ret_string[7:-3]
-
-        return {'llm_response': ret_string}
+        return {'llm_response': self.extract_toml_block(ret_string)}
 
     @llm_impl
     def submit_streaming(
-        self, prompt: Prompt, args: dict[str, str], websocket_manager: WebsocketManager
+        self, prompt: Prompt, args: dict[str, Any], websocket_manager: WebsocketManager
     ) -> dict[str, str]:
-        del args
-        model = 'gemini-2.0-flash'
+        model = args['model']
         contents = [
             types.Content(
                 role='user',
@@ -106,4 +110,4 @@ class Gemini(LLM):
             websocket_manager.send_message(LLM.StreamPacket(chunk, False, ''))
             full_response += chunk.text
 
-        return {'llm_response': full_response}
+        return {'llm_response': self.extract_toml_block(full_response)}

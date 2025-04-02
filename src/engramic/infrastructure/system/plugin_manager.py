@@ -13,12 +13,15 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pluggy
 import tomli
 
 from engramic.infrastructure.system.engram_profiles import EngramProfiles
+
+if TYPE_CHECKING:
+    from engramic.core.host import Host
 
 
 class ResponseType(Enum):
@@ -35,7 +38,20 @@ class PluginManager:
         installed_dependencies: set[str]
         detected_dependencies: set[str]
 
-    def __init__(self, profile_name: str, *, ignore_profile: bool = False):
+    def __init__(self, host: Host, profile_name: str, *, ignore_profile: bool = False):
+        self.host = host
+        self.default_plugin_path = ''
+
+        plugin_paths = os.getenv('ENGRAMIC_PLUGIN_PATHS')
+        if plugin_paths:
+            paths = plugin_paths.split(';')
+            self.default_plugin_path = paths[0]
+            if len(paths) > 1:
+                error = 'Multiple plugin paths not currently supported.'
+                raise ValueError(error)
+        else:
+            self.default_plugin_path = PluginManager.PLUGIN_DEFAULT_ROOT
+
         if profile_name is None and not ignore_profile:
             error = 'Profile name empty'
             raise RuntimeError(error)
@@ -73,7 +89,7 @@ class PluginManager:
 
         if current_profile:
             for row_key, row_value in current_profile.items():
-                if row_key == 'type':
+                if row_key in {'type', 'name'}:
                     continue
 
                 for usage in row_value:
@@ -97,7 +113,7 @@ class PluginManager:
 
         if current_profile:
             for category in current_profile:
-                category_path = os.path.join(self.PLUGIN_DEFAULT_ROOT, category)
+                category_path = os.path.join(self.default_plugin_path, category)
                 if os.path.isdir(category_path):
                     usage = current_profile[category]
                     for items in usage:
@@ -112,8 +128,6 @@ class PluginManager:
                             module = importlib.util.module_from_spec(spec)
                             spec.loader.exec_module(module)
                             sys.modules[module_name] = module
-                            # pm = pluggy.PluginManager(category)
-                            # pm.register(Gemini())
 
     def get_plugin(self, category: str, usage: str) -> dict[str, Any]:
         if self.profiles is None:
@@ -139,15 +153,20 @@ class PluginManager:
                     raise RuntimeError(runtime_error)
 
                 pm = pluggy.PluginManager(category)
-                pm.register(plugin_class())
-                return {'func': pm.hook, 'args': args}
+
+                if profile['name'] == 'mock':
+                    pm.register(plugin_class(self.host.mock_data_collector))
+                else:
+                    pm.register(plugin_class())
+
+                return {'func': pm.hook, 'args': args, 'usage': usage}
 
         logging.error('Plugin %s.%s failed to load.', category, usage)
         error = 'Plugin failed to load'
         raise RuntimeError(error)
 
     def _get_packages(self, key: str, plugin_name: dict[str, str]) -> list[str]:
-        system_plugin_root_dir = Path(PluginManager.PLUGIN_DEFAULT_ROOT)
+        system_plugin_root_dir = Path(self.default_plugin_path)
         plugin_root_dir = system_plugin_root_dir / key / plugin_name['name'].lower()
 
         packages = self._parse_plugin_toml(str(plugin_root_dir))
@@ -186,7 +205,7 @@ class PluginManager:
     def _install_package(self, package: str) -> bool:
         """Installs a package using pip and prints the virtual environment information."""
         # Detect virtual environment
-        virtual_env = os.environ.get('VIRTUAL_ENV')
+        virtual_env = sys.prefix
 
         if not virtual_env:
             logging.info('No virtual environment detected. Using system Python.')

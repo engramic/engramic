@@ -64,9 +64,9 @@ class Ask(Retrieval):
             logging.info('user_intent: %s', direction_ret)  # We will be using this later for anticipatory retrieval
 
             embed_step = self.service.run_task(self._embed_gen_direction(direction_ret['user_intent']))
-            embed_step.add_done_callback(on_embed_complete)
+            embed_step.add_done_callback(on_embed_direction_complete)
 
-        def on_embed_complete(fut: Future[Any]) -> None:
+        def on_embed_direction_complete(fut: Future[Any]) -> None:
             embedding = fut.result()
             fetch_direction_step = self.service.run_task(self._vector_fetch_direction_meta(embedding))
             fetch_direction_step.add_done_callback(on_vector_fetch_direction_meta_complete)
@@ -85,8 +85,8 @@ class Ask(Retrieval):
             analysis = fut.result()  # This will raise an exception if the coroutine fails
 
             self.prompt_analysis = PromptAnalysis(
-                json.loads(analysis['_analyze_prompt']['llm_response']),
-                json.loads(analysis['_generate_indices']['llm_response']),
+                json.loads(analysis['_analyze_prompt'][0]['llm_response']),
+                json.loads(analysis['_generate_indices'][0]['llm_response']),
             )
 
             genrate_indices_future = self.service.run_task(
@@ -113,7 +113,7 @@ class Ask(Retrieval):
             retrieve_response = {
                 'query': list(ret),
                 'analysis': asdict(self.prompt_analysis),
-                'prompt': asdict(self.prompt),
+                'prompt_str': self.prompt.prompt_str,
                 'retrieve_response': asdict(retrieve_result),
             }
 
@@ -131,7 +131,10 @@ class Ask(Retrieval):
 
         structured_schema = {'user_intent': str, 'perform_research': bool}
 
-        ret = plugin['func'].submit(prompt=prompt_gen, structured_schema=structured_schema, args=plugin['args'])
+        ret = plugin['func'].submit(
+            prompt=prompt_gen, structured_schema=structured_schema, args=self.service.host.mock_update_args(plugin)
+        )
+        self.service.host.update_mock_data(plugin, ret)
 
         json_parsed: dict[str, str] = json.loads(ret[0]['llm_response'])
         self.metrics_tracker.increment(
@@ -142,14 +145,21 @@ class Ask(Retrieval):
 
     async def _embed_gen_direction(self, main_prompt: str) -> list[float]:
         plugin = self.embeddings_gen_embed
-        ret = plugin['func'].gen_embed(strings=[main_prompt], args=plugin['args'])
+        ret = plugin['func'].gen_embed(strings=[main_prompt], args=self.service.host.mock_update_args(plugin))
+        self.service.host.update_mock_data(plugin, ret)
+
         float_array: list[float] = ret[0]['embeddings_list'][0]
         return float_array
 
     async def _vector_fetch_direction_meta(self, embedding: list[float]) -> list[str]:
         plugin = self.prompt_vector_db_plugin
-        ret = plugin['func'].query(collection_name='meta', embedding=embedding, args=plugin['args'])
-        list_str: list[str] = ret[0]
+        plugin['args'].update({'threshold': 1, 'n_results': 10})
+        ret = plugin['func'].query(
+            collection_name='meta', embeddings=embedding, args=self.service.host.mock_update_args(plugin)
+        )
+        self.service.host.update_mock_data(plugin, ret)
+
+        list_str: list[str] = ret[0]['query_set']
         return list_str
 
     async def _fetch_direction_meta(self, meta_id: list[str]) -> list[Meta]:
@@ -161,7 +171,10 @@ class Ask(Retrieval):
         # add prompt engineering here and submit as the full prompt.
         prompt = PromptAnalyzePrompt(prompt_str=self.prompt.prompt_str, input_data={'meta_list': meta_list})
         structured_response = {'response_length': str}
-        ret = plugin['func'].submit(prompt=prompt, structured_schema=structured_response, args=plugin['args'])
+        ret = plugin['func'].submit(
+            prompt=prompt, structured_schema=structured_response, args=self.service.host.mock_update_args(plugin)
+        )
+        self.service.host.update_mock_data(plugin, ret)
 
         self.metrics_tracker.increment(engramic.application.retrieve.retrieve_service.RetrieveMetric.PROMPTS_ANALYZED)
 
@@ -176,7 +189,10 @@ class Ask(Retrieval):
         # add prompt engineering here and submit as the full prompt.
         prompt = PromptGenIndices(prompt_str=self.prompt.prompt_str, input_data={'meta_list': meta_list})
         structured_output = {'indices': list[str]}
-        ret = plugin['func'].submit(prompt=prompt, structured_schema=structured_output, args=plugin['args'])
+        ret = plugin['func'].submit(
+            prompt=prompt, structured_schema=structured_output, args=self.service.host.mock_update_args(plugin)
+        )
+        self.service.host.update_mock_data(plugin, ret)
         response = ret[0]['llm_response']
         response_json = json.loads(response)
         count = len(response_json['indices'])
@@ -192,7 +208,8 @@ class Ask(Retrieval):
 
     async def _generate_indicies_embeddings(self, indices: list[str]) -> list[list[float]]:
         plugin = self.embeddings_gen_embed
-        ret = plugin['func'].gen_embed(strings=indices, args=plugin['args'])
+        ret = plugin['func'].gen_embed(strings=indices, args=self.service.host.mock_update_args(plugin))
+        self.service.host.update_mock_data(plugin, ret)
         embeddings_list: list[list[float]] = ret[0]['embeddings_list']
         return embeddings_list
 
@@ -200,9 +217,13 @@ class Ask(Retrieval):
         plugin = self.prompt_vector_db_plugin
 
         ids = set()
-        for embedding in embeddings:
-            ret = plugin['func'].query(collection_name='main', embedding=embedding, args=plugin['args'])
-            ids.update(ret[0])
+
+        ret = plugin['func'].query(
+            collection_name='main', embeddings=embeddings, args=self.service.host.mock_update_args(plugin)
+        )
+
+        self.service.host.update_mock_data(plugin, ret)
+        ids.update(ret[0]['query_set'])
 
         num_queries = len(ids)
         self.metrics_tracker.increment(

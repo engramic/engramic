@@ -2,11 +2,18 @@
   "version": "0.2.0",
   "configurations": [
   {
-      "name": "Example - Mock Only (hatch env:dev)",
+      "name": "Example - Mock (hatch env:dev)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/examples/mock_only/mock_only.py",
+      "program": "${workspaceFolder}/examples/mock_profile/mock_profile.py",
       "console": "integratedTerminal"
+  },
+  {
+    "name": "Example - Standard (hatch env:dev)",
+    "type": "debugpy",
+    "request": "launch",
+    "program": "${workspaceFolder}/examples/standard_profile/standard_profile.py",
+    "console": "integratedTerminal"
   },
   {
     "name": "Integration Test - Mock Only (hatch env:test)",

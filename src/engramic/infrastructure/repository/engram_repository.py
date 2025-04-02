@@ -22,10 +22,12 @@ class EngramRepository:
         self.cache: LRUCache[str, Engram] = LRUCache(maxsize=cache_size)
 
     def save_engram(self, engram: Engram) -> None:
-        self.db_plugin['func'].insert_documents(table=DB.DBTables.ENGRAM, docs=[asdict(engram)])
+        self.db_plugin['func'].insert_documents(table=DB.DBTables.ENGRAM, docs=[asdict(engram)], args=None)
 
     def load_dict(self, engram_dict: dict[str, Any]) -> Engram:
-        return Engram(**engram_dict)
+        engram = Engram(**engram_dict)
+
+        return engram
 
     def load_batch_dict(self, dict_list: list[dict[str, str]]) -> list[Engram]:
         return [self.load_dict(engram_dict) for engram_dict in dict_list]
@@ -46,7 +48,7 @@ class EngramRepository:
             return cached_engrams
 
         # Fetch only missing Engrams from the database
-        plugin_ret = self.db_plugin['func'].fetch(table=DB.DBTables.ENGRAM, ids=missing_ids)
+        plugin_ret = self.db_plugin['func'].fetch(table=DB.DBTables.ENGRAM, ids=missing_ids, args=None)
 
         engram_data_array = plugin_ret[0]['engram']
 

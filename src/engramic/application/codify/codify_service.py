@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import logging
 import time
 from concurrent.futures import Future
 from dataclasses import asdict
@@ -23,6 +24,7 @@ from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
+    from engramic.core.observation import Observation
     from engramic.infrastructure.system.plugin_manager import PluginManager
 
 
@@ -51,21 +53,23 @@ class CodifyService(Service):
 
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
-        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_prompt_complete)
+        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
 
     def init_async(self) -> None:
-        self.db_document_plugin['func'].connect()
+        self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
 
-    def on_prompt_complete(self, response_dict: dict[str, Any]) -> None:
+    def on_main_prompt_complete(self, response_dict: dict[str, Any]) -> None:
         if not self.training_mode:
             return
 
-        prompt = Prompt(response_dict['prompt'])
+        prompt_str = response_dict['prompt_str']
         model = response_dict['model']
         analysis = PromptAnalysis(**response_dict['analysis'])
         retrieve_result = RetrieveResult(**response_dict['retrieve_result'])
-        response = Response(response_dict['id'], response_dict['response'], retrieve_result, prompt, analysis, model)
+        response = Response(
+            response_dict['id'], response_dict['response'], retrieve_result, prompt_str, analysis, model
+        )
         self.metrics_tracker.increment(CodifyMetric.RESPONSE_RECIEVED)
         fetch_engram_step = self.run_task(self.fetch_engrams(response))
         fetch_engram_step.add_done_callback(self.on_fetch_engram_complete)
@@ -104,33 +108,48 @@ class CodifyService(Service):
 
         del meta_array
 
-        engram_list: list[Engram] = []
-        for engram in engram_array:
-            not_implemented = 'not implemented'
-            raise NotImplementedError(not_implemented)
-            engram_list.append(engram)
+        input_data = {
+            'engram_list': engram_array,
+            'response': response.response,
+        }
 
-        input_data = {'engram_render_list': engram_list, 'response': response.response}
+        prompt = PromptValidatePrompt(response.prompt_str, input_data=input_data)
 
-        prompt = PromptValidatePrompt(response.prompt.prompt_str, input_data=input_data)
-
-        validate_response = self.llm_validate['func'].submit(
-            prompt=prompt, structured_schema=None, args=self.llm_validate['args']
+        plugin = self.llm_validate
+        validate_response = plugin['func'].submit(
+            prompt=prompt, structured_schema=None, args=self.host.mock_update_args(plugin)
         )
+        self.host.update_mock_data(self.llm_validate, validate_response)
 
-        toml_data = tomli.loads(validate_response[0]['llm_response'])
+        toml_data = None
+
+        try:
+            toml_data = tomli.loads(validate_response[0]['llm_response'])
+        except tomli.TOMLDecodeError as e:
+            logging.exception('TOML decode error: %s', validate_response[0]['llm_response'])
+            error = 'Malformed TOML file in codify:validate.'
+            raise TypeError(error) from e
+
+        if 'not_memorable' in toml_data:
+            return {'return_observation': None}
+
+        if not self.observation_repository.validate_toml_dict(toml_data):
+            error = 'Codify TOML did not pass validation.'
+            raise TypeError(error)
 
         return_observation = self.observation_repository.load_toml_dict(
             self.observation_repository.normalize_toml_dict(toml_data, response)
         )
 
-        # if this observation is from multiple sources, it must be merge the sources into it's meta.
-        if len(engram_list) > 0:
-            not_implemented = 'not implemented'
-            raise NotImplementedError(not_implemented)
-            # return_observation = observation.merge_observation(
-            #    observation, CodifyService.ACCURACY_CONSTANT, CodifyService.RELEVANCY_CONSTANT, self.engram_repository
-            # )
+        # if this observation is from multiple sources, it must be merged the sources into it's meta.
+        if len(engram_array) > 0:
+            return_observation_merged: Observation = return_observation.merge_observation(
+                return_observation,
+                CodifyService.ACCURACY_CONSTANT,
+                CodifyService.RELEVANCY_CONSTANT,
+                self.engram_repository,
+            )
+            return {'return_observation': return_observation_merged}
 
         self.metrics_tracker.increment(CodifyMetric.ENGRAM_VALIDATED)
 
@@ -138,7 +157,9 @@ class CodifyService(Service):
 
     def on_validate_complete(self, fut: Future[Any]) -> None:
         ret = fut.result()
-        self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(ret['return_observation']))
+
+        if ret['return_observation'] is not None:
+            self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(ret['return_observation']))
 
     def on_acknowledge(self, message_in: str) -> None:
         del message_in

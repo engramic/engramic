@@ -2,6 +2,8 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 import asyncio
+import inspect
+import json
 import logging
 import os
 import threading
@@ -15,7 +17,16 @@ from engramic.infrastructure.system.service import Service
 
 
 class Host:
-    def __init__(self, selected_profile: str, services: list[type[Service]], *, ignore_profile: bool = False) -> None:
+    def __init__(
+        self,
+        selected_profile: str,
+        services: list[type[Service]],
+        *,
+        ignore_profile: bool = False,
+        generate_mock_data: bool = False,
+    ) -> None:
+        del ignore_profile
+
         path = '.env'
         if os.path.exists(path):
             with open(path, encoding='utf-8') as f:
@@ -24,7 +35,14 @@ class Host:
                         key, value = line.strip().split('=', 1)
                         os.environ[key] = value
 
-        self.plugin_manager: PluginManager = PluginManager(selected_profile, ignore_profile=ignore_profile)
+        self.mock_data_collector: dict[str, dict[str, Any]] = {}
+        self.is_mock_profile = selected_profile == 'mock'
+        self.generate_mock_data = generate_mock_data
+
+        if self.is_mock_profile:
+            self.read_mock_data()
+
+        self.plugin_manager: PluginManager = PluginManager(self, selected_profile)
 
         self.services: dict[str, Service] = {}
         for ctr in services:
@@ -53,7 +71,8 @@ class Host:
             exc = _fut.exception()
             if exc:
                 logging.exception('Unhandled exception during init_services_async: %s', exc)
-            self.init_async_done_event.set()
+            else:
+                self.init_async_done_event.set()
 
         future.add_done_callback(on_done)
 
@@ -100,18 +119,14 @@ class Host:
                 ret: dict[str, Any] = {}
                 for i, coro in enumerate(coros):
                     name = self._get_coro_name(coro)
-                    if name in ret:
-                        if isinstance(ret[name], list):
-                            ret[name].append(gather[i])
-                        else:
-                            ret[name] = [ret[name], gather[i]]
-                    else:
-                        ret[name] = gather[i]
+                    if name not in ret:
+                        ret[name] = []
+                    ret[name].append(gather[i])
             except Exception:
                 logging.exception('Unexpected error in gather_tasks()')
                 raise
-            else:
-                return ret
+
+            return ret
 
         future = asyncio.run_coroutine_threadsafe(gather_tasks(), self.loop)
 
@@ -184,3 +199,68 @@ class Host:
             logging.warning('Failed to retrieve coroutine name due to incorrect type.')
 
         return 'unknown_coroutine'
+
+    def update_mock_data(self, plugin: dict[str, Any], response: list[dict[str, Any]], index_in: int = 0) -> None:
+        if self.generate_mock_data:
+            caller_name = inspect.stack()[1].function
+            usage = plugin['usage']
+            index = index_in
+
+            concat = f'{caller_name}-{usage}-{index}'
+
+            if self.mock_data_collector.get(concat) is not None:
+                error = 'Mock data collection collision error. Missing an index?'
+                raise ValueError(error)
+
+            save_string = response[0]
+            self.mock_data_collector[concat] = save_string
+
+    class CustomEncoder(json.JSONEncoder):
+        def default(self, obj: Any) -> Any:
+            if isinstance(obj, set):
+                return {'__type__': 'set', 'value': list(obj)}
+
+            return super().default(obj)
+
+    def custom_decoder(self, obj: Any) -> Any:
+        if '__type__' in obj:
+            type_name = obj['__type__']
+            if type_name == 'set':
+                return set(obj['value'])
+        return obj
+
+    def write_mock_data(self) -> None:
+        if self.generate_mock_data:
+            directory = 'local_storage/mock_data'
+            filename = 'mock.txt'
+            full_path = os.path.join(directory, filename)
+
+            # Create the directory if it doesn't exist
+            os.makedirs(directory, exist_ok=True)
+
+            output = json.dumps(self.mock_data_collector, cls=self.CustomEncoder, indent=1)
+
+            # Write to the file (this will overwrite if it exists)
+            with open(full_path, 'w', encoding='utf-8') as f:
+                f.write(output)
+                f.flush()
+
+    def read_mock_data(self) -> None:
+        directory = 'tests/data'
+        filename = 'mock.txt'
+        full_path = os.path.join(directory, filename)
+
+        with open(full_path, encoding='utf-8') as f:
+            data_in = f.read()
+            self.mock_data_collector = json.loads(data_in, object_hook=self.custom_decoder)
+
+    def mock_update_args(self, plugin: dict[str, Any], index_in: int = 0) -> dict[str, Any]:
+        args: dict[str, Any] = plugin['args']
+
+        if self.is_mock_profile:
+            caller_name = inspect.stack()[1].function
+            usage = plugin['usage']
+            concat = f'{caller_name}-{usage}-{index_in}'
+            args.update({'mock_lookup': concat})
+
+        return args

@@ -3,6 +3,7 @@
 # See the LICENSE file in the project root for more details.
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class Embedding(ABC):
@@ -11,7 +12,7 @@ class Embedding(ABC):
     """
 
     @abstractmethod
-    def gen_embed(self, strings: list[str], args: dict[str, str]) -> dict[str, list[list[float]]]:
+    def gen_embed(self, strings: list[str], args: dict[str, Any]) -> dict[str, list[list[float]]]:
         """
         Submits a prompt to the embedding API and returns the model-generated text.
 

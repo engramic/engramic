@@ -22,9 +22,7 @@ class LLM(ABC):
         finish_reason: str
 
     @abstractmethod
-    def submit(
-        self, llm_input_prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, str]
-    ) -> dict[str, Any]:
+    def submit(self, prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
         """
         Submits a prompt to the LLM and returns the model-generated text.
 

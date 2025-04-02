@@ -39,7 +39,7 @@ class RetrieveService(Service):
         self.meta_repository: MetaRepository = MetaRepository(self.db_plugin)
 
     def init_async(self) -> None:
-        self.db_plugin['func'].connect()
+        self.db_plugin['func'].connect(args=None)
         return super().init_async()
 
     def start(self) -> None:
@@ -65,8 +65,12 @@ class RetrieveService(Service):
         self.run_task(self.insert_engram_vector(index_list, engram_id))
 
     async def insert_engram_vector(self, index_list: list[Index], engram_id: str) -> None:
-        args = self.vector_db_plugin['args']
-        self.vector_db_plugin['func'].insert(collection_name='main', index_list=index_list, obj_id=engram_id, args=args)
+        plugin = self.vector_db_plugin
+        self.vector_db_plugin['func'].insert(
+            collection_name='main', index_list=index_list, obj_id=engram_id, args=plugin['args']
+        )
+
+        self.host.write_mock_data()
         self.metrics_tracker.increment(RetrieveMetric.EMBEDDINGS_ADDED_TO_VECTOR)
 
     def on_meta_complete(self, meta_dict: dict[str, Any]) -> None:
@@ -75,9 +79,9 @@ class RetrieveService(Service):
         self.metrics_tracker.increment(RetrieveMetric.META_ADDED_TO_VECTOR)
 
     async def insert_meta_vector(self, meta: Meta) -> None:
-        args = self.vector_db_plugin['args']
+        plugin = self.vector_db_plugin
         self.vector_db_plugin['func'].insert(
-            collection_name='meta', index_list=[meta.summary_full], obj_id=meta.id, args=args
+            collection_name='meta', index_list=[meta.summary_full], obj_id=meta.id, args=plugin['args']
         )
 
     def on_acknowledge(self, message_in: str) -> None:

@@ -14,4 +14,4 @@ class HistoryRepository:
         self.db_plugin = plugin
 
     def save_history(self, response: Response) -> None:
-        self.db_plugin['func'].insert_documents(table=DB.DBTables.HISTORY, docs=[asdict(response)])
+        self.db_plugin['func'].insert_documents(table=DB.DBTables.HISTORY, docs=[asdict(response)], args=None)

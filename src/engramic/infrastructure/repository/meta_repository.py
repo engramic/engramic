@@ -20,7 +20,7 @@ class MetaRepository:
         self.cache: LRUCache[str, Meta] = LRUCache(maxsize=cache_size)
 
     def save(self, meta: Meta) -> None:
-        self.db_plugin['func'].insert_documents(table=DB.DBTables.META, docs=[asdict(meta)])
+        self.db_plugin['func'].insert_documents(table=DB.DBTables.META, docs=[asdict(meta)], args=None)
 
     def load(self, meta_dict: dict[str, Any]) -> Meta:
         if isinstance(meta_dict.get('summary_full'), dict):
@@ -45,7 +45,7 @@ class MetaRepository:
             return cached_metas
 
         # Fetch only missing Meta from the database
-        plugin_ret = self.db_plugin['func'].fetch(table=DB.DBTables.META, ids=missing_ids)
+        plugin_ret = self.db_plugin['func'].fetch(table=DB.DBTables.META, ids=missing_ids, args=None)
 
         meta_data_array = plugin_ret[0]['meta']
 

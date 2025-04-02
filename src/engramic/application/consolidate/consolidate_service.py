@@ -3,6 +3,7 @@
 # See the LICENSE file in the project root for more details.
 
 import json
+import logging
 import time
 from concurrent.futures import Future
 from dataclasses import asdict
@@ -91,8 +92,12 @@ class ConsolidateService(Service):
             error = 'Summary full is none.'
             raise ValueError(error)
 
-        args = self.embedding_gen_embed['args']
-        embedding_list_ret = self.embedding_gen_embed['func'].gen_embed(strings=[meta.summary_full.text], args=args)
+        plugin = self.embedding_gen_embed
+        embedding_list_ret = plugin['func'].gen_embed(
+            strings=[meta.summary_full.text], args=self.host.mock_update_args(plugin)
+        )
+        self.host.update_mock_data(plugin, embedding_list_ret)
+
         embedding_list = embedding_list_ret[0]['embeddings_list']
         meta.summary_full.embedding = embedding_list[0]
 
@@ -125,7 +130,8 @@ class ConsolidateService(Service):
                 raise RuntimeError(error)
 
         # 1) Generate indices for each engram
-        index_tasks = [self.gen_indices(engram.id, engram.render()) for engram in engram_list]
+        index_tasks = [self.gen_indices(i, engram.id, engram.render()) for i, engram in enumerate(engram_list)]
+
         indices_future = self.run_tasks(index_tasks)
 
         # Once all indices are generated, generate embeddings
@@ -136,7 +142,9 @@ class ConsolidateService(Service):
             index_sets: list[dict[str, Any]] = indices_list['gen_indices']
 
             # 2) Generate embeddings for each index set
-            embed_tasks = [self.gen_embeddings(index_set) for index_set in index_sets]
+            embed_tasks = [self.gen_embeddings(index_set, i) for i, index_set in enumerate(index_sets)]
+
+            logging.info('index_sets %s', index_sets)
             embed_future = self.run_tasks(embed_tasks)
 
             # Once embeddings are generated, then we're truly done
@@ -154,33 +162,40 @@ class ConsolidateService(Service):
 
         indices_future.add_done_callback(on_indices_done)
 
-    async def gen_indices(self, id_in: str, engram_render: str) -> dict[str, Any]:
+    async def gen_indices(self, index: int, id_in: str, engram_render: str) -> dict[str, Any]:
         """Generate the 'indices' for one engram via an LLM plugin."""
 
         data_input = {'engram_render': engram_render}
 
-        prompt = PromptGenIndices(input_data=data_input)
-        args = self.llm_gen_indices['args']
+        prompt = PromptGenIndices(prompt_str='', input_data=data_input)
+        plugin = self.llm_gen_indices
 
         response_schema = {'index_text_array': list[str]}
 
-        indices = self.llm_gen_indices['func'].submit(prompt=prompt, structured_schema=response_schema, args=args)
+        indices = plugin['func'].submit(
+            prompt=prompt, structured_schema=response_schema, args=self.host.mock_update_args(plugin)
+        )
+        self.host.update_mock_data(plugin, indices, index)
+
         self.metrics_tracker.increment(ConsolidateMetric.INDICES_GENERATED, len(indices))
 
         response_json = json.loads(indices[0]['llm_response'])
 
         return {'id': id_in, 'indices': response_json['index_text_array']}
 
-    async def gen_embeddings(self, id_and_index_dict: dict[str, Any]) -> str:
+    async def gen_embeddings(self, id_and_index_dict: dict[str, Any], process_index: int) -> str:
         """
         Called after `gen_indices`; now we have the engram ID plus the new indices to embed.
         """
+        logging.info('data in %s', id_and_index_dict)
+
         indices = id_and_index_dict['indices']
         engram_id: str = id_and_index_dict['id']
 
-        args = self.embedding_gen_embed['args']
+        plugin = self.embedding_gen_embed
+        embedding_list_ret = plugin['func'].gen_embed(strings=indices, args=self.host.mock_update_args(plugin))
+        self.host.update_mock_data(plugin, embedding_list_ret, process_index)
 
-        embedding_list_ret = self.embedding_gen_embed['func'].gen_embed(strings=indices, args=args)
         embedding_list = embedding_list_ret[0]['embeddings_list']
 
         self.metrics_tracker.increment(ConsolidateMetric.EMBEDDINGS_GENERATED, len(embedding_list))
