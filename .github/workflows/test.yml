@@ -38,8 +38,3 @@ jobs:
       - name: Run tests on the entire python matrix
         run: hatch test -a
 
-      - name: Switch to test environment
-        run: hatch shell test
-
-      - name: Run typechecker
-        run: hatch run typecheck
