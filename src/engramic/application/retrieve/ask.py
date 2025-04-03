@@ -50,78 +50,14 @@ class Ask(Retrieval):
         self.embeddings_gen_embed = plugin_manager.get_plugin('embedding', 'gen_embed')
 
     def get_sources(self) -> None:
-        if (
-            self.retrieve_gen_conversation_direction_plugin is None
-            or self.prompt_analysis_plugin is None
-            or self.prompt_retrieve_indices_plugin is None
-            or self.prompt_vector_db_plugin is None
-        ):
-            return None
-
-        def on_direction_ret_complete(fut: Future[Any]) -> None:
-            direction_ret = fut.result()
-
-            logging.info('user_intent: %s', direction_ret)  # We will be using this later for anticipatory retrieval
-
-            embed_step = self.service.run_task(self._embed_gen_direction(direction_ret['user_intent']))
-            embed_step.add_done_callback(on_embed_direction_complete)
-
-        def on_embed_direction_complete(fut: Future[Any]) -> None:
-            embedding = fut.result()
-            fetch_direction_step = self.service.run_task(self._vector_fetch_direction_meta(embedding))
-            fetch_direction_step.add_done_callback(on_vector_fetch_direction_meta_complete)
-
-        def on_vector_fetch_direction_meta_complete(fut: Future[Any]) -> None:
-            meta_ids = fut.result()
-            meta_fetch_step = self.service.run_task(self._fetch_direction_meta(meta_ids))
-            meta_fetch_step.add_done_callback(on_fetch_direction_meta_complete)
-
-        def on_fetch_direction_meta_complete(fut: Future[Any]) -> None:
-            meta_list = fut.result()
-            analyze_step = self.service.run_tasks([self._analyze_prompt(meta_list), self._generate_indices(meta_list)])
-            analyze_step.add_done_callback(on_analyze_complete)
-
-        def on_analyze_complete(fut: Future[Any]) -> None:
-            analysis = fut.result()  # This will raise an exception if the coroutine fails
-
-            self.prompt_analysis = PromptAnalysis(
-                json.loads(analysis['_analyze_prompt'][0]['llm_response']),
-                json.loads(analysis['_generate_indices'][0]['llm_response']),
-            )
-
-            genrate_indices_future = self.service.run_task(
-                self._generate_indicies_embeddings(self.prompt_analysis.indices['indices'])
-            )
-            genrate_indices_future.add_done_callback(on_indices_embeddings_generated)
-
-        def on_indices_embeddings_generated(fut: Future[Any]) -> None:
-            embeddings = fut.result()
-
-            query_index_db_future = self.service.run_task(self._query_index_db(embeddings))
-            query_index_db_future.add_done_callback(on_query_index_db)
-
-        def on_query_index_db(fut: Future[Any]) -> None:
-            ret = fut.result()
-            logging.info('Query Result: %s', ret)
-
-            retrieve_result = RetrieveResult(engram_id_array=list(ret))
-
-            if self.prompt_analysis is None:
-                error = 'Prompt analysis None in on_query_index_db'
-                raise RuntimeError(error)
-
-            retrieve_response = {
-                'analysis': asdict(self.prompt_analysis),
-                'prompt_str': self.prompt.prompt_str,
-                'retrieve_response': asdict(retrieve_result),
-            }
-
-            self.service.send_message_async(Service.Topic.RETRIEVE_COMPLETE, retrieve_response)
-
         direction_step = self.service.run_task(self._retrieve_gen_conversation_direction())
-        direction_step.add_done_callback(on_direction_ret_complete)
+        direction_step.add_done_callback(self.on_direction_ret_complete)
 
-        return None
+    """
+    ### CONVERSATION DIRECTION
+
+    Fetches related domain knowledge based on the prompt intent.
+    """
 
     async def _retrieve_gen_conversation_direction(self) -> dict[str, str]:
         plugin = self.retrieve_gen_conversation_direction_plugin
@@ -142,6 +78,14 @@ class Ask(Retrieval):
 
         return json_parsed
 
+    def on_direction_ret_complete(self, fut: Future[Any]) -> None:
+        direction_ret = fut.result()
+
+        logging.info('user_intent: %s', direction_ret)  # We will be using this later for anticipatory retrieval
+
+        embed_step = self.service.run_task(self._embed_gen_direction(direction_ret['user_intent']))
+        embed_step.add_done_callback(self.on_embed_direction_complete)
+
     async def _embed_gen_direction(self, main_prompt: str) -> list[float]:
         plugin = self.embeddings_gen_embed
         ret = plugin['func'].gen_embed(strings=[main_prompt], args=self.service.host.mock_update_args(plugin))
@@ -149,6 +93,11 @@ class Ask(Retrieval):
 
         float_array: list[float] = ret[0]['embeddings_list'][0]
         return float_array
+
+    def on_embed_direction_complete(self, fut: Future[Any]) -> None:
+        embedding = fut.result()
+        fetch_direction_step = self.service.run_task(self._vector_fetch_direction_meta(embedding))
+        fetch_direction_step.add_done_callback(self.on_vector_fetch_direction_meta_complete)
 
     async def _vector_fetch_direction_meta(self, embedding: list[float]) -> list[str]:
         plugin = self.prompt_vector_db_plugin
@@ -161,9 +110,25 @@ class Ask(Retrieval):
         list_str: list[str] = ret[0]['query_set']
         return list_str
 
+    def on_vector_fetch_direction_meta_complete(self, fut: Future[Any]) -> None:
+        meta_ids = fut.result()
+        meta_fetch_step = self.service.run_task(self._fetch_direction_meta(meta_ids))
+        meta_fetch_step.add_done_callback(self.on_fetch_direction_meta_complete)
+
     async def _fetch_direction_meta(self, meta_id: list[str]) -> list[Meta]:
         meta_list = self.service.meta_repository.load_batch(meta_id)
         return meta_list
+
+    def on_fetch_direction_meta_complete(self, fut: Future[Any]) -> None:
+        meta_list = fut.result()
+        analyze_step = self.service.run_tasks([self._analyze_prompt(meta_list), self._generate_indices(meta_list)])
+        analyze_step.add_done_callback(self.on_analyze_complete)
+
+    """
+    ### Prompt Analysis
+
+    Analyzies the prompt and generates lookups that will aid in vector searching of related content
+    """
 
     async def _analyze_prompt(self, meta_list: list[Meta]) -> dict[str, str]:
         plugin = self.prompt_analysis_plugin
@@ -182,6 +147,19 @@ class Ask(Retrieval):
             raise TypeError(error)
 
         return ret[0]
+
+    def on_analyze_complete(self, fut: Future[Any]) -> None:
+        analysis = fut.result()  # This will raise an exception if the coroutine fails
+
+        self.prompt_analysis = PromptAnalysis(
+            json.loads(analysis['_analyze_prompt'][0]['llm_response']),
+            json.loads(analysis['_generate_indices'][0]['llm_response']),
+        )
+
+        genrate_indices_future = self.service.run_task(
+            self._generate_indicies_embeddings(self.prompt_analysis.indices['indices'])
+        )
+        genrate_indices_future.add_done_callback(self.on_indices_embeddings_generated)
 
     async def _generate_indices(self, meta_list: list[Meta]) -> dict[str, str]:
         plugin = self.prompt_retrieve_indices_plugin
@@ -205,12 +183,24 @@ class Ask(Retrieval):
 
         return ret[0]
 
+    def on_indices_embeddings_generated(self, fut: Future[Any]) -> None:
+        embeddings = fut.result()
+
+        query_index_db_future = self.service.run_task(self._query_index_db(embeddings))
+        query_index_db_future.add_done_callback(self.on_query_index_db)
+
     async def _generate_indicies_embeddings(self, indices: list[str]) -> list[list[float]]:
         plugin = self.embeddings_gen_embed
         ret = plugin['func'].gen_embed(strings=indices, args=self.service.host.mock_update_args(plugin))
         self.service.host.update_mock_data(plugin, ret)
         embeddings_list: list[list[float]] = ret[0]['embeddings_list']
         return embeddings_list
+
+    """
+    ### Fetch Engram IDs
+
+    Use the indices to fetch related Engram IDs
+    """
 
     async def _query_index_db(self, embeddings: list[list[float]]) -> set[str]:
         plugin = self.prompt_vector_db_plugin
@@ -230,3 +220,21 @@ class Ask(Retrieval):
         )
 
         return ids
+
+    def on_query_index_db(self, fut: Future[Any]) -> None:
+        ret = fut.result()
+        logging.info('Query Result: %s', ret)
+
+        retrieve_result = RetrieveResult(engram_id_array=list(ret))
+
+        if self.prompt_analysis is None:
+            error = 'Prompt analysis None in on_query_index_db'
+            raise RuntimeError(error)
+
+        retrieve_response = {
+            'analysis': asdict(self.prompt_analysis),
+            'prompt_str': self.prompt.prompt_str,
+            'retrieve_response': asdict(retrieve_result),
+        }
+
+        self.service.send_message_async(Service.Topic.RETRIEVE_COMPLETE, retrieve_response)
