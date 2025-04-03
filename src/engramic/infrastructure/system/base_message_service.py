@@ -53,7 +53,7 @@ class BaseMessageService(Service):
 
     async def listen_for_push_messages(self) -> None:
         """Continuously checks for incoming messages"""
-        while True:
+        while not self.recieved_stop_message:
             topic, message = await self.pull_socket.recv_multipart()
             self.metrics_tracker.increment(MessageMetric.MESSAGE_RECIEVED)
             self.pub_socket.send_multipart([topic, message])

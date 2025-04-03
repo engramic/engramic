@@ -2,7 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 from __future__ import annotations
-
+import ensurepip
 import importlib.util
 import logging
 import os
@@ -10,6 +10,8 @@ import platform
 import shutil
 import subprocess
 import sys
+import ensurepip
+import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -195,12 +197,21 @@ class PluginManager:
         Checks if a package is installed.
         """
         try:
-            logging.info('Looking for module in: %s', sys.path)
             importlib.import_module(package)
         except ModuleNotFoundError:  # More specific than ImportError
             return False
         else:
             return True
+        
+    def _ensure_pip_installed(self):
+        try:
+            logging.info('Attempting to install pip using ensurepip...')
+            ensurepip.bootstrap()
+            logging.info('pip installed successfully using ensurepip.')
+            return True
+        except Exception as e:
+            logging.error(f'Failed to install pip using ensurepip: {e}')
+            return False
 
     def _install_package(self, package: str) -> bool:
         """Installs a package using pip and prints the virtual environment information."""
@@ -213,17 +224,23 @@ class PluginManager:
         else:
             logging.info('Using virtual environment: %s', virtual_env)
 
+            
+
             # Construct the correct path to the pip executable
             if platform.system() == 'Windows':
                 pip_executable = os.path.join(virtual_env, 'Scripts', 'pip.exe')
+                logging.error("Windows not tested. This may not work.")
             else:  # Linux/macOS (including WSL)
-                pip_executable = os.path.join(virtual_env, 'bin', 'pip')
+                pip_executable = os.path.join(virtual_env, 'bin', 'pip3')
+
+            if not pip_executable or not os.path.exists(pip_executable):
+                ensurepip.bootstrap()
 
             # Handle WSL-specific case (if Windows path is needed)
             if 'microsoft-standard' in platform.uname().release and not os.path.exists(pip_executable):
                 try:
                     wsl_path = subprocess.check_output(['/usr/bin/wslpath', '-w', virtual_env]).decode().strip()
-                    pip_executable = os.path.join(wsl_path, 'bin', 'pip')
+                    pip_executable = os.path.join(wsl_path, 'bin', 'pip3')
                 except FileNotFoundError:
                     logging.warning('wslpath not found. Ensure WSL is installed and accessible.')
                 except subprocess.CalledProcessError as e:
@@ -233,7 +250,7 @@ class PluginManager:
 
         # Ensure pip_executable is valid
         if not pip_executable or not os.path.exists(pip_executable):
-            logging.error('pip not found. Ensure it is installed and accessible.')
+            logging.error(f'pip not found. Installing now. {pip_executable}')
             return False  # Return False instead of proceeding with a None value
 
         logging.info('Using pip executable: %s', pip_executable)

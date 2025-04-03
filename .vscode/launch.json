@@ -1,50 +1,27 @@
 {
   "version": "0.2.0",
   "configurations": [
-  {
-      "name": "Example - Mock (hatch env:dev)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/examples/mock_profile/mock_profile.py",
-      "console": "integratedTerminal"
-  },
-  {
-    "name": "Example - Standard (hatch env:dev)",
-    "type": "debugpy",
-    "request": "launch",
-    "program": "${workspaceFolder}/examples/standard_profile/standard_profile.py",
-    "console": "integratedTerminal"
-  },
-  {
-    "name": "Integration Test - Mock Only (hatch env:test)",
-    "type": "debugpy",
-    "request": "launch",
-    "module": "pytest",
-    //"args": "${workspaceFolder}/tests/application/integration/test_retrieve.py",
-    "args": "${workspaceFolder}/tests/core/unit/test_engram.py",
-    "console": "integratedTerminal"
-  },
-  {
-    "name": "Run Pytest with Debugger (hatch env:test)",
-    "type": "debugpy",
-    "request": "launch",
-    "module": "pytest",
-    "args": [
-        "-s",  // Allows print statements to show in the terminal
-        "-v",  // Increases verbosity for better debugging output
-        "tests/" // Adjust this to the path where your test files are located
-    ],
-    "console": "integratedTerminal",
-    "justMyCode": false,
+    {
+        "name": "Example - Mock (hatch env:dev)",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/examples/mock_profile/mock_profile.py",
+        "console": "integratedTerminal"
     },
     {
-        "name": "Attach to running Hatch Test ",
-        "type": "debugpy",
-        "request": "attach",
-        "connect": {
-            "host": "localhost",
-            "port": 5678
-        }
+      "name": "Example - Standard (hatch env:dev)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/standard_profile/standard_profile.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Integration Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": "${workspaceFolder}/tests/application/integration/test_retrieve.py",
+      "console": "integratedTerminal"
     }
   ]
 }

@@ -7,6 +7,9 @@ import json
 import logging
 import os
 import threading
+import queue
+import time
+
 from collections.abc import Awaitable, Sequence
 from concurrent.futures import Future
 from threading import Thread
@@ -39,6 +42,8 @@ class Host:
         self.is_mock_profile = selected_profile == 'mock'
         self.generate_mock_data = generate_mock_data
 
+        self.exception_queue = queue.Queue()
+
         if self.is_mock_profile:
             self.read_mock_data()
 
@@ -55,6 +60,7 @@ class Host:
         self.init_async_done_event.wait()
 
         self.stop_event: threading.Event = threading.Event()
+        self.shutdown_message_recieved = False
 
         for ctr in services:
             self.services[ctr.__name__].start()
@@ -125,8 +131,8 @@ class Host:
             except Exception:
                 logging.exception('Unexpected error in gather_tasks()')
                 raise
-
-            return ret
+            else:
+                return ret
 
         future = asyncio.run_coroutine_threadsafe(gather_tasks(), self.loop)
 
@@ -135,6 +141,7 @@ class Host:
             exc = f.exception()
             if exc:
                 logging.exception('Unhandled exception in run_tasks():  ERROR: %s', {exc})
+                self.exception_queue.put(f)
 
         future.add_done_callback(handle_future_exception)
 
@@ -149,11 +156,14 @@ class Host:
 
         # Ensure background exceptions are logged
         def handle_future_exception(f: Future[None]) -> None:
+            if f.cancelled():
+                logging.debug("Future was cancelled")
+                return
+
             exc = f.exception()
             if exc:
-                logging.exception(
-                    'Unhandled exception in run_background(): FUNCTION: %s, ERROR: %s', {coro.__name__}, {exc}
-                )
+                logging.exception('Unhandled exception in run_background(): FUNCTION: %s, ERROR: %s', {coro.__name__}, {exc})
+                self.exception_queue.put(f)
 
         future.add_done_callback(handle_future_exception)
         return future
@@ -165,20 +175,30 @@ class Host:
         error = 'Service not found in get_service.'
         raise RuntimeError(error)
 
+    def trigger_shutdown(self)->None:
+        self.shutdown_message_recieved = True
+        self.stop_event.set()
+        
     def shutdown(self) -> None:
+        self.shutdown_message_recieved = True
         """Stop all running services."""
         for service in self.services:
             self.services[service].stop()
-
+        
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
-        # host ready for shutdown
-        self.stop_event.set()
+        if not self.exception_queue.empty():
+            exc = self.exception_queue.get().exception()
+            error = f"Background thread failed: {exc}"
+            raise RuntimeError(error) from None
 
-    def wait_for_shutdown(self) -> None:
+    def wait_for_shutdown(self,timeout=None) -> None:
         try:
-            self.stop_event.wait()
+            if not self.shutdown_message_recieved:
+                self.stop_event.wait(timeout)
+            time.sleep(1)
+            self.shutdown()
 
         except KeyboardInterrupt:
             self.shutdown()

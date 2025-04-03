@@ -111,7 +111,6 @@ class Ask(Retrieval):
                 raise RuntimeError(error)
 
             retrieve_response = {
-                'query': list(ret),
                 'analysis': asdict(self.prompt_analysis),
                 'prompt_str': self.prompt.prompt_str,
                 'retrieve_response': asdict(retrieve_result),

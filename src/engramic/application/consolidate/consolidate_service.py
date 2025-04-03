@@ -47,6 +47,9 @@ class ConsolidateService(Service):
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
 
+    def stop(self) -> None:
+        super().stop()
+
     def on_observation_complete(self, observation_dict: dict[str, Any]) -> None:
         """
         Callback invoked once an observation is complete.
@@ -144,7 +147,7 @@ class ConsolidateService(Service):
             # 2) Generate embeddings for each index set
             embed_tasks = [self.gen_embeddings(index_set, i) for i, index_set in enumerate(index_sets)]
 
-            logging.info('index_sets %s', index_sets)
+            logging.info('index_sets %s', len(index_sets))
             embed_future = self.run_tasks(embed_tasks)
 
             # Once embeddings are generated, then we're truly done
@@ -173,7 +176,7 @@ class ConsolidateService(Service):
         response_schema = {'index_text_array': list[str]}
 
         indices = plugin['func'].submit(
-            prompt=prompt, structured_schema=response_schema, args=self.host.mock_update_args(plugin)
+            prompt=prompt, structured_schema=response_schema, args=self.host.mock_update_args(plugin,index)
         )
         self.host.update_mock_data(plugin, indices, index)
 
@@ -187,13 +190,13 @@ class ConsolidateService(Service):
         """
         Called after `gen_indices`; now we have the engram ID plus the new indices to embed.
         """
-        logging.info('data in %s', id_and_index_dict)
+        logging.info('gen_embeddings: indices in %s', len(id_and_index_dict['indices']))
 
         indices = id_and_index_dict['indices']
         engram_id: str = id_and_index_dict['id']
 
         plugin = self.embedding_gen_embed
-        embedding_list_ret = plugin['func'].gen_embed(strings=indices, args=self.host.mock_update_args(plugin))
+        embedding_list_ret = plugin['func'].gen_embed(strings=indices, args=self.host.mock_update_args(plugin,process_index))
         self.host.update_mock_data(plugin, embedding_list_ret, process_index)
 
         embedding_list = embedding_list_ret[0]['embeddings_list']

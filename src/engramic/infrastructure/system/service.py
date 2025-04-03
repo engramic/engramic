@@ -47,6 +47,7 @@ class Service(ABC):
         self.context: zmq.asyncio.Context | None = None
         self.sub_socket: zmq.asyncio.Socket | None = None
         self.push_socket: zmq.asyncio.Socket | None = None
+        self.recieved_stop_message = False
 
     def init_async(self) -> None:
         try:
@@ -75,6 +76,9 @@ class Service(ABC):
         pass
 
     def stop(self) -> None:
+        print("stop service")
+        self.recieved_stop_message = True
+
         if self.sub_socket is not None:
             self.sub_socket.close()
 
@@ -83,6 +87,8 @@ class Service(ABC):
 
         if self.context is not None:
             self.context.term()
+
+
 
     def run_task(self, async_coro: Awaitable[Any]) -> Future[None]:
         if inspect.iscoroutinefunction(async_coro):
@@ -171,7 +177,7 @@ class Service(ABC):
             error = 'sub_socket is not initialized before receiving messages'
             raise RuntimeError(error)
 
-        while True:
+        while not self.recieved_stop_message:
             topic, message = await self.sub_socket.recv_multipart()
             decoded_topic = topic.decode()
             decoded_message = json.loads(message.decode())
@@ -179,5 +185,7 @@ class Service(ABC):
             for callbacks in self.subscriber_callbacks[decoded_topic]:
                 try:
                     callbacks(decoded_message)
-                except Exception:
-                    logging.exception('Exception while listening to published message. TOPIC: %s', decoded_topic)
+                except ValueError as e:
+                    #logging.exception('Exception while listening to published message. TOPIC: %s', decoded_topic)
+                    error = f"Runtime error: {e}"
+                    raise RuntimeError(error)

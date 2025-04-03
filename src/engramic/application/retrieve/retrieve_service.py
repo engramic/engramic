@@ -48,6 +48,9 @@ class RetrieveService(Service):
         self.subscribe(Service.Topic.INDEX_COMPLETE, self.on_index_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
 
+    def stop(self) -> None:
+        super().stop()
+
     # when called from monitor service
     def on_submit_prompt(self, data: str) -> None:
         self.submit(Prompt(data))

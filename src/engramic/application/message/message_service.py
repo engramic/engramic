@@ -31,6 +31,9 @@ class MessageService(BaseMessageService):
         self.subscribe(Service.Topic.START_PROFILER, self.start_profiler)
         self.subscribe(Service.Topic.END_PROFILER, self.end_profiler)
 
+    def stop(self) -> None:
+        super().stop()
+
     def start_profiler(self, data: dict[Any, Any]) -> None:
         if data is not None:
             del data

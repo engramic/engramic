@@ -47,3 +47,10 @@ class WebsocketManager:
 
     def send_message(self, message: LLM.StreamPacket) -> None:
         self.host.run_task(self.message_task(message))
+
+    async def shutdown(self) -> None:
+        """Gracefully shut down the websocket server."""
+        if self.websocket:
+            self.websocket.close()
+            await self.websocket.wait_closed()
+            self.websocket = None
