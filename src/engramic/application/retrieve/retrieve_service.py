@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import asyncio
 import time
 from enum import Enum
 from typing import TYPE_CHECKING, Any
@@ -83,8 +84,12 @@ class RetrieveService(Service):
 
     async def insert_meta_vector(self, meta: Meta) -> None:
         plugin = self.vector_db_plugin
-        self.vector_db_plugin['func'].insert(
-            collection_name='meta', index_list=[meta.summary_full], obj_id=meta.id, args=plugin['args']
+        await asyncio.to_thread(
+            self.vector_db_plugin['func'].insert,
+            collection_name='meta',
+            index_list=[meta.summary_full],
+            obj_id=meta.id,
+            args=plugin['args'],
         )
 
     def on_acknowledge(self, message_in: str) -> None:

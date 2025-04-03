@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import asyncio
 import logging
 import time
 from concurrent.futures import Future
@@ -77,8 +78,16 @@ class CodifyService(Service):
         fetch_engram_step = self.run_task(self.fetch_engrams(response))
         fetch_engram_step.add_done_callback(self.on_fetch_engram_complete)
 
+    """
+    ### Fetch Engrams & Meta
+
+    Fetch engrams based on retrieved results.
+    """
+
     async def fetch_engrams(self, response: Response) -> dict[str, Any]:
-        engram_array: list[Engram] = self.engram_repository.load_batch_retrieve_result(response.retrieve_result)
+        engram_array: list[Engram] = await asyncio.to_thread(
+            self.engram_repository.load_batch_retrieve_result, response.retrieve_result
+        )
 
         self.metrics_tracker.increment(CodifyMetric.ENGRAM_FETCHED, len(engram_array))
 
@@ -97,7 +106,7 @@ class CodifyService(Service):
     async def fetch_meta(
         self, engram_array: list[Engram], meta_id_array: list[str], response: Response
     ) -> dict[str, Any]:
-        meta_array: list[Meta] = self.meta_repository.load_batch(meta_id_array)
+        meta_array: list[Meta] = await asyncio.to_thread(self.meta_repository.load_batch, meta_id_array)
         # assembled main_prompt, render engrams.
         return {'engram_array': engram_array, 'meta_array': meta_array, 'response': response}
 
@@ -105,6 +114,12 @@ class CodifyService(Service):
         ret = fut.result()
         fetch_meta_step = self.run_task(self.validate(ret['engram_array'], ret['meta_array'], ret['response']))
         fetch_meta_step.add_done_callback(self.on_validate_complete)
+
+    """
+    ### Validate
+
+    Validates and extracts engrams (i.e. memories) from responses.
+    """
 
     async def validate(self, engram_array: list[Engram], meta_array: list[Meta], response: Response) -> dict[str, Any]:
         # insert prompt engineering
@@ -119,9 +134,10 @@ class CodifyService(Service):
         prompt = PromptValidatePrompt(response.prompt_str, input_data=input_data)
 
         plugin = self.llm_validate
-        validate_response = plugin['func'].submit(
-            prompt=prompt, structured_schema=None, args=self.host.mock_update_args(plugin)
+        validate_response = await asyncio.to_thread(
+            plugin['func'].submit, prompt=prompt, structured_schema=None, args=self.host.mock_update_args(plugin)
         )
+
         self.host.update_mock_data(self.llm_validate, validate_response)
 
         toml_data = None
@@ -163,6 +179,12 @@ class CodifyService(Service):
 
         if ret['return_observation'] is not None:
             self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(ret['return_observation']))
+
+    """
+    ### Ack
+
+    Acknowledge and return metrics
+    """
 
     def on_acknowledge(self, message_in: str) -> None:
         del message_in

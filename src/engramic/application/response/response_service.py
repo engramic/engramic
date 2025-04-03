@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import asyncio
 import time
 import uuid
 from concurrent.futures import Future
@@ -66,10 +67,19 @@ class ResponseService(Service):
         )
         fetch_engrams_task.add_done_callback(self.on_fetch_engrams_complete)
 
+    """
+    ### Fetch Engram
+
+    Fetch engrams based on the IDs provided by the retrieve service.
+    """
+
     async def fetch_engrams(
         self, prompt_str: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult
     ) -> dict[str, Any]:
-        engram_array: list[Engram] = self.engram_repository.load_batch_retrieve_result(retrieve_result)
+        engram_array: list[Engram] = await asyncio.to_thread(
+            self.engram_repository.load_batch_retrieve_result, retrieve_result
+        )
+
         # assembled main_prompt, render engrams.
         return {
             'prompt_str': prompt_str,
@@ -91,6 +101,12 @@ class ResponseService(Service):
         )
         main_prompt_task.add_done_callback(self.on_main_prompt_complete)
 
+    """
+    ### Main Prompt
+
+    Combine the previous stages to generate the response.
+    """
+
     async def main_prompt(
         self, prompt_str: str, analysis: PromptAnalysis, engram_array: list[Engram], retrieve_result: RetrieveResult
     ) -> Response:
@@ -103,9 +119,13 @@ class ResponseService(Service):
 
         plugin = self.llm_main
 
-        response = plugin['func'].submit_streaming(
-            prompt=prompt, websocket_manager=self.web_socket_manager, args=self.host.mock_update_args(plugin)
+        response = await asyncio.to_thread(
+            plugin['func'].submit_streaming,
+            prompt=prompt,
+            websocket_manager=self.web_socket_manager,
+            args=self.host.mock_update_args(plugin),
         )
+
         self.host.update_mock_data(self.llm_main, response)
 
         model = ''
@@ -122,6 +142,12 @@ class ResponseService(Service):
         result = fut.result()
         self.metrics_tracker.increment(ResponseMetric.MAIN_PROMPTS_RUN)
         self.send_message_async(Service.Topic.MAIN_PROMPT_COMPLETE, asdict(result))
+
+    """
+    ### Ack
+
+    Acknowledge and return metrics
+    """
 
     def on_acknowledge(self, message_in: str) -> None:
         del message_in

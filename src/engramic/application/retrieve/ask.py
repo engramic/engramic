@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from dataclasses import asdict
@@ -66,9 +67,13 @@ class Ask(Retrieval):
 
         structured_schema = {'user_intent': str, 'perform_research': bool}
 
-        ret = plugin['func'].submit(
-            prompt=prompt_gen, structured_schema=structured_schema, args=self.service.host.mock_update_args(plugin)
+        ret = await asyncio.to_thread(
+            plugin['func'].submit,
+            prompt=prompt_gen,
+            structured_schema=structured_schema,
+            args=self.service.host.mock_update_args(plugin),
         )
+
         self.service.host.update_mock_data(plugin, ret)
 
         json_parsed: dict[str, str] = json.loads(ret[0]['llm_response'])
@@ -88,7 +93,10 @@ class Ask(Retrieval):
 
     async def _embed_gen_direction(self, main_prompt: str) -> list[float]:
         plugin = self.embeddings_gen_embed
-        ret = plugin['func'].gen_embed(strings=[main_prompt], args=self.service.host.mock_update_args(plugin))
+        ret = await asyncio.to_thread(
+            plugin['func'].gen_embed, strings=[main_prompt], args=self.service.host.mock_update_args(plugin)
+        )
+
         self.service.host.update_mock_data(plugin, ret)
 
         float_array: list[float] = ret[0]['embeddings_list'][0]
@@ -102,9 +110,14 @@ class Ask(Retrieval):
     async def _vector_fetch_direction_meta(self, embedding: list[float]) -> list[str]:
         plugin = self.prompt_vector_db_plugin
         plugin['args'].update({'threshold': 1, 'n_results': 10})
-        ret = plugin['func'].query(
-            collection_name='meta', embeddings=embedding, args=self.service.host.mock_update_args(plugin)
+
+        ret = await asyncio.to_thread(
+            plugin['func'].query,
+            collection_name='meta',
+            embeddings=embedding,
+            args=self.service.host.mock_update_args(plugin),
         )
+
         self.service.host.update_mock_data(plugin, ret)
 
         list_str: list[str] = ret[0]['query_set']
@@ -135,9 +148,13 @@ class Ask(Retrieval):
         # add prompt engineering here and submit as the full prompt.
         prompt = PromptAnalyzePrompt(prompt_str=self.prompt.prompt_str, input_data={'meta_list': meta_list})
         structured_response = {'response_length': str}
-        ret = plugin['func'].submit(
-            prompt=prompt, structured_schema=structured_response, args=self.service.host.mock_update_args(plugin)
+        ret = await asyncio.to_thread(
+            plugin['func'].submit,
+            prompt=prompt,
+            structured_schema=structured_response,
+            args=self.service.host.mock_update_args(plugin),
         )
+
         self.service.host.update_mock_data(plugin, ret)
 
         self.metrics_tracker.increment(engramic.application.retrieve.retrieve_service.RetrieveMetric.PROMPTS_ANALYZED)
@@ -166,9 +183,13 @@ class Ask(Retrieval):
         # add prompt engineering here and submit as the full prompt.
         prompt = PromptGenIndices(prompt_str=self.prompt.prompt_str, input_data={'meta_list': meta_list})
         structured_output = {'indices': list[str]}
-        ret = plugin['func'].submit(
-            prompt=prompt, structured_schema=structured_output, args=self.service.host.mock_update_args(plugin)
+        ret = await asyncio.to_thread(
+            plugin['func'].submit,
+            prompt=prompt,
+            structured_schema=structured_output,
+            args=self.service.host.mock_update_args(plugin),
         )
+
         self.service.host.update_mock_data(plugin, ret)
         response = ret[0]['llm_response']
         response_json = json.loads(response)
@@ -191,7 +212,11 @@ class Ask(Retrieval):
 
     async def _generate_indicies_embeddings(self, indices: list[str]) -> list[list[float]]:
         plugin = self.embeddings_gen_embed
-        ret = plugin['func'].gen_embed(strings=indices, args=self.service.host.mock_update_args(plugin))
+
+        ret = await asyncio.to_thread(
+            plugin['func'].gen_embed, strings=indices, args=self.service.host.mock_update_args(plugin)
+        )
+
         self.service.host.update_mock_data(plugin, ret)
         embeddings_list: list[list[float]] = ret[0]['embeddings_list']
         return embeddings_list
@@ -207,8 +232,11 @@ class Ask(Retrieval):
 
         ids = set()
 
-        ret = plugin['func'].query(
-            collection_name='main', embeddings=embeddings, args=self.service.host.mock_update_args(plugin)
+        ret = await asyncio.to_thread(
+            plugin['func'].query,
+            collection_name='main',
+            embeddings=embeddings,
+            args=self.service.host.mock_update_args(plugin),
         )
 
         self.service.host.update_mock_data(plugin, ret)

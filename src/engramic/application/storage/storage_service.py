@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import asyncio
 import logging
 import time
 from enum import Enum
@@ -72,18 +73,18 @@ class StorageService(Service):
         logging.info('Storage service saving observation.')
 
     async def save_history(self, response: Response) -> None:
-        self.history_repository.save_history(response)
+        await asyncio.to_thread(self.history_repository.save_history, response)
         self.metrics_tracker.increment(StorageMetric.HISTORY_SAVED)
         logging.info('Storage service saving history.')
 
     async def save_engram(self, engram: Engram) -> None:
-        self.engram_repository.save_engram(engram)
+        await asyncio.to_thread(self.engram_repository.save_engram, engram)
         self.metrics_tracker.increment(StorageMetric.ENGRAM_SAVED)
         logging.info('Storage service saving engram.')
 
     async def save_meta(self, meta: Meta) -> None:
         logging.info('Storage service saving meta.')
-        self.meta_repository.save(meta)
+        await asyncio.to_thread(self.meta_repository.save, meta)
         self.metrics_tracker.increment(StorageMetric.META_SAVED)
 
     def on_acknowledge(self, message_in: str) -> None:

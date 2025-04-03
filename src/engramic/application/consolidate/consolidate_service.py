@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import asyncio
 import json
 import logging
 import time
@@ -55,6 +56,8 @@ class ConsolidateService(Service):
         Callback invoked once an observation is complete.
         We run summary + engram pipeline tasks asynchronously.
         """
+
+        # should run a task for this.
         observation = self.observation_repository.load_dict(observation_dict)
         self.metrics_tracker.increment(ConsolidateMetric.OBSERVATIONS_RECIEVED)
 
@@ -63,6 +66,12 @@ class ConsolidateService(Service):
 
         generate_engrams = self.run_task(self.generate_engrams(observation))
         generate_engrams.add_done_callback(self.on_engrams)
+
+    """
+    ### Summarize
+
+    Will be used in the future when we pull in data from other sources.
+    """
 
     async def generate_summary(self, observation: Observation) -> Meta:
         """
@@ -96,15 +105,22 @@ class ConsolidateService(Service):
             raise ValueError(error)
 
         plugin = self.embedding_gen_embed
-        embedding_list_ret = plugin['func'].gen_embed(
-            strings=[meta.summary_full.text], args=self.host.mock_update_args(plugin)
+        embedding_list_ret = await asyncio.to_thread(
+            plugin['func'].gen_embed, strings=[meta.summary_full.text], args=self.host.mock_update_args(plugin)
         )
+
         self.host.update_mock_data(plugin, embedding_list_ret)
 
         embedding_list = embedding_list_ret[0]['embeddings_list']
         meta.summary_full.embedding = embedding_list[0]
 
         self.send_message_async(Service.Topic.META_COMPLETE, asdict(meta))
+
+    """
+    ### Generate Engrams
+
+    Create engrams from the observation.
+    """
 
     async def generate_engrams(self, observation: Observation) -> list[Engram]:
         """
@@ -126,6 +142,7 @@ class ConsolidateService(Service):
 
         # Keep references so we can fill them in later
         for engram in engram_list:
+            logging.info('Engram Ready: %s', engram.id)
             if self.engram_builder.get(engram.id) is None:
                 self.engram_builder[engram.id] = engram
             else:
@@ -157,8 +174,13 @@ class ConsolidateService(Service):
 
                 # 3) Now that embeddings exist, we can send "ENGRAM_COMPLETE" for each
                 for eid in ids:
+                    logging.info('Done: %s', eid)
                     engram = self.engram_builder[eid]
                     self.send_message_async(Service.Topic.ENGRAM_COMPLETE, asdict(engram))
+
+                for eid in ids:
+                    logging.info('Deleting: %s', eid)
+                    engram = self.engram_builder[eid]
                     del self.engram_builder[eid]
 
             embed_future.add_done_callback(on_embeddings_done)
@@ -175,9 +197,13 @@ class ConsolidateService(Service):
 
         response_schema = {'index_text_array': list[str]}
 
-        indices = plugin['func'].submit(
-            prompt=prompt, structured_schema=response_schema, args=self.host.mock_update_args(plugin, index)
+        indices = await asyncio.to_thread(
+            plugin['func'].submit,
+            prompt=prompt,
+            structured_schema=response_schema,
+            args=self.host.mock_update_args(plugin, index),
         )
+
         self.host.update_mock_data(plugin, indices, index)
 
         self.metrics_tracker.increment(ConsolidateMetric.INDICES_GENERATED, len(indices))
@@ -196,9 +222,10 @@ class ConsolidateService(Service):
         engram_id: str = id_and_index_dict['id']
 
         plugin = self.embedding_gen_embed
-        embedding_list_ret = plugin['func'].gen_embed(
-            strings=indices, args=self.host.mock_update_args(plugin, process_index)
+        embedding_list_ret = await asyncio.to_thread(
+            plugin['func'].gen_embed, strings=indices, args=self.host.mock_update_args(plugin, process_index)
         )
+
         self.host.update_mock_data(plugin, embedding_list_ret, process_index)
 
         embedding_list = embedding_list_ret[0]['embeddings_list']
@@ -219,6 +246,12 @@ class ConsolidateService(Service):
 
         # Return the ID so we know which engram was updated
         return engram_id
+
+    """
+    ### Acknowledge
+
+    Acknowledge and return metrics
+    """
 
     def on_acknowledge(self, message_in: str) -> None:
         del message_in

@@ -23,5 +23,5 @@ class Mock(VectorDB):
 
     @vector_db_impl
     def insert(self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any]) -> None:
-        del collection_name, obj_id, args
-        logging.info('Add %s embeddings.', len(index_list))
+        del obj_id, args
+        logging.info('Add %s %s.', len(index_list), collection_name)
