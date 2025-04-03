@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 class WebsocketManager:
     def __init__(self, host: Host):
-        self.websocket_server: Server | None = None
+        self.websocket: Server | None = None
         self.active_connection: ServerConnection | None = None
         self.host = host
 
@@ -47,3 +47,10 @@ class WebsocketManager:
 
     def send_message(self, message: LLM.StreamPacket) -> None:
         self.host.run_task(self.message_task(message))
+
+    async def shutdown(self) -> None:
+        """Gracefully shut down the websocket server."""
+        if self.websocket:
+            self.websocket.close()
+            await self.websocket.wait_closed()
+            self.websocket = None

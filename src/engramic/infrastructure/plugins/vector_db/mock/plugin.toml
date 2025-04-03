@@ -1,5 +1,5 @@
 [project]
-name = "vector_mock"
+name = "Mock"
 version = "0.0.1"
 description = "A mock of a vector database."
 authors = ["ericp@engramic.org"]

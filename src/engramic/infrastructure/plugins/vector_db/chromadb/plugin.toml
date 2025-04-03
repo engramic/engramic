@@ -1,0 +1,6 @@
+[project]
+name = "ChromaDB"
+version = "0.0.1"
+description = "A mock of a vector database."
+authors = ["ericp@engramic.org"]
+dependencies = ["chromadb"]

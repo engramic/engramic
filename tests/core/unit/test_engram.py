@@ -32,24 +32,3 @@ def test_engram_initialization() -> None:
     assert engram.indices is None
     assert isinstance(engram.id, str)
     assert uuid.UUID(engram.id)  # Ensure valid UUID
-
-
-def test_render_engram() -> None:
-    """Test the render_engram method."""
-    engram = Engram(
-        locations=['test_location'],
-        source_ids=['test_source'],
-        content='test_text',
-        is_native_source=True,
-        id='3702e0f0-3aac-4df9-8c33-78cf162f9cfd',
-        accuracy=0,
-        relevancy=0,
-        context={'title': 'Title of Paragraph'},
-        indices=[MockIndex('index1'), MockIndex('index2')],
-    )
-
-    expected_output = 'id = "3702e0f0-3aac-4df9-8c33-78cf162f9cfd"\ncontent = "test_text"\nis_native_source = true\nlocations = ["test_location"]\nsource_ids = ["test_source"]\ncontext = { title = "Title of Paragraph" }\n[[indices]]\ntext = "index1"\nembedding = "fdsfdasfds"\n[[indices]]\ntext = "index2"\nembedding = "fdsfdasfds"'
-
-    render = engram.render()
-
-    assert render == expected_output

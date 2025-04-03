@@ -107,4 +107,6 @@ class EngramProfiles:
                 "Profile '%s' type must contain 'pointer' or 'type' value. Found %s", name, profile.get('type')
             )
             raise ValueError
+
+        profile['name'] = name
         return profile

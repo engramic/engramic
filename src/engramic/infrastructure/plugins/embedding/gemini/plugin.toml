@@ -1,0 +1,6 @@
+[project]
+name = "gemini"
+version = "0.0.1"
+description = "Google embeddings"
+authors = ["ericp@engramic.org"]
+dependencies = ["google-genai"]

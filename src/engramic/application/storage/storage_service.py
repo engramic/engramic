@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import asyncio
 import logging
 import time
 from enum import Enum
@@ -33,10 +34,11 @@ class StorageService(Service):
     def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
-        self.history_repository: HistoryRepository = HistoryRepository(self.plugin_manager)
-        self.observation_repository: ObservationRepository = ObservationRepository(self.plugin_manager)
-        self.engram_repository: EngramRepository = EngramRepository(self.plugin_manager)
-        self.meta_repository: MetaRepository = MetaRepository(self.plugin_manager)
+        self.db_document_plugin = self.plugin_manager.get_plugin('db', 'document')
+        self.history_repository: HistoryRepository = HistoryRepository(self.db_document_plugin)
+        self.observation_repository: ObservationRepository = ObservationRepository(self.db_document_plugin)
+        self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
+        self.meta_repository: MetaRepository = MetaRepository(self.db_document_plugin)
         self.metrics_tracker: MetricsTracker[StorageMetric] = MetricsTracker[StorageMetric]()
 
     def start(self) -> None:
@@ -45,6 +47,10 @@ class StorageService(Service):
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engram_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
+
+    def init_async(self) -> None:
+        self.db_document_plugin['func'].connect(args=None)
+        return super().init_async()
 
     def on_engram_complete(self, engram_dict: dict[str, Any]) -> None:
         engram = self.engram_repository.load_dict(engram_dict)
@@ -67,18 +73,18 @@ class StorageService(Service):
         logging.info('Storage service saving observation.')
 
     async def save_history(self, response: Response) -> None:
-        self.history_repository.save_history(response)
+        await asyncio.to_thread(self.history_repository.save_history, response)
         self.metrics_tracker.increment(StorageMetric.HISTORY_SAVED)
         logging.info('Storage service saving history.')
 
     async def save_engram(self, engram: Engram) -> None:
-        self.engram_repository.save_engram(engram)
+        await asyncio.to_thread(self.engram_repository.save_engram, engram)
         self.metrics_tracker.increment(StorageMetric.ENGRAM_SAVED)
         logging.info('Storage service saving engram.')
 
     async def save_meta(self, meta: Meta) -> None:
         logging.info('Storage service saving meta.')
-        self.meta_repository.save(meta)
+        await asyncio.to_thread(self.meta_repository.save, meta)
         self.metrics_tracker.increment(StorageMetric.META_SAVED)
 
     def on_acknowledge(self, message_in: str) -> None:

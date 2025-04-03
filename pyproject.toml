@@ -29,7 +29,7 @@ dependencies = ["pluggy","mako","tomli","pyzmq","cachetools","websockets"]
 
 [tool.hatch.envs.dev]
 template = "default"
-dependencies = ["pre-commit"]
+dependencies = []
 
 [tool.hatch.envs.dev.scripts]
 post-install = "pre-commit install"
@@ -80,6 +80,8 @@ omit = [
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
+log_level = "INFO"
+log_cli = true
 
 [tool.coverage.paths]
 engramic = ["src/engramic", "*/engramic/src/engramic"]
@@ -100,14 +102,17 @@ quote-style = "single"
 [tool.ruff.lint]
 preview = true
 extend-select = ["C901"]
-ignore = ["PLC0414","RET504","PLR6301","S105","TRY301"] 
+ignore = ["PLC0414","RET504","PLR6301","S105","TRY301","S702","S324","S608"] 
 
 #ignores
-#PLC0414 - redundant "as" in init files
-#RET504 -allowing assignments before a return
-#PLR6301 - not using self in a method. Should add back later.
+#PLC0414 - Redundant "as" in init files
+#RET504 - Allowing assignments before a return
+#PLR6301 - Not using self in a method. Should add back later.
 #S105 - Hardcoded password assigned
 #TRY301 - Make an inner function for raising. Incompatible with mypy.
+#S702 - Escaping mako text
+#S324 - MD5, not using for insecure hashing
+#S608 - Possible SQL injection vector through string-based query construction
 
 [tool.ruff.lint.extend-per-file-ignores]
 "docs/.hooks/*" = ["INP001", "T201"]

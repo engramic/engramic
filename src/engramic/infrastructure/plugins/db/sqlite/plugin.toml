@@ -1,0 +1,6 @@
+[project]
+name = "Sqlite"
+version = "0.0.1"
+description = "A mock of a sqlite plugin."
+authors = ["ericp@engramic.org"]
+dependencies = ["sqlite3"]

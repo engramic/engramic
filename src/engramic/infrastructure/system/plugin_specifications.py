@@ -19,8 +19,8 @@ llm_spec = pluggy.HookspecMarker('llm')
 
 class LLMSpec(LLM):
     @llm_spec
-    def submit(self, llm_input_prompt: Prompt, args: dict[str, str]) -> dict[str, str]:
-        del llm_input_prompt, args
+    def submit(self, prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, Any]) -> dict[str, str]:
+        del prompt, structured_schema, args
         """Submits an LLM request with the given prompt and arguments."""
         error_message = 'Subclasses must implement `submit`'
         raise NotImplementedError(error_message)
@@ -36,14 +36,14 @@ vector_db_spec = pluggy.HookspecMarker('vector_db')
 
 class VectorDBspec(VectorDB):
     @vector_db_spec
-    def query(self, prompt: Prompt) -> set[str]:
-        del prompt
+    def query(self, collection_name: str, embeddings: list[float], args: dict[str, Any]) -> dict[str, Any]:
+        del embeddings, collection_name, args
         error_message = 'Subclasses must implement `query`'
         raise NotImplementedError(error_message)
 
     @vector_db_spec
-    def insert(self, index_list: list[Index]) -> None:
-        del index_list
+    def insert(self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any]) -> None:
+        del index_list, collection_name, obj_id, args
         error_message = 'Subclasses must implement `index`'
         raise NotImplementedError(error_message)
 
@@ -58,24 +58,26 @@ db_spec = pluggy.HookspecMarker('db')
 
 class DBspec(DB):
     @db_spec
-    def connect(self) -> None:
+    def connect(self, args: dict[str, Any]) -> None:
+        del args
         error_message = 'Subclasses must implement `connect`'
         raise NotImplementedError(error_message)
 
     @db_spec
-    def close(self) -> None:
+    def close(self, args: dict[str, Any]) -> None:
+        del args
         error_message = 'Subclasses must implement `close`'
         raise NotImplementedError(error_message)
 
     @db_spec
-    def execute(self, query: str) -> dict[Any, Any]:
-        del query
+    def fetch(self, table: DB.DBTables, ids: list[str], args: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+        del table, ids, args
         error_message = 'Subclasses must implement `execute`'
         raise NotImplementedError(error_message)
 
     @db_spec
-    def execute_data(self, query: str, data: dict[Any, Any]) -> None:
-        del query, data
+    def insert_documents(self, table: DB.DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:
+        del table, docs, args
         error_message = 'Subclasses must implement `execute_data`'
         raise NotImplementedError(error_message)
 
@@ -90,8 +92,8 @@ embedding_spec = pluggy.HookspecMarker('embedding')
 
 class EmbeddingSpec(Embedding):
     @embedding_spec
-    def gen_embed(self, strings: list[str]) -> dict[str, list[str]]:
-        del strings
+    def gen_embed(self, strings: list[str], args: dict[str, Any]) -> dict[str, list[list[float]]]:
+        del strings, args
         error_message = 'Subclasses must implement `embed`'
         raise NotImplementedError(error_message)
 

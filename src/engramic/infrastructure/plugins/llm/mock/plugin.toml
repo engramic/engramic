@@ -1,5 +1,5 @@
 [project]
-name = "llm_mock"
+name = "Mock"
 version = "0.0.1"
 description = "A simple plugin test with cowsay dependency."
 authors = ["ericp@engramic.org"]

@@ -17,6 +17,7 @@ class Observation(ABC):
     id: str
     meta: Meta
     engram_list: list[Engram]
+    created_date: float | None = None
 
     @abstractmethod
     def render(self) -> str:

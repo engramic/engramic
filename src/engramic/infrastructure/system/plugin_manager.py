@@ -3,6 +3,7 @@
 # See the LICENSE file in the project root for more details.
 from __future__ import annotations
 
+import ensurepip
 import importlib.util
 import logging
 import os
@@ -13,12 +14,15 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pluggy
 import tomli
 
 from engramic.infrastructure.system.engram_profiles import EngramProfiles
+
+if TYPE_CHECKING:
+    from engramic.core.host import Host
 
 
 class ResponseType(Enum):
@@ -35,7 +39,20 @@ class PluginManager:
         installed_dependencies: set[str]
         detected_dependencies: set[str]
 
-    def __init__(self, profile_name: str, *, ignore_profile: bool = False):
+    def __init__(self, host: Host, profile_name: str, *, ignore_profile: bool = False):
+        self.host = host
+        self.default_plugin_path = ''
+
+        plugin_paths = os.getenv('ENGRAMIC_PLUGIN_PATHS')
+        if plugin_paths:
+            paths = plugin_paths.split(';')
+            self.default_plugin_path = paths[0]
+            if len(paths) > 1:
+                error = 'Multiple plugin paths not currently supported.'
+                raise ValueError(error)
+        else:
+            self.default_plugin_path = PluginManager.PLUGIN_DEFAULT_ROOT
+
         if profile_name is None and not ignore_profile:
             error = 'Profile name empty'
             raise RuntimeError(error)
@@ -73,7 +90,7 @@ class PluginManager:
 
         if current_profile:
             for row_key, row_value in current_profile.items():
-                if row_key == 'type':
+                if row_key in {'type', 'name'}:
                     continue
 
                 for usage in row_value:
@@ -97,12 +114,12 @@ class PluginManager:
 
         if current_profile:
             for category in current_profile:
-                category_path = os.path.join(self.PLUGIN_DEFAULT_ROOT, category)
+                category_path = os.path.join(self.default_plugin_path, category)
                 if os.path.isdir(category_path):
                     usage = current_profile[category]
                     for items in usage:
                         plugin_entry = usage[items]
-                        plugin_name = plugin_entry['name']
+                        plugin_name = plugin_entry['name'].lower()
 
                         plugin_path = os.path.join(category_path, plugin_name)
                         plugin_file = os.path.join(plugin_path, f'{plugin_name}.py')
@@ -123,24 +140,35 @@ class PluginManager:
             cat_usage = profile[category][usage]
 
             if 'name' in cat_usage:
-                implementation = cat_usage['name']
-
+                name = cat_usage['name']
+                module_name = name.lower()
                 args = profile[category][usage]
 
-                plugin = sys.modules.get(f'{category}.{implementation}')
+                plugin = sys.modules.get(f'{category}.{module_name}')
 
-                if plugin:
-                    pm = pluggy.PluginManager(category)
-                    pm.register(plugin.Mock())
-                    return {'func': pm.hook, 'args': args}
+                plugin_class = getattr(plugin, name, None)
+
+                if not plugin_class:
+                    # If it's not found, raise an error
+                    runtime_error = f'Class {name} not found in module {category}.{module_name}'
+                    raise RuntimeError(runtime_error)
+
+                pm = pluggy.PluginManager(category)
+
+                if profile['name'] == 'mock':
+                    pm.register(plugin_class(self.host.mock_data_collector))
+                else:
+                    pm.register(plugin_class())
+
+                return {'func': pm.hook, 'args': args, 'usage': usage}
 
         logging.error('Plugin %s.%s failed to load.', category, usage)
         error = 'Plugin failed to load'
         raise RuntimeError(error)
 
     def _get_packages(self, key: str, plugin_name: dict[str, str]) -> list[str]:
-        system_plugin_root_dir = Path(PluginManager.PLUGIN_DEFAULT_ROOT)
-        plugin_root_dir = system_plugin_root_dir / key / plugin_name['name']
+        system_plugin_root_dir = Path(self.default_plugin_path)
+        plugin_root_dir = system_plugin_root_dir / key / plugin_name['name'].lower()
 
         packages = self._parse_plugin_toml(str(plugin_root_dir))
         return packages
@@ -168,17 +196,27 @@ class PluginManager:
         Checks if a package is installed.
         """
         try:
-            logging.info('Looking for module in: %s', sys.path)
             importlib.import_module(package)
         except ModuleNotFoundError:  # More specific than ImportError
             return False
         else:
             return True
 
+    def _ensure_pip_installed(self) -> bool:
+        try:
+            logging.info('Attempting to install pip using ensurepip...')
+            ensurepip.bootstrap()
+        except Exception:
+            logging.exception('Failed to install pip using ensurepip')
+            return False
+        else:
+            logging.info('pip installed successfully using ensurepip.')
+            return True
+
     def _install_package(self, package: str) -> bool:
         """Installs a package using pip and prints the virtual environment information."""
         # Detect virtual environment
-        virtual_env = os.environ.get('VIRTUAL_ENV')
+        virtual_env = sys.prefix
 
         if not virtual_env:
             logging.info('No virtual environment detected. Using system Python.')
@@ -189,24 +227,16 @@ class PluginManager:
             # Construct the correct path to the pip executable
             if platform.system() == 'Windows':
                 pip_executable = os.path.join(virtual_env, 'Scripts', 'pip.exe')
+                logging.error('Windows not tested. This may not work.')
             else:  # Linux/macOS (including WSL)
-                pip_executable = os.path.join(virtual_env, 'bin', 'pip')
+                pip_executable = os.path.join(virtual_env, 'bin', 'pip3')
 
-            # Handle WSL-specific case (if Windows path is needed)
-            if 'microsoft-standard' in platform.uname().release and not os.path.exists(pip_executable):
-                try:
-                    wsl_path = subprocess.check_output(['/usr/bin/wslpath', '-w', virtual_env]).decode().strip()
-                    pip_executable = os.path.join(wsl_path, 'bin', 'pip')
-                except FileNotFoundError:
-                    logging.warning('wslpath not found. Ensure WSL is installed and accessible.')
-                except subprocess.CalledProcessError as e:
-                    logging.warning('Failed to execute wslpath: %s', e.output.decode().strip())
-                except UnicodeDecodeError:
-                    logging.warning('Could not decode wslpath output. Unexpected encoding.')
+            if not pip_executable or not os.path.exists(pip_executable):
+                ensurepip.bootstrap()
 
         # Ensure pip_executable is valid
         if not pip_executable or not os.path.exists(pip_executable):
-            logging.error('pip not found. Ensure it is installed and accessible.')
+            logging.error('pip not found. Installing now. %s', pip_executable)
             return False  # Return False instead of proceeding with a None value
 
         logging.info('Using pip executable: %s', pip_executable)

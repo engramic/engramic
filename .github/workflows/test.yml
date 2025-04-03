@@ -37,3 +37,4 @@ jobs:
 
       - name: Run tests on the entire python matrix
         run: hatch test -a
+

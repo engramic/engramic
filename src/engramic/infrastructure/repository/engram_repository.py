@@ -3,28 +3,31 @@
 # See the LICENSE file in the project root for more details.
 
 
+from dataclasses import asdict
 from typing import Any
 
 from cachetools import LRUCache
 
 from engramic.core.engram import Engram
+from engramic.core.index import Index
+from engramic.core.interface.db import DB
 from engramic.core.retrieve_result import RetrieveResult
-from engramic.infrastructure.system.plugin_manager import PluginManager
 
 
 class EngramRepository:
-    def __init__(self, plugin_manager: PluginManager, cache_size: int = 1000) -> None:
-        self.db_document_plugin = plugin_manager.get_plugin('db', 'document')
-        self.is_connected = self.db_document_plugin['func'].connect()
+    def __init__(self, plugin: dict[str, Any], cache_size: int = 1000) -> None:
+        self.db_plugin = plugin
 
         # LRU Cache to store Engram objects
         self.cache: LRUCache[str, Engram] = LRUCache(maxsize=cache_size)
 
     def save_engram(self, engram: Engram) -> None:
-        self.db_document_plugin['func'].execute_data(query='save_engram', data=engram)
+        self.db_plugin['func'].insert_documents(table=DB.DBTables.ENGRAM, docs=[asdict(engram)], args=None)
 
     def load_dict(self, engram_dict: dict[str, Any]) -> Engram:
-        return Engram(**engram_dict)
+        engram = Engram(**engram_dict)
+
+        return engram
 
     def load_batch_dict(self, dict_list: list[dict[str, str]]) -> list[Engram]:
         return [self.load_dict(engram_dict) for engram_dict in dict_list]
@@ -45,13 +48,15 @@ class EngramRepository:
             return cached_engrams
 
         # Fetch only missing Engrams from the database
-        plugin_ret = self.db_document_plugin['func'].execute(query='load_batch', engram_array=missing_ids)
+        plugin_ret = self.db_plugin['func'].fetch(table=DB.DBTables.ENGRAM, ids=missing_ids, args=None)
 
         engram_data_array = plugin_ret[0]['engram']
 
         # Convert database results to Engram objects
         new_engrams = []
         for engram_data in engram_data_array:
+            indices = engram_data['indices']
+            engram_data['indices'] = [Index(**d) for d in indices]
             engram = Engram(**engram_data)
             new_engrams.append(engram)
 

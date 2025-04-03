@@ -1,6 +1,9 @@
 # Default Config
 engram_profiles.toml
 
+# Local Storage
+local_storage/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
