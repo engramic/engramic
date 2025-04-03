@@ -23,7 +23,7 @@ logging.info('Using Python interpreter:%s', sys.executable)
 def main() -> None:
     host = Host(
         'standard',
-        [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService]
+        [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService],
     )
 
     retrieve_service = host.get_service(RetrieveService)

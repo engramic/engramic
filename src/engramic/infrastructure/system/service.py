@@ -76,7 +76,6 @@ class Service(ABC):
         pass
 
     def stop(self) -> None:
-        print("stop service")
         self.recieved_stop_message = True
 
         if self.sub_socket is not None:
@@ -87,8 +86,6 @@ class Service(ABC):
 
         if self.context is not None:
             self.context.term()
-
-
 
     def run_task(self, async_coro: Awaitable[Any]) -> Future[None]:
         if inspect.iscoroutinefunction(async_coro):
@@ -186,6 +183,6 @@ class Service(ABC):
                 try:
                     callbacks(decoded_message)
                 except ValueError as e:
-                    #logging.exception('Exception while listening to published message. TOPIC: %s', decoded_topic)
-                    error = f"Runtime error: {e}"
-                    raise RuntimeError(error)
+                    # logging.exception('Exception while listening to published message. TOPIC: %s', decoded_topic)
+                    error = f'Runtime error: {e}'
+                    raise RuntimeError(error) from e

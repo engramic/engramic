@@ -176,7 +176,7 @@ class ConsolidateService(Service):
         response_schema = {'index_text_array': list[str]}
 
         indices = plugin['func'].submit(
-            prompt=prompt, structured_schema=response_schema, args=self.host.mock_update_args(plugin,index)
+            prompt=prompt, structured_schema=response_schema, args=self.host.mock_update_args(plugin, index)
         )
         self.host.update_mock_data(plugin, indices, index)
 
@@ -196,7 +196,9 @@ class ConsolidateService(Service):
         engram_id: str = id_and_index_dict['id']
 
         plugin = self.embedding_gen_embed
-        embedding_list_ret = plugin['func'].gen_embed(strings=indices, args=self.host.mock_update_args(plugin,process_index))
+        embedding_list_ret = plugin['func'].gen_embed(
+            strings=indices, args=self.host.mock_update_args(plugin, process_index)
+        )
         self.host.update_mock_data(plugin, embedding_list_ret, process_index)
 
         embedding_list = embedding_list_ret[0]['embeddings_list']

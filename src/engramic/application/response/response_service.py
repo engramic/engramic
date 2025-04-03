@@ -48,10 +48,9 @@ class ResponseService(Service):
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
         self.web_socket_manager.init_async()
 
-    def stop(self)->None:
+    def stop(self) -> None:
         self.run_task(self.web_socket_manager.shutdown())
         super().stop()
-        
 
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
@@ -80,9 +79,10 @@ class ResponseService(Service):
         }
 
     def on_fetch_engrams_complete(self, fut: Future[Any]) -> None:
+        exc = fut.exception()
+        if exc is not None:
+            raise exc
         result = fut.result()
-        if fut.exception():
-            raise fut.exception()
 
         main_prompt_task = self.run_task(
             self.main_prompt(

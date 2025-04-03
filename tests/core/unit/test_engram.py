@@ -32,4 +32,3 @@ def test_engram_initialization() -> None:
     assert engram.indices is None
     assert isinstance(engram.id, str)
     assert uuid.UUID(engram.id)  # Ensure valid UUID
-

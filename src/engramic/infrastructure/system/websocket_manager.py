@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 class WebsocketManager:
     def __init__(self, host: Host):
-        self.websocket_server: Server | None = None
+        self.websocket: Server | None = None
         self.active_connection: ServerConnection | None = None
         self.host = host
 
