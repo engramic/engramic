@@ -22,12 +22,35 @@ extra_css:
   - stylesheets/extra.css
 nav:
   - Home: index.md
+  - Getting Started: getting_started.md
+  - Host & Services: host_and_services.md
+  - Profiles: profiles.md
+  - How To's: how_to.md
   - API Reference:
       - Engram: reference/emgram.md
+      - Retrieve Service: 
+        - Retrieve Service: reference/retrieve_service.md
+        - Ask: reference/ask.md
+      - Response Service: reference/response_service.md
+      - Codify Service: reference/codify_service.md
+      - Consolidate Service: reference/consolidate_service.md
+      - Storage Service: reference/storage_service.md
+      - Message Service: reference/message_service.md
 
 plugins:
   - mkdocstrings:
       default_handler: python
       handlers:
         python:
-          paths: [.] 
+          paths: ["src"]
+  - search
+  - mike
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+extra:
+  version:
+    provider: mike

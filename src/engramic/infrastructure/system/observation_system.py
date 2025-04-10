@@ -14,16 +14,6 @@ from engramic.infrastructure.repository.engram_repository import EngramRepositor
 
 @dataclass
 class ObservationSystem(Observation):
-    def render(self) -> str:
-        return_string = ''
-
-        return_string += self.meta.render()
-
-        for engram in self.engram_list:
-            return_string = engram.render()
-
-        return return_string
-
     def merge_observation(
         self, observation: Observation, accuracy_filter: int, relevancy_filter: int, engram_repository: EngramRepository
     ) -> Observation:

@@ -34,6 +34,7 @@ dependencies = []
 [tool.hatch.envs.dev.scripts]
 post-install = "pre-commit install"
 web_server = "python -m http.server 8000 --directory ./web/"
+delete_dbs = "rm -rf ./local_storage/sqlite ./local_storage/chroma_db"
 
 [project.urls]
 Documentation = "https://github.com/engramic/engramic#readme"
@@ -59,7 +60,8 @@ dependencies = [
   "mkdocs",
   "mkdocs-material",
   "mkdocstrings[python]",
-  "pylint"
+  "pylint",
+  "mike"
 ]
 
 [tool.hatch.envs.docs.scripts]

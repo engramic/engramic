@@ -6,6 +6,8 @@ from abc import ABC, abstractmethod
 
 
 class Retrieval(ABC):
+    id: str
+
     @abstractmethod
     def get_sources(self) -> None:
         pass

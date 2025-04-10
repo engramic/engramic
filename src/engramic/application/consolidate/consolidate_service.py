@@ -12,7 +12,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from engramic.application.consolidate.prompt_gen_indices import PromptGenIndices
-from engramic.core import Engram, Index, Meta, Prompt
+from engramic.core import Engram, Index, Meta
 from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.observation import Observation
@@ -32,6 +32,47 @@ class ConsolidateMetric(Enum):
 
 
 class ConsolidateService(Service):
+    """
+    The ConsolidateService orchestrates the post-processing pipeline for completed observations,
+    coordinating summarization, engram generation, index generation, and embedding creation.
+
+    This service is triggered when an observation is marked complete and is responsible for the following:
+
+    1. **Summarization** - Generates a natural language summary from the observation using an LLM plugin.
+    2. **Embedding Summaries** - Uses an embedding plugin to create vector embeddings of the summary text.
+    3. **Engram Generation** - Extracts or constructs engrams from the observation's content.
+    4. **Index Generation** - Applies an LLM to generate meaningful textual indices for each engram.
+    5. **Embedding Indices** - Uses an embedding plugin to convert each index into a vector representation.
+    6. **Publishing Results** - Emits messages like `ENGRAM_COMPLETE`, `META_COMPLETE`, and `INDEX_COMPLETE` at various stages to notify downstream systems.
+
+    Metrics are tracked throughout the pipeline using a `MetricsTracker` and returned on demand via the
+    `on_acknowledge` method.
+
+    Attributes:
+        plugin_manager (PluginManager): Manages access to all system plugins.
+        llm_summary (dict): Plugin used for generating summaries.
+        llm_gen_indices (dict): Plugin used for generating indices from engrams.
+        embedding_gen_embed (dict): Plugin used for generating embeddings for summaries and indices.
+        db_document (dict): Plugin for document-level database access.
+        observation_repository (ObservationRepository): Handles deserialization of incoming observations.
+        engram_builder (dict[str, Engram]): In-memory store of engrams awaiting completion.
+        index_builder (dict[str, Index]): In-memory store of indices being constructed.
+        metrics_tracker (MetricsTracker): Tracks metrics across each processing stage.
+
+    Methods:
+        start(): Subscribes the service to message topics.
+        stop(): Stops the service and clears subscriptions.
+        on_observation_complete(observation_dict): Handles post-processing when an observation completes.
+        generate_summary(observation): Creates a summary of the observation content.
+        on_summary(summary_fut): Callback after summary generation completes.
+        generate_summary_embeddings(meta): Generates and attaches embeddings for a summary.
+        generate_engrams(observation): Constructs engrams from observation data.
+        on_engrams(engram_list_fut): Callback after engram generation; handles index and embedding creation.
+        gen_indices(index, id_in, engram): Uses an LLM to create indices from an engram.
+        gen_embeddings(id_and_index_dict, process_index): Creates embeddings for generated indices.
+        on_acknowledge(message_in): Sends a metrics snapshot for observability/debugging.
+    """
+
     def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
@@ -52,11 +93,6 @@ class ConsolidateService(Service):
         super().stop()
 
     def on_observation_complete(self, observation_dict: dict[str, Any]) -> None:
-        """
-        Callback invoked once an observation is complete.
-        We run summary + engram pipeline tasks asynchronously.
-        """
-
         # should run a task for this.
         observation = self.observation_repository.load_dict(observation_dict)
         self.metrics_tracker.increment(ConsolidateMetric.OBSERVATIONS_RECIEVED)
@@ -74,28 +110,16 @@ class ConsolidateService(Service):
     """
 
     async def generate_summary(self, observation: Observation) -> Meta:
-        """
-        Asynchronously call your LLM to create a summary of the observation.
-        """
-
         if (
             observation.meta.summary_full is not None and not observation.meta.summary_full.text
         ):  # native LLM observations have a summary already.
             not_test = 'not tested yet'
             raise NotImplementedError(not_test)
-            prompt = Prompt('Make me a summary')
-            args = self.llm_summary['args']
-            args.update({'observation': observation.render()})
-            summary = self.llm_summary['func'].submit(prompt=prompt, args=args)
-
             self.metrics_tracker.increment(ConsolidateMetric.SUMMARIES_GENERATED)
-
-            observation.meta.summary_full.text = summary
 
         return observation.meta
 
     def on_summary(self, summary_fut: Future[Any]) -> None:
-        """Callback after `generate_summary` completes."""
         result = summary_fut.result()
         self.run_task(self.generate_summary_embeddings(result))
 
@@ -123,26 +147,16 @@ class ConsolidateService(Service):
     """
 
     async def generate_engrams(self, observation: Observation) -> list[Engram]:
-        """
-        Will procedurally generate engrams from other elements in an observation.
-        """
         self.metrics_tracker.increment(ConsolidateMetric.ENGRAMS_GENERATED, len(observation.engram_list))
 
         return observation.engram_list
 
     def on_engrams(self, engram_list_fut: Future[Any]) -> None:
-        """
-        Called after generate_engrams(...) is done.
-        We next need to:
-           (1) Generate indices for each engram
-           (2) Then generate embeddings for all indices
-           (3) Only then publish engram_complete
-        """
         engram_list = engram_list_fut.result()
 
         # Keep references so we can fill them in later
         for engram in engram_list:
-            logging.info('Engram Ready: %s', engram.id)
+            logging.debug('Engram Ready: %s', engram.id)
             if self.engram_builder.get(engram.id) is None:
                 self.engram_builder[engram.id] = engram
             else:
@@ -150,7 +164,7 @@ class ConsolidateService(Service):
                 raise RuntimeError(error)
 
         # 1) Generate indices for each engram
-        index_tasks = [self.gen_indices(i, engram.id, engram.render()) for i, engram in enumerate(engram_list)]
+        index_tasks = [self.gen_indices(i, engram.id, engram) for i, engram in enumerate(engram_list)]
 
         indices_future = self.run_tasks(index_tasks)
 
@@ -164,7 +178,7 @@ class ConsolidateService(Service):
             # 2) Generate embeddings for each index set
             embed_tasks = [self.gen_embeddings(index_set, i) for i, index_set in enumerate(index_sets)]
 
-            logging.info('index_sets %s', len(index_sets))
+            logging.debug('index_sets %s', len(index_sets))
             embed_future = self.run_tasks(embed_tasks)
 
             # Once embeddings are generated, then we're truly done
@@ -174,12 +188,12 @@ class ConsolidateService(Service):
 
                 # 3) Now that embeddings exist, we can send "ENGRAM_COMPLETE" for each
                 for eid in ids:
-                    logging.info('Done: %s', eid)
+                    logging.debug('Done: %s', eid)
                     engram = self.engram_builder[eid]
                     self.send_message_async(Service.Topic.ENGRAM_COMPLETE, asdict(engram))
 
                 for eid in ids:
-                    logging.info('Deleting: %s', eid)
+                    logging.debug('Deleting: %s', eid)
                     engram = self.engram_builder[eid]
                     del self.engram_builder[eid]
 
@@ -187,10 +201,8 @@ class ConsolidateService(Service):
 
         indices_future.add_done_callback(on_indices_done)
 
-    async def gen_indices(self, index: int, id_in: str, engram_render: str) -> dict[str, Any]:
-        """Generate the 'indices' for one engram via an LLM plugin."""
-
-        data_input = {'engram_render': engram_render}
+    async def gen_indices(self, index: int, id_in: str, engram: Engram) -> dict[str, Any]:
+        data_input = {'engram': engram}
 
         prompt = PromptGenIndices(prompt_str='', input_data=data_input)
         plugin = self.llm_gen_indices
@@ -213,10 +225,7 @@ class ConsolidateService(Service):
         return {'id': id_in, 'indices': response_json['index_text_array']}
 
     async def gen_embeddings(self, id_and_index_dict: dict[str, Any], process_index: int) -> str:
-        """
-        Called after `gen_indices`; now we have the engram ID plus the new indices to embed.
-        """
-        logging.info('gen_embeddings: indices in %s', len(id_and_index_dict['indices']))
+        logging.debug('gen_embeddings: indices in %s', len(id_and_index_dict['indices']))
 
         indices = id_and_index_dict['indices']
         engram_id: str = id_and_index_dict['id']

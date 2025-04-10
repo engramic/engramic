@@ -22,7 +22,7 @@ class EngramProfiles:
 
     DEFAULT_PROFILE_PATH = 'default_engram_profiles.toml'
     LOCAL_PROFILE_PATH = 'engram_profiles.toml'
-    ENGRAM_PROFILE_VERSION = 1.0
+    ENGRAM_PROFILE_VERSION = 0.1
 
     def __init__(self) -> None:
         self.currently_set_profile: dict[Any, Any] | None = None
@@ -61,7 +61,9 @@ class EngramProfiles:
             raise TypeError(error)
 
         if version != EngramProfiles.ENGRAM_PROFILE_VERSION:
-            logging.error('Incompatible profile version: %s %s', EngramProfiles.ENGRAM_PROFILE_VERSION, version)
+            logging.error(
+                'Incompatible profile version: Expected: %s Found: %s', EngramProfiles.ENGRAM_PROFILE_VERSION, version
+            )
             raise ValueError
 
     def set_current_profile(self, name: str) -> None:

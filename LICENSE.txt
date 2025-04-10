@@ -7,7 +7,7 @@ Notwithstanding the foregoing, the following Restrictions apply:
 
 Restrictions.
 
-1. If you or the entity you represent employ 250 or more people worldwide, including majority owned subsidiaries, you or the entity may not distribute, sublicense, or sell this Software, including, but not limited to, SaaS, cloud-based services, or managed services without obtaining an alternative license from license@engramic.org.
+1. If you or the entity you represent employ 250 or more people worldwide you must obtain a commerical or research license. Contact us at license@engramic.org.
 
 2. You may not act on behalf of any person or entity employing 250 or more people worldwide to circumvent Restriction 1.
 

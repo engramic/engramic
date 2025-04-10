@@ -10,9 +10,15 @@ from engramic.core.prompt import Prompt
 class PromptGenIndices(Prompt):
     def render_prompt(self) -> str:
         return_str = Template("""
-Review the content and generate short yet context rich phrase indexes that would act as an index to look up the most valuable information provided. An index should be at least 5 relevant words long.
+Review the content and generate short yet context rich phrase indexes that can be used as an index to perform a relevance search seeking to find the content. An index should be at least 8 relevant words long but may be longer.
+
+If the information is a sentence, you may only need one or two indexes.
+
+If the information is a paragraph and very dense with information, you may need four or five.
+
+If the information is more than a paragraph and very dense, you may need 8 to 10 indexes.
 <infomation>
-    ${engram_render}
+    ${engram.content}
 </information>
 """).render(**self.input_data)
         return str(return_str)

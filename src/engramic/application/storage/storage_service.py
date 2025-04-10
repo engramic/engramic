@@ -31,6 +31,36 @@ class StorageMetric(Enum):
 
 
 class StorageService(Service):
+    """
+    A service responsible for persisting various data artifacts generated during the Engramic runtime process.
+
+    The StorageService listens to multiple system topics and asynchronously saves different types of data,
+    including observations, engrams, metadata, and history responses. It utilizes plugin-based repositories
+    for storage and maintains metrics on saved entities for monitoring and reporting.
+
+    Attributes:
+        plugin_manager (PluginManager): Manages system plugins including the database plugin.
+        db_document_plugin: The database document plugin used by repositories.
+        history_repository (HistoryRepository): Handles persistence of history data.
+        observation_repository (ObservationRepository): Handles persistence of observations.
+        engram_repository (EngramRepository): Handles persistence of engrams.
+        meta_repository (MetaRepository): Handles persistence of metadata.
+        metrics_tracker (MetricsTracker): Tracks and reports storage metrics for each saved entity type.
+
+    Methods:
+        start(): Subscribes to message topics and prepares the service for operation.
+        init_async(): Initializes database connections asynchronously.
+        on_engram_complete(engram_dict): Callback to handle completed engrams and trigger storage.
+        on_observation_complete(response): Callback to handle completed observations and trigger storage.
+        on_prompt_complete(response_dict): Callback to handle completed prompt responses and trigger history storage.
+        on_meta_complete(meta_dict): Callback to handle completed meta information and trigger storage.
+        save_observation(response): Asynchronously saves an observation and updates metrics.
+        save_history(response): Asynchronously saves a history response and updates metrics.
+        save_engram(engram): Asynchronously saves an engram and updates metrics.
+        save_meta(meta): Asynchronously saves meta information and updates metrics.
+        on_acknowledge(message_in): Collects metrics and sends a status update on acknowledgment.
+    """
+
     def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
@@ -70,20 +100,20 @@ class StorageService(Service):
     async def save_observation(self, response: Observation) -> None:
         self.observation_repository.save(response)
         self.metrics_tracker.increment(StorageMetric.OBSERVATION_SAVED)
-        logging.info('Storage service saving observation.')
+        logging.debug('Storage service saving observation.')
 
     async def save_history(self, response: Response) -> None:
         await asyncio.to_thread(self.history_repository.save_history, response)
         self.metrics_tracker.increment(StorageMetric.HISTORY_SAVED)
-        logging.info('Storage service saving history.')
+        logging.debug('Storage service saving history.')
 
     async def save_engram(self, engram: Engram) -> None:
         await asyncio.to_thread(self.engram_repository.save_engram, engram)
         self.metrics_tracker.increment(StorageMetric.ENGRAM_SAVED)
-        logging.info('Storage service saving engram.')
+        logging.debug('Storage service saving engram.')
 
     async def save_meta(self, meta: Meta) -> None:
-        logging.info('Storage service saving meta.')
+        logging.debug('Storage service saving meta.')
         await asyncio.to_thread(self.meta_repository.save, meta)
         self.metrics_tracker.increment(StorageMetric.META_SAVED)
 
