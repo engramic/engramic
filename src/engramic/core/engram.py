@@ -16,22 +16,26 @@ if TYPE_CHECKING:
 @dataclass()
 class Engram:
     """
-    Represents a unit of memory, consisting of a text string (such as a phrase, sentence, or paragraph)
-    along with contextual information to help an LLM understand its domain relevance.
+    Represents a unit of memory, consisting of a text string (e.g., a phrase, sentence, or paragraph)
+    along with contextual information that helps in retrieval and responses.
 
     Attributes:
         id (str): A unique identifier for the engram.
-        location (str): The specific location or source of the engram such as a filepath.
-        source_id (str): An identifier linking the engram to its originating source.
-        content (str): The content of the engram in text.
-        is_native_source (bool): Indicates whether the text is directly from the source (True) or derived from a previous response (False).
-        context (Context | None): The contextual information associated with the engram.
-        indices (list[Index] | None): A list of indices (text & embedding pair) related to the engram, this is used for semantic query.
-        meta_id (str | None): A metadata identifier giving overview of the source document.
-        library_id (str | None): An identifier linking the engram to a library, a collection of source documents.
+        locations (list[str]): One or more locations where the engram was generated such as file paths or URLs.
+        source_ids (list[str]): One or more identifiers linking the engram to its originating sources.
+        content (str): The textual content of the engram.
+        is_native_source (bool): Whether the content is directly extracted from a source (True) or derived/generated (False).
+        context (dict[str, str] | None): Optional key-value pairs providing additional context for the engram.
+        indices (list[Index] | None): Optional list of semantic indices associated with the engram, typically used for embedding-based search.
+        meta_ids (list[str] | None): Optional metadata identifiers associated with this Engram.
+        library_ids (list[str] | None): Optional identifiers grouping this engram into document collections or libraries.
+        accuracy (int | None): An optional accuracy score assigned to the engram by validation on the Codify Service).
+        relevancy (int | None): An optional relevancy score assigned to the engram by validation on the Codify Service).
+        created_date (datetime | None): The creation timestamp of the engram.
 
     Methods:
-        render_engram(): Returns a structured string representation of the engram to be used by the LLM.
+        generate_toml() -> str:
+            Serializes the engram to a TOML-formatted string, including all non-null attributes and flattening indices.
     """
 
     id: str
@@ -88,28 +92,3 @@ class Engram:
                 ])
 
         return '\n'.join(lines)
-
-    def render(self) -> str:
-        """
-        Renders the engram into a structured string suitable for an LLM to use as context.
-        """
-        source_type = 'This data is an original source.' if self.is_native_source else ''
-
-        meta_section = '<meta>\n'
-        if self.locations:
-            meta_section += 'Source: ' + ',\n    '.join(self.locations) + '\n'
-        meta_section += '</meta>'
-
-        context_section = ''
-        if self.context:
-            context_section = '<context>\n'
-            context_section += '\n'.join(f'    {k}: {v}' for k, v in self.context.items()) + '\n'
-            context_section += '</context>'
-
-        content = '<content>'
-        content += self.content.strip()
-        content += '</content>'
-
-        rendered = f'{source_type}\n\n' f'{meta_section}\n\n' f'{context_section}\n\n' f'{content}'
-
-        return rendered

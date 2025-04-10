@@ -52,52 +52,40 @@ class ObservationRepository:
         return all(self._validate_engram(engram) for engram in engrams)
 
     def _validate_engram(self, engram: dict[str, Any]) -> bool:
-        if not isinstance(engram.get('content'), str):
-            return False
-        if not isinstance(engram.get('is_native_source'), bool):
-            return False
-
-        if not engram['is_native_source']:
-            if not isinstance(engram.get('locations'), list):
-                return False
-            if not isinstance(engram.get('source_ids'), list):
-                return False
-            if not isinstance(engram.get('meta_ids'), list):
-                return False
-            if not isinstance(engram.get('accuracy'), int):
-                return False
-            if not isinstance(engram.get('relevancy'), int):
-                return False
-
-        return True
+        return (
+            isinstance(engram.get('content'), str)
+            and ('locations' not in engram or isinstance(engram['locations'], list))
+            and ('source_ids' not in engram or isinstance(engram['source_ids'], list))
+            and ('meta_ids' not in engram or isinstance(engram['meta_ids'], list))
+            and ('accuracy' not in engram or isinstance(engram['accuracy'], int))
+            and ('relevancy' not in engram or isinstance(engram['relevancy'], int))
+        )
 
     def normalize_toml_dict(self, toml_data: dict[str, Any], response: Response) -> dict[str, Any]:
-        meta_id = str(uuid.uuid4())
-        if toml_data['meta'].get('id') is None:
-            toml_data['meta']['id'] = meta_id
-
-        if toml_data['meta'].get('source_ids') is None:
-            toml_data['meta']['source_ids'] = [response.hash]
-
-        if toml_data['meta'].get('locations') is None:
-            toml_data['meta']['locations'] = [f'llm://{response.model}']
-
-        text = toml_data['meta']['summary_full']['text']
-        toml_data['meta']['summary_full'] = Index(text, None)
-
+        meta_id = self._normalize_meta(toml_data['meta'], response)
         for engram_dict in toml_data['engram']:
-            if engram_dict.get('id') is None:
-                engram_dict['id'] = str(uuid.uuid4())
-
-            if engram_dict.get('created_date') is None:
-                engram_dict['created_date'] = int(time.time())
-
-            if engram_dict['is_native_source'] is True:
-                engram_dict['source_ids'] = [response.hash]
-                engram_dict['locations'] = [f'llm://{response.model}']
-                engram_dict['meta_ids'] = [meta_id]
-
+            self._normalize_engram(engram_dict, meta_id, response)
         return toml_data
+
+    def _normalize_meta(self, meta: dict[str, Any], response: Response) -> Any:
+        meta_id = str(uuid.uuid4())
+        meta.setdefault('id', meta_id)
+        meta.setdefault('source_ids', [response.hash])
+        meta.setdefault('locations', [f'llm://{response.model}'])
+
+        # Normalize summary_full into Index
+        text = meta.get('summary_full', {}).get('text', '')
+        meta['summary_full'] = Index(text, None)
+
+        return meta['id']
+
+    def _normalize_engram(self, engram: dict[str, Any], meta_id: str, response: Response) -> None:
+        engram.setdefault('id', str(uuid.uuid4()))
+        engram.setdefault('created_date', int(time.time()))
+        engram.setdefault('source_ids', [response.hash])
+        engram.setdefault('locations', [f'llm://{response.model}'])
+        engram.setdefault('meta_ids', [meta_id])
+        engram.setdefault('is_native_source', False)
 
     def save(self, observation: Observation) -> bool:
         ret: bool = self.db_plugin['func'].insert_documents(

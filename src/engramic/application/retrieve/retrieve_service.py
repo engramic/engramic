@@ -4,6 +4,7 @@
 
 import asyncio
 import time
+import uuid
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
@@ -29,7 +30,32 @@ class RetrieveMetric(Enum):
 
 
 class RetrieveService(Service):
-    # ITERATIONS = 3
+    """
+    Service responsible for handling semantic prompt retrieval. It communicates with vector and document databases via plugins and tracks operational metrics for observability.
+
+    Attributes:
+        plugin_manager (PluginManager): Plugin manager to access database and vector services.
+        vector_db_plugin (dict): Plugin for interacting with the vector database.
+        db_plugin (dict): Plugin for document database operations.
+        metrics_tracker (MetricsTracker): Tracks various retrieval-related metrics.
+        meta_repository (MetaRepository): Handles persistence and loading of Meta objects.
+
+    Methods:
+        init_async(): Initializes the database connection.
+        start(): Subscribes to service topics for prompt submission, indexing, and metadata completion.
+        stop(): Stops the service and cleans up subscriptions.
+
+        submit(prompt): Initiates the retrieval process for a given prompt and logs metrics.
+        on_submit_prompt(data): Handles incoming prompt strings from messaging, wraps them in a Prompt object, and triggers retrieval.
+
+        on_index_complete(index_message): Callback that handles completed indices and submits them to the vector DB.
+        on_meta_complete(meta_dict): Callback for completed metadata, converts and submits to vector DB.
+
+        insert_meta_vector(meta): Asynchronously inserts metadata summaries into the vector DB.
+        insert_engram_vector(index_list, engram_id): Asynchronously inserts semantic indices into the vector DB.
+
+        on_acknowledge(message_in): Handles status reporting and resets the current metric tracker.
+    """
 
     def __init__(self, host: Host) -> None:
         super().__init__(host)
@@ -59,7 +85,7 @@ class RetrieveService(Service):
     # when used from main
     def submit(self, prompt: Prompt) -> None:
         self.metrics_tracker.increment(RetrieveMetric.PROMPTS_SUBMITTED)
-        retrieval = Ask(prompt, self.plugin_manager, self.metrics_tracker, self)
+        retrieval = Ask(str(uuid.uuid4()), prompt, self.plugin_manager, self.metrics_tracker, self.db_plugin, self)
         retrieval.get_sources()
 
     def on_index_complete(self, index_message: dict[str, Any]) -> None:

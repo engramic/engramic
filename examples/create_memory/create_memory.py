@@ -5,10 +5,14 @@
 import logging
 from typing import Any
 
+from engramic.application.codify.codify_service import CodifyService
+from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
+from engramic.application.storage.storage_service import StorageService
 from engramic.core.host import Host
+from engramic.core.observation import Observation
 from engramic.core.prompt import Prompt
 from engramic.core.response import Response
 from engramic.infrastructure.system import Service
@@ -20,18 +24,30 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class TestService(Service):
     def start(self):
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, on_main_prompt_complete)
+        self.subscribe(Service.Topic.OBSERVATION_COMPLETE, on_observation_complete)
         return super().start()
+
+    def init_async(self):
+        super().init_async()
+        self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
 
 
 def main() -> None:
-    # MessageService - Manages all interservice communication.
-    # RetrieveService - Performs the query on all memories.
-    # ResponseService - Combines all sources of information and performs the query.
-
-    host = Host('mock', [MessageService, TestService, RetrieveService, ResponseService])
+    host = Host(
+        'standard',
+        [
+            MessageService,
+            TestService,
+            RetrieveService,
+            ResponseService,
+            StorageService,
+            CodifyService,
+            ConsolidateService,
+        ],
+    )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Tell me about the All In podcast.'))
+    retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.'))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()
@@ -40,6 +56,12 @@ def main() -> None:
 def on_main_prompt_complete(message_in: dict[str, Any]) -> None:
     response = Response(**message_in)
     logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
+
+
+def on_observation_complete(message_in: dict[str, Any]) -> None:
+    observation = Observation(**message_in)
+    logging.info('\n\n==============[Meta Summary]============\n%s\n\n', observation.meta['summary_full']['text'])
+    logging.info('\n\n=================[Engrams]==============\n%s\n\n', observation.engram_list)
 
 
 if __name__ == '__main__':

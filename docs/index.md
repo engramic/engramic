@@ -4,30 +4,63 @@
   <img src="assets/logo_200.png" alt="Engramic Logo">
 </p>
 
+================================================================================================
 
-Welcome to the **open-source API reference documentation** for Engramic! This documentation provides a comprehensive guide to integrating and utilizing Engramic’s powerful features.
+Note: Engramic is pre-alpha. The architecture is designed to support all of the features described in this documentation but the implementation may be partial, not fully tested, or not publicly available at this time. It is a good time to get familiar with the architecture and get involved with the development process.
 
-For a **high-level overview** of Engramic’s capabilities, visit our [Knowledge Base](https://www.engramic.org/knowledge-base) on the website.
+There is currently no support for the following:
+
+- There is no support for userids.
+- There is no HTTP(s) Interface at this time. 
+- This is no support for documents such as PDFs.
+- Windows and MacOS is not being tested as part of our release process.
+
+These features, along with others, will be available in the near future.
+
+================================================================================================
+
+For an evergreen overview of Engramic, visit our online [Knowledge Base](https://www.engramic.org/knowledge-base).
 
 ## Introduction to Engramic
 
-Engramic is a **Retrieval-Augmented Generation (RAG) system**, but it extends beyond traditional implementations in several key ways:
+### Why Engramic?
 
-### **Long-Term Memory**
-Engramic stores representations of responses that are **validated, relevant, and provide valuable reframing** of factual content. This ensures that information remains useful and contextually rich over time.
-
-### **Enhanced Context Integration**
-Context is **not an afterthought** but an integral part of the data ingestion and consolidation process. Engramic enhances retrieval and inference accuracy by ensuring that context enriches every stored data chunk.
-
-### **Conceptual Combination**
-Stored engrams contribute to an evolving dataset, enabling Engramic to **recall, combine, and synthesize ideas** dynamically. This fosters insight-driven responses—akin to human "aha" moments—and facilitates higher-order cognitive functions such as analysis and evaluation. Engramic is particularly effective when integrating **relevant external data and experiences**.
-
-### **Step-Function Improvements**
-Engramic achieves **incremental refinements** across the entire RAG pipeline. These improvements progressively **reduce errors** and enhance response precision.
-
-### **A Necessary Evolution**
-Engramic is **not just an incremental improvement**—it represents a fundamental evolution in how AI systems process, store, and retrieve knowledge. While **LLMs provide the foundation, they are not sufficient alone**. Engramic bridges the gap by ensuring AI models can think, recall, and adapt like a true knowledge system.
+Engramic is designed to seamlessly integrate unstructured, proprietary data with any large language model (LLM).
 
 ---
 
-Explore the API documentation for detailed implementation guidelines, examples, and best practices.
+### Engramic Architecture
+
+- **Modular**  
+  The plugin system allows easy switching between LLMs, databases, vector databases, and embedding tools.
+
+- **Scalable**  
+  Built as a set of independent services, Engramic can run on a single machine or be distributed across multiple systems.
+
+- **Fast**  
+  Optimized for usage patterns involving many blocking API calls, ensuring responsive performance.
+
+- **Extensible**  
+  Easily create custom services or plugins to extend functionality.
+
+---
+
+### Engramic Core Concepts
+
+- **Memory**  
+  Supports both short-term and long-term memory mechanisms.
+
+- **Engram**  
+  The fundamental unit of information, which includes content and base and customizable contextual metadata
+
+- **Citable Engrams**  
+  External documents or media that are directly referenced. Citable Engrams are high-fidelity textual representations of the media.
+
+- **Long-Term Memory Engrams**  
+  Constructed from one or more Citable Engram or other Long-Term Memory Engrams.
+
+- **Learning**  
+  Built through the combination of memory, citable external sources, and user interaction or input.
+
+- **Unified Memory**  
+  All engrams are stored within a unified system, enabling both full and selective access to memory content.

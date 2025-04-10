@@ -38,6 +38,13 @@ class Service(ABC):
         INDEX_COMPLETE = 'index_complete'
         ACKNOWLEDGE = 'acknowledge'
         STATUS = 'status'
+        SET_TRAINING_MODE = 'set_training_mode'
+        DEBUG_OBSERVATION_TOML_COMPLETE = 'debug_engram_complete'
+        DEBUG_CONVERSATION_DIRECTION = 'debug_conversation_direction'
+        DEBUG_ASK_CREATED = 'debug_ask_created'
+        DEBUG_ASK_INDICES = 'debug_ask_indices'
+        DEBUG_ASK_META = 'debug_ask_meta'
+        DEBUG_MAIN_PROMPT_INPUT = 'debug_main_prompt_input'
 
     def __init__(self, host: Host) -> None:
         self.id = str(uuid.uuid4())

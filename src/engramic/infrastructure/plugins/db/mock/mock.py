@@ -29,7 +29,7 @@ class Mock(DB):
         del args
 
         if table.value == 'history':
-            return {'return_history': [self.history[id_] for id_ in ids]}
+            return {'history': [self.history[id_] for id_ in ids]}
         if table.value == 'observation':
             return {'return_observation': [self.observations[id_] for id_ in ids]}
         if table.value == 'engram':

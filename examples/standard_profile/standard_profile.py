@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for more details.
 
 import logging
-import sys
+from typing import Any
 
 from engramic.application.codify.codify_service import CodifyService
 from engramic.application.consolidate.consolidate_service import ConsolidateService
@@ -13,26 +13,43 @@ from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.storage.storage_service import StorageService
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
+from engramic.core.response import Response
+from engramic.infrastructure.system import Service
 
-# Configure logging
-# logging.basicConfig(filename='output.log',level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.info('Using Python interpreter:%s', sys.executable)
+
+
+# This service is built only to subscribe to the main prompt completion message.
+class TestService(Service):
+    def start(self):
+        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, on_main_prompt_complete)
+        return super().start()
 
 
 def main() -> None:
     host = Host(
         'standard',
-        [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService],
+        [
+            MessageService,
+            TestService,
+            RetrieveService,
+            ResponseService,
+            StorageService,
+            CodifyService,
+            ConsolidateService,
+        ],
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Briefly tell me about the All In podcast.'))
-    # time.sleep(10)
-    # retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.'))
+    retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.'))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()
+
+
+def on_main_prompt_complete(message_in: dict[str, Any]) -> None:
+    response = Response(**message_in)
+    logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
 
 
 if __name__ == '__main__':

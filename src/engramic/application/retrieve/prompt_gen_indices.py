@@ -10,20 +10,23 @@ from engramic.core.prompt import Prompt
 class PromptGenIndices(Prompt):
     def render_prompt(self) -> str:
         rendered_template = Template("""
-    Based on the user prompt, generate lookup strings that will be used to query and fetch additional data that would help you generate a response to the user prompt.
 
-    Domain_knowledge includes knowledge that you have available in your memory. Use it to help formulate your indices.
-    % if meta_list:
-    <domain_knowledge>
+    Write a set of 4 to 6 indices, phrases of 5 to 8 words, that will be used by a vector database to search for data that will satisfy the user_prompt.
+
+    % if len(meta_list)>0:
+    The domain_knowledge gives you insight into knowledge stored in your long term memory. It's here because it's the most closely related information you have stored about the user_prompt. Up to half of your indices should be based on domain_knowledge.
+    % endif
+
     % for meta in meta_list:
+    <domain_knowledge>
         <knowledge>
             information location: ${" ".join(meta.locations)}
             context keywords: ${" ".join(meta.keywords)}
             knowledge: ${meta.summary_full.text}
-        </knowlege>
+        </knowledge>
     </domain_knowledge>
     % endfor
-    % endif
+
     <user_prompt>
         ${prompt_str}
     </user_prompt>

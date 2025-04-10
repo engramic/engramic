@@ -69,7 +69,7 @@ class PluginManager:
                 error = '[ERROR] Invalid config file.'
                 raise RuntimeError(error) from err
             else:
-                logging.info('[INFO] Config loaded successfully')
+                logging.debug('Config loaded successfully')
 
             self.install_dependencies()
             self.import_plugins()
@@ -222,7 +222,7 @@ class PluginManager:
             logging.info('No virtual environment detected. Using system Python.')
             pip_executable = shutil.which('pip')  # Fallback to system pip
         else:
-            logging.info('Using virtual environment: %s', virtual_env)
+            logging.debug('Using virtual environment: %s', virtual_env)
 
             # Construct the correct path to the pip executable
             if platform.system() == 'Windows':
@@ -239,7 +239,7 @@ class PluginManager:
             logging.error('pip not found. Installing now. %s', pip_executable)
             return False  # Return False instead of proceeding with a None value
 
-        logging.info('Using pip executable: %s', pip_executable)
+        logging.debug('Using pip executable: %s', pip_executable)
 
         try:
             result = subprocess.run(
@@ -252,5 +252,5 @@ class PluginManager:
             logging.exception('Failed to install package: %s', e.stderr)
             return False
         else:
-            logging.info('Package installed successfully: %s', result.stdout)
+            logging.debug('Package installed successfully: %s', result.stdout)
             return True

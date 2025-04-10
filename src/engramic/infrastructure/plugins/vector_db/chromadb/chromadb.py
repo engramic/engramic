@@ -33,8 +33,10 @@ class ChromaDB(VectorDB):
             path='local_storage/chroma_db', settings=Settings(anonymized_telemetry=False)
         )
         self.collection = {}
-        self.collection['main'] = self.client.get_or_create_collection(name='main')
-        self.collection['meta'] = self.client.get_or_create_collection(name='meta')
+        metadata = {'hnsw:space': 'cosine'}
+
+        self.collection['main'] = self.client.get_or_create_collection(name='main', metadata=metadata)
+        self.collection['meta'] = self.client.get_or_create_collection(name='meta', metadata=metadata)
 
     @vector_db_impl
     def query(self, collection_name: str, embeddings: list[float], args: dict[str, Any]) -> dict[str, Any]:
@@ -51,13 +53,18 @@ class ChromaDB(VectorDB):
         with self.multi_process_lock:
             results = self.collection[collection_name].query(query_embeddings=embeddings_typed, n_results=n_results)
 
-        distances = cast(list[list[float]], results['distances'])[0]
-        documents = cast(list[list[str]], results['documents'])[0]
-
         ret_ids = []
-        for i, distance in enumerate(distances):
-            if distance < threshold:
-                ret_ids.append(documents[i])
+
+        distances_groups = results.get('distances') or []
+        documents_groups = results.get('documents') or []
+
+        for i in range(len(distances_groups)):
+            distances = distances_groups[i]
+            documents = documents_groups[i]
+
+            for j, distance in enumerate(distances):
+                if distance < threshold:
+                    ret_ids.append(documents[j])
 
         return {'query_set': set(ret_ids)}
 

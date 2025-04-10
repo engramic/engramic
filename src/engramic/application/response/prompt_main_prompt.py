@@ -10,28 +10,34 @@ from engramic.core.prompt import Prompt
 class PromptMainPrompt(Prompt):
     def render_prompt(self) -> str:
         render_string = Template("""
-Respond to the user's prompt as if you were having a business conversation with them.  Be informative, accurate, and complete. It is very, very important to begin your response by answering the user's prompt directly and before you cover other topics.
+You are having a conversation with user and are answering the user prompt. You use sources as your to guide to how you respond, but if the sources don't help you, just respond politely. Be social, charismatic, but professional. Long term memories are formed from one or more sources.
 
-% if len(engram_list)>0:
+Display your output in a human readable format favoring prose or if visual, ascii diagrams.
+
+
+<your_last_response>
+        % for value in history:
+                 % for item in history[value]:
+                    ${item['response']}
+                % endfor
+        % endfor
+</your_last_response>
+
+
 Do not explain the instructions but do let them influence how you respond.
 
 <instructions>
     <definitions>
-    Sources are citable information found during a search.
-    Memories are information you remember and are derrived from sources.
+    Working memory is a representation of the state of the current conversation.
+    Long term memory are important and relevant concepts you have recalled that should contribute to your response if relevant.
     </definitions>
-    <priorities>
-        Prioritize answering the user's prompt over providing information from Sources and Memories.
-        When information conflicts, prioritize Sources over Memories.
-        When information conflicts, prioritize newer timestamps over older ones.
-    </priorities>
-    <no_answer>
-        If you can't satisfy the user's prompt within the sources, begin your response by telling them you couldn't find an answer in the source and ask them if they would like you to use your pre-trained knowledge to search for more information. You may offer alternative topics based on the sources you found.
-    </no_answer>
 </instructions>
 <sources>
+    <working_memory>
+        ${working_memory}
+    </working_memory>
     % for engram in engram_list:
-    if engram["is_native_source"]:
+    % if engram["is_native_source"]:
         <source>
             % if len(engram["locations"]) == 1:
             location: ${engram["locations"][0]}
@@ -48,8 +54,9 @@ Do not explain the instructions but do let them influence how you respond.
             content: ${engram["content"]}
             timestamp: ${engram["created_date"]}
         </source>
-    if not engram["is_native_source"]:
-        <memory>
+    % endif
+    % if not engram["is_native_source"]:
+        <long_term_memory>
             % if len(engram["locations"]) == 1:
             location: ${engram["locations"][0]}
             % else:
@@ -64,10 +71,11 @@ Do not explain the instructions but do let them influence how you respond.
             % endif
             content: ${engram["content"]}
             timestamp: ${engram["created_date"]}
-        </memory>
+        </long_term_memory>
+    % endif
     % endfor
 </sources>
-% endif
+
 
 <user_prompt>
     ${prompt_str}

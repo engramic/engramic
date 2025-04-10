@@ -36,6 +36,43 @@ class CodifyMetric(Enum):
 
 
 class CodifyService(Service):
+    """
+    CodifyService is a system-level service responsible for validating and extracting engrams (memories) from AI model responses using a TOML-based validation pipeline.
+
+    This service listens for prompts that have completed processing, and if the system is in training mode, it fetches related engrams and metadata, applies an LLM-based validation process, and stores structured observations. It tracks metrics related to its activity and supports training workflows.
+
+    Key Responsibilities:
+    - Subscribes to relevant service events like `MAIN_PROMPT_COMPLETE` and `ACKNOWLEDGE`.
+    - Fetches engrams and their associated metadata based on a completed model response.
+    - Uses a validation plugin to process model responses and extract structured observation data.
+    - Validates and loads TOML-encoded responses into structured Observation objects.
+    - Merges observations when applicable and sends results asynchronously to downstream systems.
+    - Tracks system-level metrics for observability and debugging.
+
+    Attributes:
+        plugin_manager (PluginManager): Manages access to system plugins such as the LLM and document DB.
+        engram_repository (EngramRepository): Repository for accessing and managing engram data.
+        meta_repository (MetaRepository): Repository for associated metadata retrieval.
+        observation_repository (ObservationRepository): Handles validation and normalization of observation data.
+        prompt (Prompt): Default prompt object used during validation.
+        metrics_tracker (MetricsTracker): Tracks custom CodifyMetric metrics.
+        training_mode (bool): Flag indicating whether the system is in training mode.
+
+    Methods:
+        start(): Subscribes the service to key topics.
+        stop(): Stops the service.
+        init_async(): Initializes async components, including DB connections.
+        on_set_training_mode(message_in): Sets training mode flag based on incoming message.
+        on_main_prompt_complete(response_dict): Main entry point triggered after a model completes a prompt.
+        fetch_engrams(response): Asynchronously fetches engrams associated with a response.
+        on_fetch_engram_complete(fut): Callback that processes fetched engrams and triggers metadata retrieval.
+        fetch_meta(engram_array, meta_id_array, response): Asynchronously fetches metadata for given engrams.
+        on_fetch_meta_complete(fut): Callback that begins the validation process after fetching metadata.
+        validate(engram_array, meta_array, response): Runs the validation plugin on the response and returns an observation.
+        on_validate_complete(fut): Final step that emits the completed observation to other systems.
+        on_acknowledge(message_in): Responds to ACK messages by reporting and resetting metrics.
+    """
+
     ACCURACY_CONSTANT = 3
     RELEVANCY_CONSTANT = 3
 
@@ -50,11 +87,12 @@ class CodifyService(Service):
 
         self.prompt = Prompt('Validate the llm.')
         self.metrics_tracker: MetricsTracker[CodifyMetric] = MetricsTracker[CodifyMetric]()
-        self.training_mode = True
+        self.training_mode = False
 
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
+        self.subscribe(Service.Topic.SET_TRAINING_MODE, self.on_set_training_mode)
 
     def stop(self) -> None:
         super().stop()
@@ -62,6 +100,9 @@ class CodifyService(Service):
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
+
+    def on_set_training_mode(self, message_in: dict[str, Any]) -> None:
+        self.training_mode = message_in['training_mode']
 
     def on_main_prompt_complete(self, response_dict: dict[str, Any]) -> None:
         if not self.training_mode:
@@ -94,7 +135,7 @@ class CodifyService(Service):
         meta_array: set[str] = set()
         for engram in engram_array:
             if engram.meta_ids is not None:
-                meta_array.add(engram.meta_ids[0])
+                meta_array.update(engram.meta_ids)
 
         return {'engram_array': engram_array, 'meta_array': list(meta_array), 'response': response}
 
@@ -143,7 +184,15 @@ class CodifyService(Service):
         toml_data = None
 
         try:
+            if __debug__:
+                prompt_render = prompt.render_prompt()
+                self.send_message_async(
+                    Service.Topic.DEBUG_OBSERVATION_TOML_COMPLETE,
+                    {'prompt': prompt_render, 'toml': validate_response[0]['llm_response'], 'response_id': response.id},
+                )
+
             toml_data = tomli.loads(validate_response[0]['llm_response'])
+
         except tomli.TOMLDecodeError as e:
             logging.exception('TOML decode error: %s', validate_response[0]['llm_response'])
             error = 'Malformed TOML file in codify:validate.'

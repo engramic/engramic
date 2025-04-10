@@ -1,0 +1,1 @@
+::: engramic.application.consolidate.consolidate_service.ConsolidateService

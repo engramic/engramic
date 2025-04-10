@@ -28,4 +28,5 @@ class Response:
         if self.hash is None:
             self.hash = hashlib.md5(self.response.encode('utf-8')).hexdigest()  # nosec
 
-        self.response_time = datetime.now(timezone.utc).timestamp()
+        if self.response_time is None:
+            self.response_time = datetime.now(timezone.utc).timestamp()

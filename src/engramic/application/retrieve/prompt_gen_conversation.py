@@ -11,14 +11,45 @@ class PromptGenConversation(Prompt):
     def render_prompt(self) -> str:
         return_str = Template("""
 <instructions>
-    Review the original prompt and briefly summarize user intent and determine if you need to do any research to answer the question. For example, if the user is making idle conversation such as "hi" or "how are you doing?" that doesn't require research.
+Your name is Engramic and you are in a conversation with the user. When the user submits input and Engramic returns a response, this is known as an exchange. Review the input and provide user intent and a description of your working memory.
 
-    Provide two items in your response: user_intent:str and perform_research:bool.
+% if history_array['history']:
+The results of the previous exchange are provided below. Use those results to inform your response.
+% endif
 
-    user_intent: Answer in 10 or less in a sentence like keyword phrase that predicts the direction of the conversation.
+user_intent:str - Detailed keyword phrase of what is the user is really intending. This should be keyword rich, omitting any filler words.
+% if not history_array['history']:
+working_memory - Update or create new variables in a dict:[str,Any] called "memory". Please write variables and the values needed to track all elements of the conversation or any activities that will ensue based on the current_user_input in a dict[str,Any] named "memory". Assume if this were a program, you would need all of these memory variables in order for the code to work. Include any responsibilities you have for yourself.
+% else:
+working_memory - Update working memory. Include typing on variables. First, include variables from previous_working_memory and then overwrite those values with any changes in the previous_response. Finally, add or update variables in memory if the current_user_input overrides those.
+
+If you are asked to start a new conversation, remove all data from working memory and set it to None.
+% endif
+
 </instructions>
-<original_prompt>
-    ${prompt_str}
-<original_prompt>
+<input>
+    <current_user_input>
+        ${prompt_str}
+    </current_user_input>
+    % if history_array['history']:
+    <previous_exchange>
+    % for item in history_array['history']:
+        <previous_prompt>
+            This was the previous user input:
+            ${item['prompt_str']}
+        </previous_prompt>
+        <previous_working_memory>
+            This was the previous working memory that Engramic generated:
+            ${item['retrieve_result']['conversation_direction']['current_user_intent']}
+            ${item['retrieve_result']['conversation_direction']['working_memory']}
+        </previous_working_memory>
+        <previous_response>
+            This was Engramic's response in the previous exchange:
+            ${item['response']}
+        </previous_response>
+    <previous_exchange>
+    % endfor
+    % endif
+</input>
 """).render(**self.input_data)
         return str(return_str)

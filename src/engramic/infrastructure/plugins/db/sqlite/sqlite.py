@@ -46,6 +46,9 @@ class Sqlite(DB):
                     name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
                 )
             """)
+            self.cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_created_date ON history(json_extract(data, '$.created_date'))"
+            )
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS meta (
                     id TEXT PRIMARY KEY,
@@ -68,26 +71,40 @@ class Sqlite(DB):
 
     @db_impl
     def fetch(self, table: DB.DBTables, ids: list[str], args: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
-        del args
-
-        query = 'SELECT * FROM engram'
+        if table not in self._table_name_map:
+            error = 'Invalid table enum value'
+            raise TypeError(error)
 
         with self.multi_process_lock:
-            self.cursor.execute(query)
-            rows = self.cursor.fetchall()
-
-            if table not in self._table_name_map:
-                type_error = 'Invalid table enum value'
-                raise TypeError(type_error)
-
             table_name: Final[str] = self._table_name_map[table]
-            placeholders = ','.join('?' for _ in ids)
-            query = f'SELECT id, data FROM {table_name} WHERE id IN ({placeholders})'
-            self.cursor.execute(query, ids)
+
+            query_select = f'SELECT id, data FROM {table_name}'
+            query_id = ''
+            query_order = ''
+            query_limit = ''
+
+            query_params = []
+
+            if ids:
+                placeholders = ','.join('?' for _ in ids)
+                query_id = f'WHERE id IN ({placeholders})'
+                query_params.extend(ids)
+
+            if args and 'history' in args:
+                query_order = "ORDER BY json_extract(data, '$.created_date') DESC"
+                query_limit = f"LIMIT {args['history']}"
+
+            # Compose final query
+            assembled_query = f'{query_select} {query_id} {query_order} {query_limit}'
+
+            if query_params:
+                self.cursor.execute(assembled_query, query_params)
+            else:
+                self.cursor.execute(assembled_query)
+
             rows = self.cursor.fetchall()
 
-        format_out = {table_name: [json.loads(data[1]) for data in rows]}
-        return format_out
+        return {table_name: [json.loads(data[1]) for data in rows]}
 
     @db_impl
     def insert_documents(self, table: DB.DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:

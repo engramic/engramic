@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -18,7 +18,3 @@ class Observation(ABC):
     meta: Meta
     engram_list: list[Engram]
     created_date: float | None = None
-
-    @abstractmethod
-    def render(self) -> str:
-        pass

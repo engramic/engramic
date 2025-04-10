@@ -2,17 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
-        "name": "Example - Mock (hatch env:dev)",
+        "name": "Example - Mock",
         "type": "debugpy",
         "request": "launch",
         "program": "${workspaceFolder}/examples/mock_profile/mock_profile.py",
         "console": "integratedTerminal"
     },
     {
-      "name": "Example - Standard (hatch env:dev)",
+      "name": "Example - Standard",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/examples/standard_profile/standard_profile.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Example - Create Memory",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/create_memory/create_memory.py",
       "console": "integratedTerminal"
     },
     {
