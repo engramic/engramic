@@ -105,6 +105,9 @@ class CodifyService(Service):
         self.training_mode = message_in['training_mode']
 
     def on_main_prompt_complete(self, response_dict: dict[str, Any]) -> None:
+        if __debug__:
+            self.host.update_mock_data_input(self, response_dict)
+
         if not self.training_mode:
             return
 
@@ -228,6 +231,9 @@ class CodifyService(Service):
 
         if ret['return_observation'] is not None:
             self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(ret['return_observation']))
+
+        if __debug__:
+            self.host.update_mock_data_output(self, asdict(ret['return_observation']))
 
     """
     ### Ack

@@ -5,6 +5,7 @@
 import asyncio
 import time
 import uuid
+from dataclasses import asdict
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
@@ -84,6 +85,9 @@ class RetrieveService(Service):
 
     # when used from main
     def submit(self, prompt: Prompt) -> None:
+        if __debug__:
+            self.host.update_mock_data_input(self, asdict(prompt))
+
         self.metrics_tracker.increment(RetrieveMetric.PROMPTS_SUBMITTED)
         retrieval = Ask(str(uuid.uuid4()), prompt, self.plugin_manager, self.metrics_tracker, self.db_plugin, self)
         retrieval.get_sources()
@@ -100,7 +104,6 @@ class RetrieveService(Service):
             collection_name='main', index_list=index_list, obj_id=engram_id, args=plugin['args']
         )
 
-        self.host.write_mock_data()
         self.metrics_tracker.increment(RetrieveMetric.EMBEDDINGS_ADDED_TO_VECTOR)
 
     def on_meta_complete(self, meta_dict: dict[str, Any]) -> None:

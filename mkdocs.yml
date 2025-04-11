@@ -44,7 +44,8 @@ plugins:
         python:
           paths: ["src"]
   - search
-  - mike
+  - mike:
+      version_selector: true
 
 markdown_extensions:
   - admonition
@@ -54,3 +55,4 @@ markdown_extensions:
 extra:
   version:
     provider: mike
+    default: 0.0

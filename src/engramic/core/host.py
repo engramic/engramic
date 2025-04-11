@@ -14,6 +14,7 @@ import time
 from threading import Thread
 from typing import TYPE_CHECKING, Any
 
+from engramic.core.index import Index
 from engramic.infrastructure.system.plugin_manager import PluginManager
 
 if TYPE_CHECKING:
@@ -226,6 +227,28 @@ class Host:
 
         return 'unknown_coroutine'
 
+    def update_mock_data_input(self, service: Service, value: dict[str, Any]) -> None:
+        if self.generate_mock_data:
+            service_name = service.__class__.__name__
+            concat = f'{service_name}-input'
+
+            if self.mock_data_collector.get(concat) is not None:
+                error = 'Mock data collection collision error. Missing an index?'
+                raise ValueError(error)
+
+            self.mock_data_collector[concat] = value
+
+    def update_mock_data_output(self, service: Service, value: dict[str, Any]) -> None:
+        if self.generate_mock_data:
+            service_name = service.__class__.__name__
+            concat = f'{service_name}-output'
+
+            if self.mock_data_collector.get(concat) is not None:
+                error = 'Mock data collection collision error. Missing an index?'
+                raise ValueError(error)
+
+            self.mock_data_collector[concat] = value
+
     def update_mock_data(self, plugin: dict[str, Any], response: list[dict[str, Any]], index_in: int = 0) -> None:
         if self.generate_mock_data:
             caller_name = inspect.stack()[1].function
@@ -245,6 +268,8 @@ class Host:
         def default(self, obj: Any) -> Any:
             if isinstance(obj, set):
                 return {'__type__': 'set', 'value': list(obj)}
+            if isinstance(obj, Index):
+                return {'__type__': 'Index', 'value': {'text': obj.text, 'embedding': obj.embedding}}
 
             return super().default(obj)
 
@@ -253,6 +278,8 @@ class Host:
             type_name = obj['__type__']
             if type_name == 'set':
                 return set(obj['value'])
+            if type_name == 'Index':
+                return Index(**obj['value'])
         return obj
 
     def write_mock_data(self) -> None:

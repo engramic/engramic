@@ -1,0 +1,34 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main  # Only deploy docs from main
+  workflow_dispatch:  # Allow manual deploys if needed
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Hatch
+        run: pip install --user hatch
+
+      - name: Add Hatch to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Create docs environment
+        run: hatch env create docs
+
+      - name: Deploy versioned docs
+        run: |
+          hatch run docs:deploy-docs
+          hatch run docs:set-default-docs

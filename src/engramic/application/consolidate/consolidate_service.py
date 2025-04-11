@@ -93,6 +93,9 @@ class ConsolidateService(Service):
         super().stop()
 
     def on_observation_complete(self, observation_dict: dict[str, Any]) -> None:
+        if __debug__:
+            self.host.update_mock_data_input(self, observation_dict)
+
         # should run a task for this.
         observation = self.observation_repository.load_dict(observation_dict)
         self.metrics_tracker.increment(ConsolidateMetric.OBSERVATIONS_RECIEVED)
@@ -252,6 +255,9 @@ class ConsolidateService(Service):
 
         # We can optionally notify about newly attached indices
         self.send_message_async(Service.Topic.INDEX_COMPLETE, {'index': serialized_index_array, 'engram_id': engram_id})
+
+        if __debug__:
+            self.host.update_mock_data_output(self, {'index': serialized_index_array, 'engram_id': engram_id})
 
         # Return the ID so we know which engram was updated
         return engram_id

@@ -394,4 +394,7 @@ class Ask(Retrieval):
             'retrieve_response': asdict(retrieve_result),
         }
 
+        if __debug__:
+            self.service.host.update_mock_data_output(self.service, retrieve_response)
+
         self.service.send_message_async(Service.Topic.RETRIEVE_COMPLETE, retrieve_response)
