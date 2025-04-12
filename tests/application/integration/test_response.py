@@ -1,6 +1,8 @@
 import logging
 import sys
 
+import pytest
+
 from engramic.application.message.message_service import MessageService
 from engramic.application.response.response_service import ResponseService
 from engramic.core.host import Host
@@ -12,21 +14,16 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 class MiniService(Service):
-    def start(self):
-        return super().start()
+    def start(self) -> None:
+        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_response_complete)
+        self.run_task(self.send_message())
 
-    def init_async(self):
-        super().init_async()
-        retrieve_response = self.host.mock_data_collector['RetrieveService-output']
-
+    async def send_message(self) -> None:
+        retrieve_response = self.host.mock_data_collector['RetrieveService-0-output']
         self.send_message_async(Service.Topic.RETRIEVE_COMPLETE, retrieve_response)
 
-
-def test_response_service_submission() -> None:
-    host = Host('mock', [MessageService, ResponseService, MiniService])
-
-    def callback_test(generated_response) -> None:
-        expected_results = host.mock_data_collector['ResponseService-output']
+    def on_response_complete(self, generated_response) -> None:
+        expected_results = self.host.mock_data_collector['ResponseService-0-output']
         del generated_response['id']
         del expected_results['id']
         del generated_response['response_time']
@@ -34,9 +31,11 @@ def test_response_service_submission() -> None:
         del generated_response['model']
         del expected_results['model']
         assert str(generated_response) == str(expected_results)
-        host.trigger_shutdown()
+        self.host.trigger_shutdown()
 
-    response_service = host.get_service(ResponseService)
-    response_service.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, callback_test)
 
-    host.wait_for_shutdown(10)
+@pytest.mark.timeout(10)  # seconds
+def test_response_service_submission() -> None:
+    host = Host('mock', [MessageService, ResponseService, MiniService])
+
+    host.wait_for_shutdown()

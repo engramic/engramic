@@ -119,7 +119,7 @@ class CodifyService(Service):
             response_dict['id'], response_dict['response'], retrieve_result, prompt_str, analysis, model
         )
         self.metrics_tracker.increment(CodifyMetric.RESPONSE_RECIEVED)
-        fetch_engram_step = self.run_task(self.fetch_engrams(response))
+        fetch_engram_step = self.run_task(self._fetch_engrams(response))
         fetch_engram_step.add_done_callback(self.on_fetch_engram_complete)
 
     """
@@ -128,7 +128,7 @@ class CodifyService(Service):
     Fetch engrams based on retrieved results.
     """
 
-    async def fetch_engrams(self, response: Response) -> dict[str, Any]:
+    async def _fetch_engrams(self, response: Response) -> dict[str, Any]:
         engram_array: list[Engram] = await asyncio.to_thread(
             self.engram_repository.load_batch_retrieve_result, response.retrieve_result
         )
@@ -144,10 +144,10 @@ class CodifyService(Service):
 
     def on_fetch_engram_complete(self, fut: Future[Any]) -> None:
         ret = fut.result()
-        fetch_meta_step = self.run_task(self.fetch_meta(ret['engram_array'], ret['meta_array'], ret['response']))
+        fetch_meta_step = self.run_task(self._fetch_meta(ret['engram_array'], ret['meta_array'], ret['response']))
         fetch_meta_step.add_done_callback(self.on_fetch_meta_complete)
 
-    async def fetch_meta(
+    async def _fetch_meta(
         self, engram_array: list[Engram], meta_id_array: list[str], response: Response
     ) -> dict[str, Any]:
         meta_array: list[Meta] = await asyncio.to_thread(self.meta_repository.load_batch, meta_id_array)
@@ -156,7 +156,7 @@ class CodifyService(Service):
 
     def on_fetch_meta_complete(self, fut: Future[Any]) -> None:
         ret = fut.result()
-        fetch_meta_step = self.run_task(self.validate(ret['engram_array'], ret['meta_array'], ret['response']))
+        fetch_meta_step = self.run_task(self._validate(ret['engram_array'], ret['meta_array'], ret['response']))
         fetch_meta_step.add_done_callback(self.on_validate_complete)
 
     """
@@ -165,7 +165,7 @@ class CodifyService(Service):
     Validates and extracts engrams (i.e. memories) from responses.
     """
 
-    async def validate(self, engram_array: list[Engram], meta_array: list[Meta], response: Response) -> dict[str, Any]:
+    async def _validate(self, engram_array: list[Engram], meta_array: list[Meta], response: Response) -> dict[str, Any]:
         # insert prompt engineering
 
         del meta_array
@@ -220,6 +220,7 @@ class CodifyService(Service):
                 CodifyService.RELEVANCY_CONSTANT,
                 self.engram_repository,
             )
+
             return {'return_observation': return_observation_merged}
 
         self.metrics_tracker.increment(CodifyMetric.ENGRAM_VALIDATED)

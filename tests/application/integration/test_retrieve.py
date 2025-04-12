@@ -1,23 +1,30 @@
 import logging
 import sys
 
+import pytest
+
 from engramic.application.message.message_service import MessageService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
+from engramic.infrastructure.system.service import Service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('Using Python interpreter:%s', sys.executable)
 
 
-def test_retrieve_service_submission() -> None:
-    host = Host('mock', [MessageService, RetrieveService])
+class MiniService(Service):
+    def start(self) -> None:
+        self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
+        self.run_task(self.send_message())
 
-    prompt = Prompt(**host.mock_data_collector['RetrieveService-input'])
+    async def send_message(self) -> None:
+        prompt = Prompt(**self.host.mock_data_collector['RetrieveService-input'])
+        self.send_message_async(Service.Topic.SUBMIT_PROMPT, prompt.prompt_str)
 
-    def callback_test(generated_results) -> None:
-        expected_results = host.mock_data_collector['RetrieveService-output']
+    def on_retrieve_complete(self, generated_results) -> None:
+        expected_results = self.host.mock_data_collector['RetrieveService-0-output']
 
         assert str(generated_results['analysis']) == str(expected_results['analysis'])
         assert str(generated_results['prompt_str']) == str(expected_results['prompt_str'])
@@ -28,10 +35,11 @@ def test_retrieve_service_submission() -> None:
 
         assert str(generated_results['retrieve_response']) == str(expected_results['retrieve_response'])
 
-        host.trigger_shutdown()
+        self.host.trigger_shutdown()
 
-    retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.subscribe(RetrieveService.Topic.RETRIEVE_COMPLETE, callback_test)
-    retrieve_service.submit(prompt)
 
-    host.wait_for_shutdown(10)
+@pytest.mark.timeout(10)  # seconds
+def test_retrieve_service_submission() -> None:
+    host = Host('mock', [MessageService, RetrieveService, MiniService])
+
+    host.wait_for_shutdown()

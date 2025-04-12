@@ -10,7 +10,6 @@ import logging
 import os
 import queue
 import threading
-import time
 from threading import Thread
 from typing import TYPE_CHECKING, Any
 
@@ -111,6 +110,8 @@ class Host:
 
         # Ensure exceptions are logged
         def handle_future_exception(f: Future[None]) -> None:
+            if f.cancelled():
+                return
             exc = f.exception()  # Fetch exception, if any
             if exc:
                 logging.exception('Unhandled exception in run_task(): FUNCTION: %s, ERROR: %s', {coro.__name__}, {exc})
@@ -192,26 +193,40 @@ class Host:
         for service in self.services:
             self.services[service].stop()
 
-        self.loop.call_soon_threadsafe(self.loop.stop)
-        self.thread.join()
-
         if not self.exception_queue.empty():
             exc = self.exception_queue.get().exception()
             error = f'Background thread failed: {exc}'
             raise RuntimeError(error) from None
 
+        asyncio.run_coroutine_threadsafe(self._shutdown_async(), self.loop)
+
+    async def _shutdown_async(self) -> None:
+        all_tasks = asyncio.all_tasks(loop=self.loop)
+        current_task = asyncio.current_task(loop=self.loop)
+
+        # Avoid cancelling the shutdown task itself
+        tasks_to_cancel = [t for t in all_tasks if t is not current_task and not t.done()]
+
+        logging.debug('Shutting down %s tasks', len(tasks_to_cancel))
+
+        for task in tasks_to_cancel:
+            task.cancel()
+
+        await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
+        self.loop.stop()
+
     def wait_for_shutdown(self, timeout: float | None = None) -> None:
         try:
             if not self.shutdown_message_recieved:
                 self.stop_event.wait(timeout)
-            time.sleep(1)
             self.shutdown()
 
         except KeyboardInterrupt:
             self.shutdown()
             logging.info('\nShutdown requested. Exiting gracefully...')
         finally:
-            logging.info('Cleaning up.')
+            self.thread.join()
+            self.loop.close()
 
     def _get_coro_name(self, coro: Awaitable[None]) -> str:
         """Extracts the coroutine function name if possible, otherwise generates a fallback name."""
@@ -238,10 +253,10 @@ class Host:
 
             self.mock_data_collector[concat] = value
 
-    def update_mock_data_output(self, service: Service, value: dict[str, Any]) -> None:
+    def update_mock_data_output(self, service: Service, value: dict[str, Any], index: int = 0) -> None:
         if self.generate_mock_data:
             service_name = service.__class__.__name__
-            concat = f'{service_name}-output'
+            concat = f'{service_name}-{index}-output'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'

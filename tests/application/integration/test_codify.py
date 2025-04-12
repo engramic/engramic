@@ -1,6 +1,8 @@
 import logging
 import sys
 
+import pytest
+
 from engramic.application.codify.codify_service import CodifyService
 from engramic.application.message.message_service import MessageService
 from engramic.core.host import Host
@@ -12,21 +14,17 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 
 class MiniService(Service):
-    def start(self):
-        return super().start()
+    def start(self) -> None:
+        self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
+        self.run_task(self.send_messages())
 
-    def init_async(self):
-        super().init_async()
-        main_propmpt_response = self.host.mock_data_collector['ResponseService-output']
+    async def send_messages(self) -> None:
+        main_propmpt_response = self.host.mock_data_collector['ResponseService-0-output']
         self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
         self.send_message_async(Service.Topic.MAIN_PROMPT_COMPLETE, main_propmpt_response)
 
-
-def test_response_service_submission() -> None:
-    host = Host('mock', [MessageService, CodifyService, MiniService])
-
-    def callback_test(generated_response) -> None:
-        expected_results = host.mock_data_collector['CodifyService-output']
+    def on_observation_complete(self, generated_response) -> None:
+        expected_results = self.host.mock_data_collector['CodifyService-0-output']
 
         for d in [generated_response, expected_results]:
             d.pop('id', None)
@@ -47,9 +45,11 @@ def test_response_service_submission() -> None:
         assert str(generated_response['meta']) == str(expected_results['meta'])
         assert str(generated_response['engram_list']) == str(expected_results['engram_list'])
 
-        host.trigger_shutdown()
+        self.host.trigger_shutdown()
 
-    codify_service = host.get_service(CodifyService)
-    codify_service.subscribe(Service.Topic.OBSERVATION_COMPLETE, callback_test)
 
-    host.wait_for_shutdown(10)
+@pytest.mark.timeout(10)  # seconds
+def test_codify_service_submission() -> None:
+    host = Host('mock', [MessageService, CodifyService, MiniService])
+
+    host.wait_for_shutdown()

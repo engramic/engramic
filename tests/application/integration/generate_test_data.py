@@ -15,7 +15,7 @@ from engramic.core.host import Host
 from engramic.core.prompt import Prompt
 from engramic.infrastructure.system import Service
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 # This service is built only to subscribe to the main prompt completion message.
@@ -49,7 +49,9 @@ def main() -> None:
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.'))
+    retrieve_service.submit(
+        Prompt('Write me two unrelated sentences. Write one about the All In Podcast and another on Silicon Valley.')
+    )
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

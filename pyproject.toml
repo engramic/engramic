@@ -52,7 +52,7 @@ dependencies = ["pytest","pytest-asyncio","mypy","types-cachetools"]
 typecheck = "mypy --strict --ignore-missing-imports -p engramic"
 
 [tool.hatch.envs.hatch-test]
-extra-dependencies = ["engramic","pytest-asyncio"]
+extra-dependencies = ["engramic","pytest-asyncio","pytest-timeout"]
 
 [tool.hatch.envs.docs]
 template = "default"
