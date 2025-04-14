@@ -1,0 +1,1533 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../codify_service/">
+      
+      
+        <link rel="next" href="../storage_service/">
+      
+      
+      <link rel="icon" href="../../assets/logo_100.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+    
+    
+      
+        <title>Consolidate Service - Engramic Reference</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4af4bdda.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Raleway";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#engramic.application.consolidate.consolidate_service.ConsolidateService" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Engramic Reference" class="md-header__button md-logo" aria-label="Engramic Reference" data-md-component="logo">
+      
+  <img src="../../assets/logo_100.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Engramic Reference
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Consolidate Service
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Engramic Reference" class="md-nav__button md-logo" aria-label="Engramic Reference" data-md-component="logo">
+      
+  <img src="../../assets/logo_100.png" alt="logo">
+
+    </a>
+    Engramic Reference
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../host_and_services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Host & Services
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../profiles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Profiles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how_to/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    How To's
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../emgram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Engram
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Retrieve Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../retrieve_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ask/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ask
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../response_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Response Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../codify_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Codify Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Consolidate Service
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Consolidate Service
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#engramic.application.consolidate.consolidate_service.ConsolidateService" class="md-nav__link">
+    <span class="md-ellipsis">
+      ConsolidateService
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../storage_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Storage Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../message_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Message Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#engramic.application.consolidate.consolidate_service.ConsolidateService" class="md-nav__link">
+    <span class="md-ellipsis">
+      ConsolidateService
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Consolidate Service</h1>
+
+<div class="doc doc-object doc-class">
+
+
+
+<a id="engramic.application.consolidate.consolidate_service.ConsolidateService"></a>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="engramic.infrastructure.system.service.Service">Service</span></code></p>
+
+
+        <p>The ConsolidateService orchestrates the post-processing pipeline for completed observations,
+coordinating summarization, engram generation, index generation, and embedding creation.</p>
+<p>This service is triggered when an observation is marked complete and is responsible for the following:</p>
+<ol>
+<li><strong>Summarization</strong> - Generates a natural language summary from the observation using an LLM plugin.</li>
+<li><strong>Embedding Summaries</strong> - Uses an embedding plugin to create vector embeddings of the summary text.</li>
+<li><strong>Engram Generation</strong> - Extracts or constructs engrams from the observation's content.</li>
+<li><strong>Index Generation</strong> - Applies an LLM to generate meaningful textual indices for each engram.</li>
+<li><strong>Embedding Indices</strong> - Uses an embedding plugin to convert each index into a vector representation.</li>
+<li><strong>Publishing Results</strong> - Emits messages like <code>ENGRAM_COMPLETE</code>, <code>META_COMPLETE</code>, and <code>INDEX_COMPLETE</code> at various stages to notify downstream systems.</li>
+</ol>
+<p>Metrics are tracked throughout the pipeline using a <code>MetricsTracker</code> and returned on demand via the
+<code>on_acknowledge</code> method.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.plugin_manager">plugin_manager</span></code></td>
+            <td>
+                  <code><span title="engramic.infrastructure.system.plugin_manager.PluginManager">PluginManager</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Manages access to all system plugins.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.llm_summary">llm_summary</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Plugin used for generating summaries.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.llm_gen_indices">llm_gen_indices</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Plugin used for generating indices from engrams.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.embedding_gen_embed">embedding_gen_embed</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Plugin used for generating embeddings for summaries and indices.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.db_document">db_document</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Plugin for document-level database access.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.observation_repository">observation_repository</span></code></td>
+            <td>
+                  <code><span title="engramic.infrastructure.repository.observation_repository.ObservationRepository">ObservationRepository</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Handles deserialization of incoming observations.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.engram_builder">engram_builder</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <a class="autorefs autorefs-internal" title="engramic.core.Engram" href="../emgram/#engramic.core.Engram">Engram</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>In-memory store of engrams awaiting completion.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.index_builder">index_builder</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="engramic.core.Index">Index</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>In-memory store of indices being constructed.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.metrics_tracker">metrics_tracker</span></code></td>
+            <td>
+                  <code><span title="engramic.core.metrics_tracker.MetricsTracker">MetricsTracker</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Tracks metrics across each processing stage.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.start">start</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Subscribes the service to message topics.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.stop">stop</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Stops the service and clears subscriptions.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.on_observation_complete">on_observation_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Handles post-processing when an observation completes.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.generate_summary">generate_summary</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Creates a summary of the observation content.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.on_summary">on_summary</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Callback after summary generation completes.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.generate_summary_embeddings">generate_summary_embeddings</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Generates and attaches embeddings for a summary.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.generate_engrams">generate_engrams</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Constructs engrams from observation data.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.on_engrams">on_engrams</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Callback after engram generation; handles index and embedding creation.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.gen_indices">gen_indices</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Uses an LLM to create indices from an engram.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.gen_embeddings">gen_embeddings</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Creates embeddings for generated indices.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.consolidate.consolidate_service.ConsolidateService.on_acknowledge">on_acknowledge</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Sends a metrics snapshot for observability/debugging.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/engramic/application/consolidate/consolidate_service.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConsolidateService</span><span class="p">(</span><span class="n">Service</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The ConsolidateService orchestrates the post-processing pipeline for completed observations,</span>
+<span class="sd">    coordinating summarization, engram generation, index generation, and embedding creation.</span>
+
+<span class="sd">    This service is triggered when an observation is marked complete and is responsible for the following:</span>
+
+<span class="sd">    1. **Summarization** - Generates a natural language summary from the observation using an LLM plugin.</span>
+<span class="sd">    2. **Embedding Summaries** - Uses an embedding plugin to create vector embeddings of the summary text.</span>
+<span class="sd">    3. **Engram Generation** - Extracts or constructs engrams from the observation&#39;s content.</span>
+<span class="sd">    4. **Index Generation** - Applies an LLM to generate meaningful textual indices for each engram.</span>
+<span class="sd">    5. **Embedding Indices** - Uses an embedding plugin to convert each index into a vector representation.</span>
+<span class="sd">    6. **Publishing Results** - Emits messages like `ENGRAM_COMPLETE`, `META_COMPLETE`, and `INDEX_COMPLETE` at various stages to notify downstream systems.</span>
+
+<span class="sd">    Metrics are tracked throughout the pipeline using a `MetricsTracker` and returned on demand via the</span>
+<span class="sd">    `on_acknowledge` method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        plugin_manager (PluginManager): Manages access to all system plugins.</span>
+<span class="sd">        llm_summary (dict): Plugin used for generating summaries.</span>
+<span class="sd">        llm_gen_indices (dict): Plugin used for generating indices from engrams.</span>
+<span class="sd">        embedding_gen_embed (dict): Plugin used for generating embeddings for summaries and indices.</span>
+<span class="sd">        db_document (dict): Plugin for document-level database access.</span>
+<span class="sd">        observation_repository (ObservationRepository): Handles deserialization of incoming observations.</span>
+<span class="sd">        engram_builder (dict[str, Engram]): In-memory store of engrams awaiting completion.</span>
+<span class="sd">        index_builder (dict[str, Index]): In-memory store of indices being constructed.</span>
+<span class="sd">        metrics_tracker (MetricsTracker): Tracks metrics across each processing stage.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        start(): Subscribes the service to message topics.</span>
+<span class="sd">        stop(): Stops the service and clears subscriptions.</span>
+<span class="sd">        on_observation_complete(observation_dict): Handles post-processing when an observation completes.</span>
+<span class="sd">        generate_summary(observation): Creates a summary of the observation content.</span>
+<span class="sd">        on_summary(summary_fut): Callback after summary generation completes.</span>
+<span class="sd">        generate_summary_embeddings(meta): Generates and attaches embeddings for a summary.</span>
+<span class="sd">        generate_engrams(observation): Constructs engrams from observation data.</span>
+<span class="sd">        on_engrams(engram_list_fut): Callback after engram generation; handles index and embedding creation.</span>
+<span class="sd">        gen_indices(index, id_in, engram): Uses an LLM to create indices from an engram.</span>
+<span class="sd">        gen_embeddings(id_and_index_dict, process_index): Creates embeddings for generated indices.</span>
+<span class="sd">        on_acknowledge(message_in): Sends a metrics snapshot for observability/debugging.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">:</span> <span class="n">Host</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="p">:</span> <span class="n">PluginManager</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">plugin_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">llm_summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;llm&#39;</span><span class="p">,</span> <span class="s1">&#39;summary&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">llm_gen_indices</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;llm&#39;</span><span class="p">,</span> <span class="s1">&#39;gen_indices&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_gen_embed</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;embedding&#39;</span><span class="p">,</span> <span class="s1">&#39;gen_embed&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_document</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;document&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_repository</span> <span class="o">=</span> <span class="n">ObservationRepository</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_document</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engram_builder</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Engram</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_builder</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="p">:</span> <span class="n">MetricsTracker</span><span class="p">[</span><span class="n">ConsolidateMetric</span><span class="p">]</span> <span class="o">=</span> <span class="n">MetricsTracker</span><span class="p">[</span><span class="n">ConsolidateMetric</span><span class="p">]()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">OBSERVATION_COMPLETE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_observation_complete</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">ACKNOWLEDGE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_acknowledge</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_observation_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_dict</span><span class="p">)</span>
+
+        <span class="c1"># should run a task for this.</span>
+        <span class="n">observation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_repository</span><span class="o">.</span><span class="n">load_dict</span><span class="p">(</span><span class="n">observation_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">ConsolidateMetric</span><span class="o">.</span><span class="n">OBSERVATIONS_RECIEVED</span><span class="p">)</span>
+
+        <span class="n">summary_observation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_summary</span><span class="p">(</span><span class="n">observation</span><span class="p">))</span>
+        <span class="n">summary_observation</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_summary</span><span class="p">)</span>
+
+        <span class="n">generate_engrams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_engrams</span><span class="p">(</span><span class="n">observation</span><span class="p">))</span>
+        <span class="n">generate_engrams</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_engrams</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### Summarize</span>
+
+<span class="sd">    Will be used in the future when we pull in data from other sources.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Meta</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">observation</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">summary_full</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">observation</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">summary_full</span><span class="o">.</span><span class="n">text</span>
+        <span class="p">):</span>  <span class="c1"># native LLM observations have a summary already.</span>
+            <span class="n">not_test</span> <span class="o">=</span> <span class="s1">&#39;not tested yet&#39;</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">not_test</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">ConsolidateMetric</span><span class="o">.</span><span class="n">SUMMARIES_GENERATED</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">observation</span><span class="o">.</span><span class="n">meta</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">summary_fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">summary_fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_summary_embeddings</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_summary_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">Meta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">summary_full</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Summary full is none.&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_gen_embed</span>
+        <span class="n">embedding_list_ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">gen_embed</span><span class="p">,</span> <span class="n">strings</span><span class="o">=</span><span class="p">[</span><span class="n">meta</span><span class="o">.</span><span class="n">summary_full</span><span class="o">.</span><span class="n">text</span><span class="p">],</span> <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">embedding_list_ret</span><span class="p">)</span>
+
+        <span class="n">embedding_list</span> <span class="o">=</span> <span class="n">embedding_list_ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;embeddings_list&#39;</span><span class="p">]</span>
+        <span class="n">meta</span><span class="o">.</span><span class="n">summary_full</span><span class="o">.</span><span class="n">embedding</span> <span class="o">=</span> <span class="n">embedding_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">META_COMPLETE</span><span class="p">,</span> <span class="n">asdict</span><span class="p">(</span><span class="n">meta</span><span class="p">))</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### Generate Engrams</span>
+
+<span class="sd">    Create engrams from the observation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_engrams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Engram</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">ConsolidateMetric</span><span class="o">.</span><span class="n">ENGRAMS_GENERATED</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">observation</span><span class="o">.</span><span class="n">engram_list</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">observation</span><span class="o">.</span><span class="n">engram_list</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_engrams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engram_list_fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">engram_list</span> <span class="o">=</span> <span class="n">engram_list_fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+        <span class="c1"># Keep references so we can fill them in later</span>
+        <span class="k">for</span> <span class="n">engram</span> <span class="ow">in</span> <span class="n">engram_list</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Engram Ready: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">engram</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">engram_builder</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">engram</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">engram_builder</span><span class="p">[</span><span class="n">engram</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">engram</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Engram ID Collision. During conslidation, two Engrams with the same IDs were detected.&#39;</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="c1"># 1) Generate indices for each engram</span>
+        <span class="n">index_tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_gen_indices</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">engram</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">engram</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">engram</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">engram_list</span><span class="p">)]</span>
+
+        <span class="n">indices_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_tasks</span><span class="p">(</span><span class="n">index_tasks</span><span class="p">)</span>
+
+        <span class="c1"># Once all indices are generated, generate embeddings</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">on_indices_done</span><span class="p">(</span><span class="n">indices_list_fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># This is the accumulated result of each gen_indices(...) call</span>
+            <span class="n">indices_list</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">indices_list_fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+            <span class="c1"># indices_list should have a key like &#39;gen_indices&#39; -&gt; list[dict[str, Any]]</span>
+            <span class="n">index_sets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">indices_list</span><span class="p">[</span><span class="s1">&#39;_gen_indices&#39;</span><span class="p">]</span>
+
+            <span class="c1"># 2) Generate embeddings for each index set</span>
+            <span class="n">embed_tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_gen_embeddings</span><span class="p">(</span><span class="n">index_set</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">index_set</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_sets</span><span class="p">)]</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;index_sets </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_sets</span><span class="p">))</span>
+            <span class="n">embed_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_tasks</span><span class="p">(</span><span class="n">embed_tasks</span><span class="p">)</span>
+
+            <span class="c1"># Once embeddings are generated, then we&#39;re truly done</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">on_embeddings_done</span><span class="p">(</span><span class="n">embed_fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">embed_fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>  <span class="c1"># ret should have &#39;gen_embeddings&#39; -&gt; list of engram IDs</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;_gen_embeddings&#39;</span><span class="p">]</span>  <span class="c1"># which IDs got their embeddings updated</span>
+
+                <span class="c1"># 3) Now that embeddings exist, we can send &quot;ENGRAM_COMPLETE&quot; for each</span>
+                <span class="n">engram_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Done: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span>
+                    <span class="n">engram_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engram_builder</span><span class="p">[</span><span class="n">eid</span><span class="p">]))</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">ENGRAM_COMPLETE</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;engram_array&#39;</span><span class="p">:</span> <span class="n">engram_dict</span><span class="p">})</span>
+
+                <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;engram_array&#39;</span><span class="p">:</span> <span class="n">engram_dict</span><span class="p">})</span>
+
+                <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Deleting: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">eid</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">engram_builder</span><span class="p">[</span><span class="n">eid</span><span class="p">]</span>
+
+            <span class="n">embed_future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="n">on_embeddings_done</span><span class="p">)</span>
+
+        <span class="n">indices_future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="n">on_indices_done</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_gen_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">id_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">engram</span><span class="p">:</span> <span class="n">Engram</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">data_input</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;engram&#39;</span><span class="p">:</span> <span class="n">engram</span><span class="p">}</span>
+
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">PromptGenIndices</span><span class="p">(</span><span class="n">prompt_str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">input_data</span><span class="o">=</span><span class="n">data_input</span><span class="p">)</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm_gen_indices</span>
+
+        <span class="n">response_schema</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;index_text_array&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]}</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">submit</span><span class="p">,</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">structured_schema</span><span class="o">=</span><span class="n">response_schema</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">index</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">ConsolidateMetric</span><span class="o">.</span><span class="n">INDICES_GENERATED</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+
+        <span class="n">response_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;llm_response&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">id_in</span><span class="p">,</span> <span class="s1">&#39;indices&#39;</span><span class="p">:</span> <span class="n">response_json</span><span class="p">[</span><span class="s1">&#39;index_text_array&#39;</span><span class="p">]}</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_gen_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_and_index_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">process_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;gen_embeddings: indices in </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">id_and_index_dict</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]))</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">id_and_index_dict</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span>
+        <span class="n">engram_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">id_and_index_dict</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_gen_embed</span>
+        <span class="n">embedding_list_ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">gen_embed</span><span class="p">,</span> <span class="n">strings</span><span class="o">=</span><span class="n">indices</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">process_index</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">embedding_list_ret</span><span class="p">,</span> <span class="n">process_index</span><span class="p">)</span>
+
+        <span class="n">embedding_list</span> <span class="o">=</span> <span class="n">embedding_list_ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;embeddings_list&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">ConsolidateMetric</span><span class="o">.</span><span class="n">EMBEDDINGS_GENERATED</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">embedding_list</span><span class="p">))</span>
+
+        <span class="c1"># Convert raw embeddings to Index objects and attach them</span>
+        <span class="n">index_array</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">vec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">embedding_list</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">Index</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">vec</span><span class="p">)</span>
+            <span class="n">index_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">engram_builder</span><span class="p">[</span><span class="n">engram_id</span><span class="p">]</span><span class="o">.</span><span class="n">indices</span> <span class="o">=</span> <span class="n">index_array</span>
+        <span class="n">serialized_index_array</span> <span class="o">=</span> <span class="p">[</span><span class="n">asdict</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">index_array</span><span class="p">]</span>
+
+        <span class="c1"># We can optionally notify about newly attached indices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">INDEX_COMPLETE</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">serialized_index_array</span><span class="p">,</span> <span class="s1">&#39;engram_id&#39;</span><span class="p">:</span> <span class="n">engram_id</span><span class="p">})</span>
+
+        <span class="c1"># Return the ID so we know which engram was updated</span>
+        <span class="k">return</span> <span class="n">engram_id</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### Acknowledge</span>
+
+<span class="sd">    Acknowledge and return metrics</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_acknowledge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">message_in</span>
+
+        <span class="n">metrics_packet</span><span class="p">:</span> <span class="n">MetricPacket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">get_and_reset_packet</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span>
+            <span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">STATUS</span><span class="p">,</span>
+            <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="n">metrics_packet</span><span class="p">},</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": 0.0, "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
