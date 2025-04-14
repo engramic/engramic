@@ -45,6 +45,10 @@ jobs:
             echo "::warning::No deploy token provided. Push may fail on protected branches or forks."
           fi
 
+      - name: Fetch gh-pages branch
+        run: |
+          git fetch origin gh-pages:gh-pages || echo "No gh-pages branch yet"
+          
       - name: Deploy versioned docs with mike
         run: |
           hatch run docs:deploy-docs
