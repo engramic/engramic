@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 
 
-
 jobs:
   build:
 
@@ -37,6 +36,19 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Set git remote with token (if available)
+        run: |
+          if [ -n "${{ secrets.GH_PAGES_DEPLOY_TOKEN }}" ]; then
+            echo "Using GH_PAGES_DEPLOY_TOKEN for authentication..."
+            git remote set-url origin https://${{ secrets.GH_PAGES_DEPLOY_TOKEN }}@github.com/${{ github.repository }}.git
+          else
+            echo "::warning::No deploy token provided. Push may fail on protected branches or forks."
+          fi
+
+      - name: Fetch gh-pages branch
+        run: |
+          git fetch origin gh-pages:gh-pages || echo "No gh-pages branch yet"
+          
       - name: Deploy versioned docs with mike
         run: |
           hatch run docs:deploy-docs
