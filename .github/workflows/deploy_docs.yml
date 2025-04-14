@@ -7,15 +7,8 @@ on:
       - feature/docs_and_tests
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-  
+
 jobs:
   build:
     environment:
@@ -46,18 +39,18 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages --depth=1
+          git worktree add site gh-pages
 
-      - name: Build versioned docs
+      - name: Deploy versioned docs with mike
         run: |
           hatch run docs:deploy-docs
           hatch run docs:set-default-docs
 
-      - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site/
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Commit and push to gh-pages
+        working-directory: site
+        run: |
+          git add .
+          git commit -m "Deploy docs for version $(hatch version | cut -d. -f1,2)" || echo "No changes to commit"
+          git push origin gh-pages
   

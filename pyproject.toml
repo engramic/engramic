@@ -67,8 +67,8 @@ dependencies = [
 [tool.hatch.envs.docs.scripts]
 build = "mkdocs build"
 serve = "mkdocs serve -a 0.0.0.0:8000"
-deploy-docs = "mike deploy $(hatch version | cut -d. -f1,2)"
-set-default-docs = "mike set-default $(hatch version | cut -d. -f1,2)"
+deploy-docs = "hatch version | cut -d. -f1,2 | xargs mike deploy --push"
+set-default-docs = "hatch version | cut -d. -f1,2 | xargs mike set-default --push"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.9", "3.10","3.11","3.12","3.13"]
