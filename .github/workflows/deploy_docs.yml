@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Only deploy docs from main
+      - feature/docs_and_tests
   workflow_dispatch:  # Allow manual deploys if needed
 
 jobs:
