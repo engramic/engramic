@@ -8,7 +8,7 @@ on:
   workflow_dispatch:  # Allow manual deploys if needed
 
 jobs:
-  deploy-docs:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,3 +38,23 @@ jobs:
         run: |
           hatch run docs:deploy-docs
           hatch run docs:set-default-docs
+
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: site/
+  
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-pages-artifact@v2
+        
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
