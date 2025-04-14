@@ -11,9 +11,6 @@ on:
 
 jobs:
   build:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
 
@@ -44,11 +41,4 @@ jobs:
         run: |
           hatch run docs:deploy-docs
           hatch run docs:set-default-docs
-
-      - name: Commit and push to gh-pages
-        working-directory: site
-        run: |
-          git add .
-          git commit -m "Deploy docs for version $(hatch version | cut -d. -f1,2)" || echo "No changes to commit"
-          git push origin gh-pages
   
