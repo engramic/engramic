@@ -29,6 +29,11 @@ jobs:
       - name: Create docs environment
         run: hatch env create docs
 
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Deploy versioned docs
         run: |
           hatch run docs:deploy-docs
