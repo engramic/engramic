@@ -83,8 +83,9 @@ class StorageService(Service):
         return super().init_async()
 
     def on_engram_complete(self, engram_dict: dict[str, Any]) -> None:
-        engram = self.engram_repository.load_dict(engram_dict)
-        self.run_task(self.save_engram(engram))
+        engram_batch = self.engram_repository.load_batch_dict(engram_dict['engram_array'])
+        for engram in engram_batch:
+            self.run_task(self.save_engram(engram))
 
     def on_observation_complete(self, response: Observation) -> None:
         self.run_task(self.save_observation(response))

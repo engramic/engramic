@@ -1,40 +1,45 @@
-import json
 import logging
 import sys
 
-from engramic.application.codify.codify_service import CodifyService
-from engramic.application.consolidate.consolidate_service import ConsolidateService
+import pytest
+
 from engramic.application.message.message_service import MessageService
-from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
-from engramic.application.storage.storage_service import StorageService
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
+from engramic.infrastructure.system.service import Service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('Using Python interpreter:%s', sys.executable)
 
 
+class MiniService(Service):
+    def start(self) -> None:
+        self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
+        self.run_task(self.send_message())
+
+    async def send_message(self) -> None:
+        prompt = Prompt(**self.host.mock_data_collector['RetrieveService-input'])
+        self.send_message_async(Service.Topic.SUBMIT_PROMPT, prompt.prompt_str)
+
+    def on_retrieve_complete(self, generated_results) -> None:
+        expected_results = self.host.mock_data_collector['RetrieveService-0-output']
+
+        assert str(generated_results['analysis']) == str(expected_results['analysis'])
+        assert str(generated_results['prompt_str']) == str(expected_results['prompt_str'])
+
+        # delete the ask ids since they are auto generated and won't match.
+        del generated_results['retrieve_response']['ask_id']
+        del expected_results['retrieve_response']['ask_id']
+
+        assert str(generated_results['retrieve_response']) == str(expected_results['retrieve_response'])
+
+        self.host.trigger_shutdown()
+
+
+@pytest.mark.timeout(10)  # seconds
 def test_retrieve_service_submission() -> None:
-    host = Host(
-        'mock', [MessageService, RetrieveService, ResponseService, StorageService, CodifyService, ConsolidateService]
-    )
+    host = Host('mock', [MessageService, RetrieveService, MiniService])
 
-    prompt = Prompt('Tell me about the All In podcast.')
-
-    def callback_test(data) -> None:
-        indices_mock = json.loads(host.mock_data_collector['_generate_indices-retrieve_gen_index-0']['llm_response'])
-        indices_response = data['analysis']['indices']
-        assert indices_mock == indices_response
-
-        retrieve_mock: list[str] = list(host.mock_data_collector['_query_index_db-db-0']['query_set'])
-        retreive_response = data['retrieve_response']['engram_id_array']
-        assert retrieve_mock == retreive_response
-        host.trigger_shutdown()
-
-    retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.subscribe(RetrieveService.Topic.RETRIEVE_COMPLETE, callback_test)
-    retrieve_service.submit(prompt)
-
-    host.wait_for_shutdown(10)
+    host.wait_for_shutdown()

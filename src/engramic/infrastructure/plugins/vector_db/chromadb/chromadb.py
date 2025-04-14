@@ -4,7 +4,6 @@
 import os
 import uuid
 from collections.abc import Sequence
-from multiprocessing import Lock
 from typing import Any, cast
 
 import chromadb
@@ -20,8 +19,6 @@ class ChromaDB(VectorDB):
     DEFAULT_N_RESULTS = 2
 
     def __init__(self) -> None:
-        self.multi_process_lock = Lock()
-
         db_path = os.path.join('local_storage', 'chroma_db')
 
         local_storage_root_path = os.getenv('LOCAL_STORAGE_ROOT_PATH')
@@ -33,7 +30,9 @@ class ChromaDB(VectorDB):
             path='local_storage/chroma_db', settings=Settings(anonymized_telemetry=False)
         )
         self.collection = {}
-        metadata = {'hnsw:space': 'cosine'}
+        metadata = {
+            'hnsw:space': 'cosine',
+        }
 
         self.collection['main'] = self.client.get_or_create_collection(name='main', metadata=metadata)
         self.collection['meta'] = self.client.get_or_create_collection(name='meta', metadata=metadata)
@@ -50,8 +49,7 @@ class ChromaDB(VectorDB):
         if args.get('threshold') is not None:
             n_results = args['n_results']
 
-        with self.multi_process_lock:
-            results = self.collection[collection_name].query(query_embeddings=embeddings_typed, n_results=n_results)
+        results = self.collection[collection_name].query(query_embeddings=embeddings_typed, n_results=n_results)
 
         ret_ids = []
 
@@ -70,6 +68,7 @@ class ChromaDB(VectorDB):
 
     @vector_db_impl
     def insert(self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any]) -> None:
+        # start = time.perf_counter()
         del args
 
         documents = []
@@ -81,5 +80,8 @@ class ChromaDB(VectorDB):
             embeddings.append(cast(Sequence[float], embedding.embedding))
             ids.append(str(uuid.uuid4()))
 
-        with self.multi_process_lock:
-            self.collection[collection_name].add(documents=documents, embeddings=embeddings, ids=ids)
+        self.collection[collection_name].add(documents=documents, embeddings=embeddings, ids=ids)
+
+        # end = time.perf_counter()
+
+        # print(f"Function took {end - start:.4f} seconds")

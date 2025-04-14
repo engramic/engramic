@@ -90,6 +90,9 @@ class ResponseService(Service):
         return super().init_async()
 
     def on_retrieve_complete(self, retrieve_result_in: dict[str, Any]) -> None:
+        if __debug__:
+            self.host.update_mock_data_input(self, retrieve_result_in)
+
         prompt_str = retrieve_result_in['prompt_str']
         prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
         retrieve_result = RetrieveResult(**retrieve_result_in['retrieve_response'])
@@ -207,7 +210,11 @@ class ResponseService(Service):
     def on_main_prompt_complete(self, fut: Future[Any]) -> None:
         result = fut.result()
         self.metrics_tracker.increment(ResponseMetric.MAIN_PROMPTS_RUN)
+
         self.send_message_async(Service.Topic.MAIN_PROMPT_COMPLETE, asdict(result))
+
+        if __debug__:
+            self.host.update_mock_data_output(self, asdict(result))
 
     """
     ### Ack

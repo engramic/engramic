@@ -52,7 +52,7 @@ dependencies = ["pytest","pytest-asyncio","mypy","types-cachetools"]
 typecheck = "mypy --strict --ignore-missing-imports -p engramic"
 
 [tool.hatch.envs.hatch-test]
-extra-dependencies = ["engramic","pytest-asyncio"]
+extra-dependencies = ["engramic","pytest-asyncio","pytest-timeout"]
 
 [tool.hatch.envs.docs]
 template = "default"
@@ -65,9 +65,10 @@ dependencies = [
 ]
 
 [tool.hatch.envs.docs.scripts]
-"build" = "mkdocs build"
-"serve" = "mkdocs serve -a 0.0.0.0:8000"
-"generate_uml" = "pyreverse -o pdf -p my_project ."
+build = "mkdocs build"
+serve = "mkdocs serve -a 0.0.0.0:8000"
+deploy-docs = "hatch version | cut -d. -f1,2 | xargs mike deploy --push"
+set-default-docs = "hatch version | cut -d. -f1,2 | xargs mike set-default --push"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.9", "3.10","3.11","3.12","3.13"]

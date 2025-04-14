@@ -93,14 +93,17 @@ class ConsolidateService(Service):
         super().stop()
 
     def on_observation_complete(self, observation_dict: dict[str, Any]) -> None:
+        if __debug__:
+            self.host.update_mock_data_input(self, observation_dict)
+
         # should run a task for this.
         observation = self.observation_repository.load_dict(observation_dict)
         self.metrics_tracker.increment(ConsolidateMetric.OBSERVATIONS_RECIEVED)
 
-        summary_observation = self.run_task(self.generate_summary(observation))
+        summary_observation = self.run_task(self._generate_summary(observation))
         summary_observation.add_done_callback(self.on_summary)
 
-        generate_engrams = self.run_task(self.generate_engrams(observation))
+        generate_engrams = self.run_task(self._generate_engrams(observation))
         generate_engrams.add_done_callback(self.on_engrams)
 
     """
@@ -109,7 +112,7 @@ class ConsolidateService(Service):
     Will be used in the future when we pull in data from other sources.
     """
 
-    async def generate_summary(self, observation: Observation) -> Meta:
+    async def _generate_summary(self, observation: Observation) -> Meta:
         if (
             observation.meta.summary_full is not None and not observation.meta.summary_full.text
         ):  # native LLM observations have a summary already.
@@ -121,9 +124,9 @@ class ConsolidateService(Service):
 
     def on_summary(self, summary_fut: Future[Any]) -> None:
         result = summary_fut.result()
-        self.run_task(self.generate_summary_embeddings(result))
+        self.run_task(self._generate_summary_embeddings(result))
 
-    async def generate_summary_embeddings(self, meta: Meta) -> None:
+    async def _generate_summary_embeddings(self, meta: Meta) -> None:
         if meta.summary_full is None:
             error = 'Summary full is none.'
             raise ValueError(error)
@@ -146,7 +149,7 @@ class ConsolidateService(Service):
     Create engrams from the observation.
     """
 
-    async def generate_engrams(self, observation: Observation) -> list[Engram]:
+    async def _generate_engrams(self, observation: Observation) -> list[Engram]:
         self.metrics_tracker.increment(ConsolidateMetric.ENGRAMS_GENERATED, len(observation.engram_list))
 
         return observation.engram_list
@@ -164,7 +167,7 @@ class ConsolidateService(Service):
                 raise RuntimeError(error)
 
         # 1) Generate indices for each engram
-        index_tasks = [self.gen_indices(i, engram.id, engram) for i, engram in enumerate(engram_list)]
+        index_tasks = [self._gen_indices(i, engram.id, engram) for i, engram in enumerate(engram_list)]
 
         indices_future = self.run_tasks(index_tasks)
 
@@ -173,10 +176,10 @@ class ConsolidateService(Service):
             # This is the accumulated result of each gen_indices(...) call
             indices_list: dict[str, Any] = indices_list_fut.result()
             # indices_list should have a key like 'gen_indices' -> list[dict[str, Any]]
-            index_sets: list[dict[str, Any]] = indices_list['gen_indices']
+            index_sets: list[dict[str, Any]] = indices_list['_gen_indices']
 
             # 2) Generate embeddings for each index set
-            embed_tasks = [self.gen_embeddings(index_set, i) for i, index_set in enumerate(index_sets)]
+            embed_tasks = [self._gen_embeddings(index_set, i) for i, index_set in enumerate(index_sets)]
 
             logging.debug('index_sets %s', len(index_sets))
             embed_future = self.run_tasks(embed_tasks)
@@ -184,24 +187,28 @@ class ConsolidateService(Service):
             # Once embeddings are generated, then we're truly done
             def on_embeddings_done(embed_fut: Future[Any]) -> None:
                 ret = embed_fut.result()  # ret should have 'gen_embeddings' -> list of engram IDs
-                ids = ret['gen_embeddings']  # which IDs got their embeddings updated
+                ids = ret['_gen_embeddings']  # which IDs got their embeddings updated
 
                 # 3) Now that embeddings exist, we can send "ENGRAM_COMPLETE" for each
+                engram_dict: list[dict[str, Any]] = []
                 for eid in ids:
                     logging.debug('Done: %s', eid)
-                    engram = self.engram_builder[eid]
-                    self.send_message_async(Service.Topic.ENGRAM_COMPLETE, asdict(engram))
+                    engram_dict.append(asdict(self.engram_builder[eid]))
+
+                self.send_message_async(Service.Topic.ENGRAM_COMPLETE, {'engram_array': engram_dict})
+
+                if __debug__:
+                    self.host.update_mock_data_output(self, {'engram_array': engram_dict})
 
                 for eid in ids:
                     logging.debug('Deleting: %s', eid)
-                    engram = self.engram_builder[eid]
                     del self.engram_builder[eid]
 
             embed_future.add_done_callback(on_embeddings_done)
 
         indices_future.add_done_callback(on_indices_done)
 
-    async def gen_indices(self, index: int, id_in: str, engram: Engram) -> dict[str, Any]:
+    async def _gen_indices(self, index: int, id_in: str, engram: Engram) -> dict[str, Any]:
         data_input = {'engram': engram}
 
         prompt = PromptGenIndices(prompt_str='', input_data=data_input)
@@ -224,7 +231,7 @@ class ConsolidateService(Service):
 
         return {'id': id_in, 'indices': response_json['index_text_array']}
 
-    async def gen_embeddings(self, id_and_index_dict: dict[str, Any], process_index: int) -> str:
+    async def _gen_embeddings(self, id_and_index_dict: dict[str, Any], process_index: int) -> str:
         logging.debug('gen_embeddings: indices in %s', len(id_and_index_dict['indices']))
 
         indices = id_and_index_dict['indices']
