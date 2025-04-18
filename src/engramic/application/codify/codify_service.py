@@ -93,9 +93,10 @@ class CodifyService(Service):
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
         self.subscribe(Service.Topic.SET_TRAINING_MODE, self.on_set_training_mode)
+        super().start()
 
-    def stop(self) -> None:
-        super().stop()
+    async def stop(self) -> None:
+        await super().stop()
 
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)

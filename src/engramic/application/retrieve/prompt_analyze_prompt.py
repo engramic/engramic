@@ -16,5 +16,7 @@ Analyze the users prompt.
 </user_prompt>
 Classify it into the following categories:
 response_type: short | medium | long
+user_prompt_type: typical | reference
+A reference type is an article, paragraph, data, that the user is asking me to understand as a reference.
 """).render(**self.input_data)
         return str(return_str)

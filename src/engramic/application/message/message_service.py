@@ -50,9 +50,10 @@ class MessageService(BaseMessageService):
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.START_PROFILER, self.start_profiler)
         self.subscribe(Service.Topic.END_PROFILER, self.end_profiler)
+        super().start()
 
-    def stop(self) -> None:
-        super().stop()
+    async def stop(self) -> None:
+        await super().stop()
 
     def start_profiler(self, data: dict[Any, Any]) -> None:
         if data is not None:

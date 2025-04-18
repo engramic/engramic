@@ -13,7 +13,11 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
     📎 [https://github.com/engramic/engramic](https://github.com/engramic/engramic)
 
-    Engramic has not had it's first release and is not yet available on PIP.
+    Engramic is availible via pip, however, working directly from the code is recomended at this time.
+
+    ```
+    pip install engramic
+    ```
 
     
 
@@ -29,7 +33,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
     ⚠️ You may see a browser download warning when downloading the Hatch installer.
 
-
+    Watch a [video](https://www.youtube.com/watch?v=aY4lpy9vV0Q&t=372s) of using Hatch in Engramic.
 
 ??? note "4. Initialize the Environment"
 
@@ -38,7 +42,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     1. Navigate to the root of the Engramic project in your terminal.
     2. Run:
 
-        ```bash
+        ```
         hatch shell
         ```
 
@@ -46,9 +50,11 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
     3. Open the project in VS Code:
 
-        ```bash
+        ```
         code .
         ```
+
+    
 
 ??? note "5. Configure the Python Interpreter"
 
@@ -115,7 +121,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
     ### Looking At The Code ###
     
-    Run the program. The plugins will automatically download all dependencies on the first run and check for updates on subsequent runs.
+    Run the program. The plugins will automatically download all dependencies on the first run and check for updates on subsequent runs. Configuration for plugins are defined by [profiles](/profiles/), in this case, the profile is named "standard"
 
     Hit **Run** and you'll see the result in the terminal window. This example adds Storage, Codify, and Consolidate service, but doesn't actually use them.
     
@@ -152,5 +158,15 @@ Please contact us at info@engramic.org if you have any issues with these instruc
                 return None
     ```
 
-    Let's look the Observation, the output of the Codify service. Two types of data structures are output on the screen, the first is a set of Engrams, these are the memories extracted from the response of the training. The next is the Meta Summary. Meta data are summary information about all Engrams that were generated. This data structure is created to help the retrieval stage with awareness of it's memory set. 
+    Let's look the Observation, the output of the Codify service. Two types of data structures are output on the screen, the first is a set of Engrams, these are the memories extracted from the response of the training. The next is the Meta Summary. Meta data are summary information about all Engrams that were generated. This data structure is created to help the retrieval stage with awareness of it's memory set.
+
+    To delete all memories, enter into the hatch shell named "dev".
+
+    ```
+    cd /engramic
+    hatch shell dev
+    hatch run delete_dbs
+    ```
+
+
     

@@ -18,6 +18,7 @@ class MiniService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
         self.run_task(self.send_message())
+        super().start()
 
     async def send_message(self) -> None:
         prompt = Prompt(**self.host.mock_data_collector['RetrieveService-input'])
@@ -35,11 +36,11 @@ class MiniService(Service):
 
         assert str(generated_results['retrieve_response']) == str(expected_results['retrieve_response'])
 
-        self.host.trigger_shutdown()
+        self.host.shutdown()
 
 
 @pytest.mark.timeout(10)  # seconds
 def test_retrieve_service_submission() -> None:
     host = Host('mock', [MessageService, RetrieveService, MiniService])
-
+    host.shutdown()
     host.wait_for_shutdown()

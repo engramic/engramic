@@ -77,6 +77,7 @@ class StorageService(Service):
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engram_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
+        super().start()
 
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)

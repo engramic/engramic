@@ -267,7 +267,7 @@ class Ask(Retrieval):
         plugin = self.prompt_analysis_plugin
         # add prompt engineering here and submit as the full prompt.
         prompt = PromptAnalyzePrompt(prompt_str=self.prompt.prompt_str, input_data={'meta_list': meta_list})
-        structured_response = {'response_length': str}
+        structured_response = {'response_length': str, 'user_prompt_type': str}
         ret = await asyncio.to_thread(
             plugin['func'].submit,
             prompt=prompt,
@@ -380,8 +380,15 @@ class Ask(Retrieval):
         ret = fut.result()
         logging.debug('Query Result: %s', ret)
 
+        if self.prompt_analysis is None:
+            error = 'on_query_index_db failed: prompt_analysis is None and likely failed during an earlier process.'
+            raise RuntimeError
+
         retrieve_result = RetrieveResult(
-            self.id, engram_id_array=list(ret), conversation_direction=self.conversation_direction
+            self.id,
+            engram_id_array=list(ret),
+            conversation_direction=self.conversation_direction,
+            analysis=asdict(self.prompt_analysis)['prompt_analysis'],
         )
 
         if self.prompt_analysis is None:

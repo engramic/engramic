@@ -88,9 +88,10 @@ class ConsolidateService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
+        super().start()
 
-    def stop(self) -> None:
-        super().stop()
+    async def stop(self) -> None:
+        await super().stop()
 
     def on_observation_complete(self, observation_dict: dict[str, Any]) -> None:
         if __debug__:
@@ -159,7 +160,6 @@ class ConsolidateService(Service):
 
         # Keep references so we can fill them in later
         for engram in engram_list:
-            logging.debug('Engram Ready: %s', engram.id)
             if self.engram_builder.get(engram.id) is None:
                 self.engram_builder[engram.id] = engram
             else:
@@ -171,42 +171,7 @@ class ConsolidateService(Service):
 
         indices_future = self.run_tasks(index_tasks)
 
-        # Once all indices are generated, generate embeddings
-        def on_indices_done(indices_list_fut: Future[Any]) -> None:
-            # This is the accumulated result of each gen_indices(...) call
-            indices_list: dict[str, Any] = indices_list_fut.result()
-            # indices_list should have a key like 'gen_indices' -> list[dict[str, Any]]
-            index_sets: list[dict[str, Any]] = indices_list['_gen_indices']
-
-            # 2) Generate embeddings for each index set
-            embed_tasks = [self._gen_embeddings(index_set, i) for i, index_set in enumerate(index_sets)]
-
-            logging.debug('index_sets %s', len(index_sets))
-            embed_future = self.run_tasks(embed_tasks)
-
-            # Once embeddings are generated, then we're truly done
-            def on_embeddings_done(embed_fut: Future[Any]) -> None:
-                ret = embed_fut.result()  # ret should have 'gen_embeddings' -> list of engram IDs
-                ids = ret['_gen_embeddings']  # which IDs got their embeddings updated
-
-                # 3) Now that embeddings exist, we can send "ENGRAM_COMPLETE" for each
-                engram_dict: list[dict[str, Any]] = []
-                for eid in ids:
-                    logging.debug('Done: %s', eid)
-                    engram_dict.append(asdict(self.engram_builder[eid]))
-
-                self.send_message_async(Service.Topic.ENGRAM_COMPLETE, {'engram_array': engram_dict})
-
-                if __debug__:
-                    self.host.update_mock_data_output(self, {'engram_array': engram_dict})
-
-                for eid in ids:
-                    logging.debug('Deleting: %s', eid)
-                    del self.engram_builder[eid]
-
-            embed_future.add_done_callback(on_embeddings_done)
-
-        indices_future.add_done_callback(on_indices_done)
+        indices_future.add_done_callback(self.on_indices_done)
 
     async def _gen_indices(self, index: int, id_in: str, engram: Engram) -> dict[str, Any]:
         data_input = {'engram': engram}
@@ -231,9 +196,21 @@ class ConsolidateService(Service):
 
         return {'id': id_in, 'indices': response_json['index_text_array']}
 
-    async def _gen_embeddings(self, id_and_index_dict: dict[str, Any], process_index: int) -> str:
-        logging.debug('gen_embeddings: indices in %s', len(id_and_index_dict['indices']))
+    # Once all indices are generated, generate embeddings
+    def on_indices_done(self, indices_list_fut: Future[Any]) -> None:
+        # This is the accumulated result of each gen_indices(...) call
+        indices_list: dict[str, Any] = indices_list_fut.result()
+        # indices_list should have a key like 'gen_indices' -> list[dict[str, Any]]
+        index_sets: list[dict[str, Any]] = indices_list['_gen_indices']
 
+        # 2) Generate embeddings for each index set
+        embed_tasks = [self._gen_embeddings(index_set, i) for i, index_set in enumerate(index_sets)]
+
+        embed_future = self.run_tasks(embed_tasks)
+
+        embed_future.add_done_callback(self.on_embeddings_done)
+
+    async def _gen_embeddings(self, id_and_index_dict: dict[str, Any], process_index: int) -> str:
         indices = id_and_index_dict['indices']
         engram_id: str = id_and_index_dict['id']
 
@@ -249,10 +226,13 @@ class ConsolidateService(Service):
         self.metrics_tracker.increment(ConsolidateMetric.EMBEDDINGS_GENERATED, len(embedding_list))
 
         # Convert raw embeddings to Index objects and attach them
-        index_array: list[Index] = []
-        for i, vec in enumerate(embedding_list):
-            index = Index(indices[i], vec)
-            index_array.append(index)
+        try:
+            index_array: list[Index] = []
+            for i, vec in enumerate(embedding_list):
+                index = Index(indices[i], vec)
+                index_array.append(index)
+        except Exception:
+            logging.exception('Exception caught.')
 
         self.engram_builder[engram_id].indices = index_array
         serialized_index_array = [asdict(index) for index in index_array]
@@ -262,6 +242,24 @@ class ConsolidateService(Service):
 
         # Return the ID so we know which engram was updated
         return engram_id
+
+    # Once embeddings are generated, then we're truly done
+    def on_embeddings_done(self, embed_fut: Future[Any]) -> None:
+        ret = embed_fut.result()  # ret should have 'gen_embeddings' -> list of engram IDs
+
+        ids = ret['_gen_embeddings']  # which IDs got their embeddings updated
+
+        # 3) Now that embeddings exist, we can send "ENGRAM_COMPLETE" for each
+        engram_dict: list[dict[str, Any]] = []
+        engram_dict = [asdict(self.engram_builder[eid]) for eid in ids]
+
+        self.send_message_async(Service.Topic.ENGRAM_COMPLETE, {'engram_array': engram_dict})
+
+        if __debug__:
+            self.host.update_mock_data_output(self, {'engram_array': engram_dict})
+
+        for eid in ids:
+            del self.engram_builder[eid]
 
     """
     ### Acknowledge

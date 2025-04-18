@@ -15,8 +15,9 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 class MiniService(Service):
     def start(self) -> None:
-        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_response_complete)
         self.run_task(self.send_message())
+        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_response_complete)
+        super().start()
 
     async def send_message(self) -> None:
         retrieve_response = self.host.mock_data_collector['RetrieveService-0-output']
@@ -31,7 +32,7 @@ class MiniService(Service):
         del generated_response['model']
         del expected_results['model']
         assert str(generated_response) == str(expected_results)
-        self.host.trigger_shutdown()
+        self.host.shutdown()
 
 
 @pytest.mark.timeout(10)  # seconds

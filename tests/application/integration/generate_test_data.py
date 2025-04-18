@@ -15,7 +15,7 @@ from engramic.core.host import Host
 from engramic.core.prompt import Prompt
 from engramic.infrastructure.system import Service
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 # This service is built only to subscribe to the main prompt completion message.

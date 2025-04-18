@@ -4,15 +4,19 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 import inspect
 import json
 import logging
 import os
 import queue
+import signal
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 from typing import TYPE_CHECKING, Any
 
+# import psutil
 from engramic.core.index import Index
 from engramic.infrastructure.system.plugin_manager import PluginManager
 
@@ -59,20 +63,27 @@ class Host:
 
         self.init_async_done_event = threading.Event()
 
-        self.thread = Thread(target=self._start_async_loop, daemon=True, name='Async Thread')
+        self.thread = Thread(target=self._start_async_loop, daemon=False, name='Async Thread')
         self.thread.start()
+
         self.init_async_done_event.wait()
 
         self.stop_event: threading.Event = threading.Event()
-        self.shutdown_message_recieved = False
 
         for ctr in services:
+            logging.debug('start %s', ctr.__name__)
             self.services[ctr.__name__].start()
+
+        if threading.current_thread() is threading.main_thread():
+            signal.signal(signal.SIGINT, lambda *_: self.shutdown())
 
     def _start_async_loop(self) -> None:
         """Run the event loop in a separate thread."""
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
+
+        self.executor = ThreadPoolExecutor(max_workers=8)
+        self.loop.set_default_executor(self.executor)
 
         future = asyncio.run_coroutine_threadsafe(self._init_services_async(), self.loop)
 
@@ -81,8 +92,8 @@ class Host:
             exc = _fut.exception()
             if exc:
                 logging.exception('Unhandled exception during init_services_async: %s', exc)
-            else:
-                self.init_async_done_event.set()
+
+            self.init_async_done_event.set()
 
         future.add_done_callback(on_done)
 
@@ -127,7 +138,7 @@ class Host:
 
         async def gather_tasks() -> dict[str, Any]:
             try:
-                gather = await asyncio.gather(*coros, return_exceptions=True)
+                gather = await asyncio.gather(*coros, return_exceptions=False)
                 ret: dict[str, Any] = {}
                 for i, coro in enumerate(coros):
                     name = self._get_coro_name(coro)
@@ -183,50 +194,46 @@ class Host:
         error = 'Service not found in get_service.'
         raise RuntimeError(error)
 
-    def trigger_shutdown(self) -> None:
-        self.shutdown_message_recieved = True
+    def shutdown(self) -> None:
+        self.services['MessageService'].shutdown()
+
+    def trigger_stop_event(self) -> None:
         self.stop_event.set()
 
-    def shutdown(self) -> None:
-        self.shutdown_message_recieved = True
-        """Stop all running services."""
-        for service in self.services:
-            self.services[service].stop()
-
-        if not self.exception_queue.empty():
-            exc = self.exception_queue.get().exception()
-            error = f'Background thread failed: {exc}'
-            raise RuntimeError(error) from None
-
-        asyncio.run_coroutine_threadsafe(self._shutdown_async(), self.loop)
-
-    async def _shutdown_async(self) -> None:
-        all_tasks = asyncio.all_tasks(loop=self.loop)
-        current_task = asyncio.current_task(loop=self.loop)
-
-        # Avoid cancelling the shutdown task itself
-        tasks_to_cancel = [t for t in all_tasks if t is not current_task and not t.done()]
-
-        logging.debug('Shutting down %s tasks', len(tasks_to_cancel))
-
-        for task in tasks_to_cancel:
-            task.cancel()
-
-        await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
-        self.loop.stop()
-
-    def wait_for_shutdown(self, timeout: float | None = None) -> None:
+    def wait_for_shutdown(self) -> None:
         try:
-            if not self.shutdown_message_recieved:
-                self.stop_event.wait(timeout)
-            self.shutdown()
+            self.stop_event.wait()
 
-        except KeyboardInterrupt:
-            self.shutdown()
-            logging.info('\nShutdown requested. Exiting gracefully...')
+            for service in self.services:
+                completed = self.services[service].cleanup_complete.wait(timeout=5)
+                if not completed:
+                    logging.warning(
+                        "Event cleanup_complete not set. This means a service didn't shut down correctly. Try subscribe to shudown method by calling super().start() in all service's start method."
+                    )
+
         finally:
+            tasks = [t for t in asyncio.all_tasks(self.loop) if not t.done()]
+            if len(tasks) > 0:
+                for task in tasks:
+                    task.cancel()
+                logging.warning('Tasks remaining. %s', tasks)
+            del tasks
+
+            future = asyncio.run_coroutine_threadsafe(self.loop.shutdown_asyncgens(), self.loop)
+
+            future.result()
+
+            self.loop.call_soon_threadsafe(self.loop.stop)
+
             self.thread.join()
+
+            self.executor.shutdown(wait=True)
+
             self.loop.close()
+
+            logging.debug('Clean exit.')
+            # debug_str = f'Memory: {psutil.virtual_memory().percent}%, Threads: {len(psutil.Process().threads())}'
+            # logging.debug(debug_str)
 
     def _get_coro_name(self, coro: Awaitable[None]) -> str:
         """Extracts the coroutine function name if possible, otherwise generates a fallback name."""
@@ -313,6 +320,8 @@ class Host:
                 f.write(output)
                 f.flush()
 
+            logging.info('Mock data saved')
+
     def read_mock_data(self) -> None:
         directory = 'tests/data'
         filename = 'mock.txt'
@@ -323,7 +332,7 @@ class Host:
             self.mock_data_collector = json.loads(data_in, object_hook=self.custom_decoder)
 
     def mock_update_args(self, plugin: dict[str, Any], index_in: int = 0) -> dict[str, Any]:
-        args: dict[str, Any] = plugin['args']
+        args: dict[str, Any] = copy.deepcopy(plugin['args'])
 
         if self.is_mock_profile:
             caller_name = inspect.stack()[1].function

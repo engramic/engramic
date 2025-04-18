@@ -22,7 +22,10 @@ class WebsocketManager:
         self.host = host
 
     def init_async(self) -> None:
-        self.host.run_background(self.run_server())
+        self.future = self.host.run_background(self.run_server())
+
+    # async def stop(self) -> None:
+    #    self.future.result()
 
     async def run_server(self) -> None:
         self.websocket = await websockets.serve(self.handler, 'localhost', 8765)
@@ -46,7 +49,8 @@ class WebsocketManager:
             await self.active_connection.send(str(message.packet))
 
     def send_message(self, message: LLM.StreamPacket) -> None:
-        self.host.run_task(self.message_task(message))
+        if self.active_connection:
+            self.host.run_task(self.message_task(message))
 
     async def shutdown(self) -> None:
         """Gracefully shut down the websocket server."""
@@ -54,3 +58,4 @@ class WebsocketManager:
             self.websocket.close()
             await self.websocket.wait_closed()
             self.websocket = None
+            logging.debug('response web socket closed.')

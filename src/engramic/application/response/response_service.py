@@ -80,10 +80,10 @@ class ResponseService(Service):
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
         self.web_socket_manager.init_async()
+        super().start()
 
-    def stop(self) -> None:
-        self.run_task(self.web_socket_manager.shutdown())
-        super().stop()
+    async def stop(self) -> None:
+        await self.web_socket_manager.shutdown()
 
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
@@ -177,6 +177,7 @@ class ResponseService(Service):
                 'engram_list': engram_dict_list,
                 'history': history_array,
                 'working_memory': retrieve_result.conversation_direction,
+                'analysis': retrieve_result.analysis,
             },
         )
 
@@ -201,9 +202,9 @@ class ResponseService(Service):
         if plugin['args'].get('model'):
             model = plugin['args']['model']
 
-        response_inst = Response(
-            str(uuid.uuid4()), response[0]['llm_response'], retrieve_result, prompt.prompt_str, analysis, model
-        )
+        response = response[0]['llm_response'].replace('$', 'USD ').replace('<context>', '').replace('</context>', '')
+
+        response_inst = Response(str(uuid.uuid4()), response, retrieve_result, prompt.prompt_str, analysis, model)
 
         return response_inst
 

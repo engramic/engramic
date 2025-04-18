@@ -60,6 +60,7 @@ class RetrieveService(Service):
 
     def __init__(self, host: Host) -> None:
         super().__init__(host)
+
         self.plugin_manager: PluginManager = host.plugin_manager
         self.vector_db_plugin = host.plugin_manager.get_plugin('vector_db', 'db')
         self.db_plugin = host.plugin_manager.get_plugin('db', 'document')
@@ -75,9 +76,10 @@ class RetrieveService(Service):
         self.subscribe(Service.Topic.SUBMIT_PROMPT, self.on_submit_prompt)
         self.subscribe(Service.Topic.INDEX_COMPLETE, self.on_index_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
+        super().start()
 
-    def stop(self) -> None:
-        super().stop()
+    async def stop(self) -> None:
+        await super().stop()
 
     # when called from monitor service
     def on_submit_prompt(self, data: str) -> None:
