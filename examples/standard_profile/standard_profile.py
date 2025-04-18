@@ -10,6 +10,7 @@ from engramic.application.consolidate.consolidate_service import ConsolidateServ
 from engramic.application.message.message_service import MessageService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
+from engramic.application.storage.storage_service import StorageService
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
 from engramic.core.response import Response
@@ -39,6 +40,7 @@ def main() -> None:
             ResponseService,
             CodifyService,  # not used in this example
             ConsolidateService,  # not used in this example
+            StorageService, # not used in this example
         ],
     )
 

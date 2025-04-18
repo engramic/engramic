@@ -1,10 +1,6 @@
 name: Deploy Documentation
 
 on:
-  push:
-    branches:
-      - main
-      - feature/docs_and_tests
   workflow_dispatch:
 
 
