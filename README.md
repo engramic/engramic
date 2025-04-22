@@ -27,7 +27,7 @@ The fastest way to begin working with Engramic is to download it from pip.
 pip install engramic
 ```
 
-During these early phases of development, we recommend working from source code, setting up your environment is designed to be straight forward. See the "Getting Started" section in our documentation.
+During these early phases of development, we recommend working from source code, setting up your environment is designed to be straight forward. See the "Getting Started" section in our documentation. The complete code is available in examples/mock_profile/mock_profile.py.
 
 ### Starter Example 
 Run a mock version (no API key required) of Engramic.
@@ -87,8 +87,9 @@ This example uses plugins that emulate API calls (i.e. mocks) to LLMs, databases
 - Pyzmq
 
 ## Plugins
-Plugins are managed in the engram_profiles.toml file which is generated during the first run. Engramic currently supports the following plugins:
-Plugin dependencies are downloaded on first run of the plugin and can be viewed in the plugin.toml file located at the root directory of the plugin.
+Plugins are managed in the engram_profiles.toml file which is generated during the first run. Engramic currently includes the plugins listed below.
+
+*Note:Plugin dependencies are downloaded on first run of the plugin and can be viewed in the plugin.toml file located in the root directory of the plugin.*
 
 Vector DB
 - ChomraDB
