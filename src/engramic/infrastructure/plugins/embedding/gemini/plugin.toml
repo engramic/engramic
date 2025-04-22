@@ -4,3 +4,6 @@ version = "0.0.1"
 description = "Google embeddings"
 authors = ["ericp@engramic.org"]
 dependencies = ["google-genai"]
+
+[tool.import-map]
+google-genai = "google.genai"
