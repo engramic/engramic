@@ -1,6 +1,9 @@
 [project]
 name = "gemini"
 version = "0.0.1"
-description = "A simple plugin test with cowsay dependency."
+description = "Google gemini."
 authors = ["ericp@engramic.org"]
 dependencies = ["google-genai"]
+
+[tool.import-map]
+google-genai = "google.genai"

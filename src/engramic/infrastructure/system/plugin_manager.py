@@ -8,6 +8,7 @@ import importlib.util
 import logging
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -44,6 +45,15 @@ class PluginManager:
         self.default_plugin_path = ''
 
         plugin_paths = os.getenv('ENGRAMIC_PLUGIN_PATHS')
+
+        if not plugin_paths:
+            error = 'ENGRAMIC_PLUGIN_PATHS environment variable is not set.'
+            raise OSError(error)
+
+        if not os.path.isdir(plugin_paths):
+            file_not_found = f'Plugin directory does not exist: {self.default_plugin_path}'
+            raise FileNotFoundError(file_not_found)
+
         if plugin_paths:
             paths = plugin_paths.split(';')
             self.default_plugin_path = paths[0]
@@ -99,10 +109,11 @@ class PluginManager:
 
             for dependency in dependencies:
                 if not self._is_package_installed(dependency):
+                    logging.info('Installing %s...import module: %s', dependency[0], dependency[1])
                     self._install_package(dependency)
-                    installed_dependencies.add(dependency)
+                    installed_dependencies.add(dependency[0])
                 else:
-                    detected_dependencies.add(dependency)
+                    detected_dependencies.add(dependency[0])
 
         return self.PluginManagerResponse(ResponseType.SUCCESS, installed_dependencies, detected_dependencies)
 
@@ -166,14 +177,14 @@ class PluginManager:
         error = 'Plugin failed to load'
         raise RuntimeError(error)
 
-    def _get_packages(self, key: str, plugin_name: dict[str, str]) -> list[str]:
+    def _get_packages(self, key: str, plugin_name: dict[str, str]) -> list[tuple[str, Any]]:
         system_plugin_root_dir = Path(self.default_plugin_path)
         plugin_root_dir = system_plugin_root_dir / key / plugin_name['name'].lower()
 
         packages = self._parse_plugin_toml(str(plugin_root_dir))
         return packages
 
-    def _parse_plugin_toml(self, plugin_root_dir: str) -> list[str]:
+    def _parse_plugin_toml(self, plugin_root_dir: str) -> list[tuple[str, Any]]:
         """
         Loads dependencies from the plugin.toml file.
         """
@@ -186,17 +197,24 @@ class PluginManager:
             with open(plugin_toml_path, 'rb') as file:
                 config = tomli.load(file)
                 dependencies = config.get('project', {}).get('dependencies', [])
-                return [dep for dep in dependencies if isinstance(dep, str)]
+                import_map = config.get('tool', {}).get('import-map', {})
+                result = [(dep, import_map.get(dep, None)) for dep in dependencies if isinstance(dep, str)]
+
+                return result
         except Exception:
             logging.exception('Error reading plugin.toml')
             return []
 
-    def _is_package_installed(self, package: str) -> bool:
+    def _is_package_installed(self, package: tuple[str, Any]) -> bool:
         """
         Checks if a package is installed.
         """
         try:
-            importlib.import_module(package)
+            module_name = re.split(r'[=<>!~]+', package[0])[0].strip()
+
+            if package[1] is not None:
+                module_name = package[1]
+            importlib.import_module(module_name)
         except ModuleNotFoundError:  # More specific than ImportError
             return False
         else:
@@ -213,7 +231,7 @@ class PluginManager:
             logging.info('pip installed successfully using ensurepip.')
             return True
 
-    def _install_package(self, package: str) -> bool:
+    def _install_package(self, package: tuple[str, Any]) -> bool:
         """Installs a package using pip and prints the virtual environment information."""
         # Detect virtual environment
         virtual_env = sys.prefix
@@ -243,7 +261,7 @@ class PluginManager:
 
         try:
             result = subprocess.run(
-                [pip_executable, 'install', package],
+                [pip_executable, 'install', package[0]],
                 check=True,
                 capture_output=True,  # Simplifies output capturing
                 text=True,
@@ -252,5 +270,5 @@ class PluginManager:
             logging.exception('Failed to install package: %s', e.stderr)
             return False
         else:
-            logging.debug('Package installed successfully: %s', result.stdout)
+            logging.info('Package installed successfully: %s', result.stdout)
             return True

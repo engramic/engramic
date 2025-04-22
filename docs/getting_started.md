@@ -29,9 +29,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
     🔗 [Hatch Installation](https://hatch.pypa.io/1.12/install/#command-line-installer_1)
 
-    We recommend using `pipx` as described in the Hatch installation instructions.
-
-    ⚠️ You may see a browser download warning when downloading the Hatch installer.
+    We recommend installing with `pipx` as described in the Hatch installation instructions. Restart your terminal if "pipx" isn't found.
 
     Watch a [video](https://www.youtube.com/watch?v=aY4lpy9vV0Q&t=372s) of using Hatch in Engramic.
 
@@ -43,17 +41,23 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     2. Run:
 
         ```
+        hatch env create
+        ```
+
+        Enter into the default shell ("default" has no name after "shell".)
+        ```
         hatch shell
         ```
 
     This will install all dependencies (should be quick—we work hard to minimize dependencies).
 
-    3. Open the project in VS Code:
+    3. In the terminal, open the project in VS Code:
 
         ```
         code .
         ```
 
+    4. On windows, in visual studio code, install the following extensions from Microsoft. WSL. Python Debugger.
     
 
 ??? note "5. Configure the Python Interpreter"
@@ -65,7 +69,13 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     3. Choose the environment that looks like:  
     `Python X.XX.X ('engramic')`
 
+    Note: If you aren't sure of the path, you can type the following while in the hatch shell:
 
+    ```
+    python -c "import sys;print(sys.executable)"
+    ```
+
+    If you are stuck, check vs code's WSL extension.
 
 ??? note "6. Run the Mock Version"
 
@@ -99,18 +109,20 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     ```
 
     1. In **Run and Debug**, select **"Example - Standard"**.
+
+    *Note: this takes some time on first run.*
     
     2. For this example, you'll need a **Gemini API key**:
 
         - Create a Google Cloud account if you don't already have one.
         - Follow Google's documentation to create an API key.
 
-    3. Add a `.env` file to the root of the project with the following content:
+    3. Add a `.env` file to the root of the project with the following content (multiple plugin paths coming soon.):
 
         ```env
         GEMINI_API_KEY=PUT_YOUR_KEY_HERE_WITH_NO_QUOTES_OR_ANYTHING_ELSE
-        ENGRAMIC_PLUGIN_PATHS=/your/absolute/directory/path/engramic/src/engramic/infrastructure/plugins
-        LOCAL_STORAGE_ROOT_PATH=/your/absolute/directory/path/engramic/local_storage
+        ENGRAMIC_PLUGIN_PATHS=./src/engramic/infrastructure/plugins
+        LOCAL_STORAGE_ROOT_PATH=./local_storage
         ```
 
         Locate this line and change it if you would like to.
