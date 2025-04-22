@@ -1,0 +1,1423 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../ask/">
+      
+      
+        <link rel="next" href="../codify_service/">
+      
+      
+      <link rel="icon" href="../../assets/logo_100.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>Response Service - Engramic Reference</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Raleway";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#engramic.application.response.response_service.ResponseService" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Engramic Reference" class="md-header__button md-logo" aria-label="Engramic Reference" data-md-component="logo">
+      
+  <img src="../../assets/logo_100.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Engramic Reference
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Response Service
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Engramic Reference" class="md-nav__button md-logo" aria-label="Engramic Reference" data-md-component="logo">
+      
+  <img src="../../assets/logo_100.png" alt="logo">
+
+    </a>
+    Engramic Reference
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../host_and_services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Host & Services
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../profiles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Profiles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how_to/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    How To's
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../emgram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Engram
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Retrieve Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../retrieve_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ask/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ask
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Response Service
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Response Service
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#engramic.application.response.response_service.ResponseService" class="md-nav__link">
+    <span class="md-ellipsis">
+      ResponseService
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../codify_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Codify Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../consolidate_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Consolidate Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../storage_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Storage Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../message_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Message Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#engramic.application.response.response_service.ResponseService" class="md-nav__link">
+    <span class="md-ellipsis">
+      ResponseService
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Response Service</h1>
+
+<div class="doc doc-object doc-class">
+
+
+
+<a id="engramic.application.response.response_service.ResponseService"></a>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="engramic.infrastructure.system.service.Service">Service</span></code></p>
+
+
+        <p>ResponseService orchestrates AI response generation by integrating retrieval
+results, historical context, and prompt engineering. It coordinates plugin-managed
+large language models (LLMs), websockets for streaming, and metrics tracking.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.response.response_service.ResponseService.plugin_manager">plugin_manager</span></code></td>
+            <td>
+                  <code><span title="engramic.infrastructure.system.plugin_manager.PluginManager">PluginManager</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Provides access to LLM and DB plugins.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.response.response_service.ResponseService.web_socket_manager">web_socket_manager</span></code></td>
+            <td>
+                  <code><span title="engramic.infrastructure.system.websocket_manager.WebsocketManager">WebsocketManager</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Manages live streaming over websocket.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.response.response_service.ResponseService.db_document_plugin">db_document_plugin</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Document store plugin interface.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.response.response_service.ResponseService.engram_repository">engram_repository</span></code></td>
+            <td>
+                  <code><span title="engramic.infrastructure.repository.engram_repository.EngramRepository">EngramRepository</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Access point for loading engrams.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.response.response_service.ResponseService.llm_main">llm_main</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Plugin for executing the main LLM-based response generation.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.response.response_service.ResponseService.instructions">instructions</span></code></td>
+            <td>
+                  <code><span title="engramic.core.Prompt">Prompt</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Placeholder prompt object for main prompt design.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.response.response_service.ResponseService.metrics_tracker">metrics_tracker</span></code></td>
+            <td>
+                  <code><span title="engramic.core.metrics_tracker.MetricsTracker">MetricsTracker</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Tracks internal response metrics.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService.start">start</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Subscribes to service topics and initializes websocket manager.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService.stop">stop</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Shuts down the websocket manager and stops the service.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService.init_async">init_async</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Initializes the DB plugin connection asynchronously.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService.on_retrieve_complete">on_retrieve_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Triggered when retrieval results are received.
+Initiates engram and history fetch processes.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService._fetch_history">_fetch_history</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Asynchronously fetches historical conversation context.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService._fetch_retrieval">_fetch_retrieval</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Loads engrams using retrieve result.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService.on_fetch_data_complete">on_fetch_data_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Callback fired after both history and engrams are loaded;
+launches the main prompt generation task.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService.main_prompt">main_prompt</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Constructs and submits the main prompt to the LLM plugin; formats and returns the response.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService.on_main_prompt_complete">on_main_prompt_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Callback fired after main prompt response is generated;
+sends result and updates metrics.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.response.response_service.ResponseService.on_acknowledge">on_acknowledge</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Sends current metrics snapshot to monitoring topics.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>Asynchronous database and model operations are handled via <code>asyncio.to_thread</code>.</li>
+<li>Debug mode transmits intermediate prompt input and final output via websocket topics.</li>
+<li>Metrics are captured throughout the response generation pipeline to monitor performance.</li>
+</ul>
+</details>
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/engramic/application/response/response_service.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ResponseService</span><span class="p">(</span><span class="n">Service</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ResponseService orchestrates AI response generation by integrating retrieval</span>
+<span class="sd">    results, historical context, and prompt engineering. It coordinates plugin-managed</span>
+<span class="sd">    large language models (LLMs), websockets for streaming, and metrics tracking.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        plugin_manager (PluginManager): Provides access to LLM and DB plugins.</span>
+<span class="sd">        web_socket_manager (WebsocketManager): Manages live streaming over websocket.</span>
+<span class="sd">        db_document_plugin (dict): Document store plugin interface.</span>
+<span class="sd">        engram_repository (EngramRepository): Access point for loading engrams.</span>
+<span class="sd">        llm_main (dict): Plugin for executing the main LLM-based response generation.</span>
+<span class="sd">        instructions (Prompt): Placeholder prompt object for main prompt design.</span>
+<span class="sd">        metrics_tracker (MetricsTracker): Tracks internal response metrics.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        start(): Subscribes to service topics and initializes websocket manager.</span>
+<span class="sd">        stop(): Shuts down the websocket manager and stops the service.</span>
+<span class="sd">        init_async(): Initializes the DB plugin connection asynchronously.</span>
+<span class="sd">        on_retrieve_complete(retrieve_result_in): Triggered when retrieval results are received.</span>
+<span class="sd">            Initiates engram and history fetch processes.</span>
+<span class="sd">        _fetch_history(): Asynchronously fetches historical conversation context.</span>
+<span class="sd">        _fetch_retrieval(prompt_str, analysis, retrieve_result): Loads engrams using retrieve result.</span>
+<span class="sd">        on_fetch_data_complete(fut): Callback fired after both history and engrams are loaded;</span>
+<span class="sd">            launches the main prompt generation task.</span>
+<span class="sd">        main_prompt(prompt_str, analysis, engram_array, retrieve_result, history_array):</span>
+<span class="sd">            Constructs and submits the main prompt to the LLM plugin; formats and returns the response.</span>
+<span class="sd">        on_main_prompt_complete(fut): Callback fired after main prompt response is generated;</span>
+<span class="sd">            sends result and updates metrics.</span>
+<span class="sd">        on_acknowledge(message_in): Sends current metrics snapshot to monitoring topics.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - Asynchronous database and model operations are handled via `asyncio.to_thread`.</span>
+<span class="sd">        - Debug mode transmits intermediate prompt input and final output via websocket topics.</span>
+<span class="sd">        - Metrics are captured throughout the response generation pipeline to monitor performance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">:</span> <span class="n">Host</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="p">:</span> <span class="n">PluginManager</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">plugin_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">web_socket_manager</span><span class="p">:</span> <span class="n">WebsocketManager</span> <span class="o">=</span> <span class="n">WebsocketManager</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_document_plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;document&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engram_repository</span><span class="p">:</span> <span class="n">EngramRepository</span> <span class="o">=</span> <span class="n">EngramRepository</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_document_plugin</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">llm_main</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;llm&#39;</span><span class="p">,</span> <span class="s1">&#39;response_main&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instructions</span><span class="p">:</span> <span class="n">Prompt</span> <span class="o">=</span> <span class="n">Prompt</span><span class="p">(</span><span class="s1">&#39;Placeholder for prompt engineering for main prompt.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="p">:</span> <span class="n">MetricsTracker</span><span class="p">[</span><span class="n">ResponseMetric</span><span class="p">]</span> <span class="o">=</span> <span class="n">MetricsTracker</span><span class="p">[</span><span class="n">ResponseMetric</span><span class="p">]()</span>
+        <span class="c1">##</span>
+        <span class="c1"># Many methods are not ready to be until their async component is running.</span>
+        <span class="c1"># Do not call async context methods in the constructor.</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">ACKNOWLEDGE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_acknowledge</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">RETRIEVE_COMPLETE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_retrieve_complete</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">web_socket_manager</span><span class="o">.</span><span class="n">init_async</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">web_socket_manager</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_document_plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">init_async</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_retrieve_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retrieve_result_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retrieve_result_in</span><span class="p">)</span>
+
+        <span class="n">prompt_str</span> <span class="o">=</span> <span class="n">retrieve_result_in</span><span class="p">[</span><span class="s1">&#39;prompt_str&#39;</span><span class="p">]</span>
+        <span class="n">prompt_analysis</span> <span class="o">=</span> <span class="n">PromptAnalysis</span><span class="p">(</span><span class="o">**</span><span class="n">retrieve_result_in</span><span class="p">[</span><span class="s1">&#39;analysis&#39;</span><span class="p">])</span>
+        <span class="n">retrieve_result</span> <span class="o">=</span> <span class="n">RetrieveResult</span><span class="p">(</span><span class="o">**</span><span class="n">retrieve_result_in</span><span class="p">[</span><span class="s1">&#39;retrieve_response&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">ResponseMetric</span><span class="o">.</span><span class="n">RETRIEVES_RECIEVED</span><span class="p">)</span>
+        <span class="n">fetch_engrams_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_tasks</span><span class="p">([</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_retrieval</span><span class="p">(</span><span class="n">prompt_str</span><span class="o">=</span><span class="n">prompt_str</span><span class="p">,</span> <span class="n">analysis</span><span class="o">=</span><span class="n">prompt_analysis</span><span class="p">,</span> <span class="n">retrieve_result</span><span class="o">=</span><span class="n">retrieve_result</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_history</span><span class="p">(),</span>
+        <span class="p">])</span>
+        <span class="n">fetch_engrams_task</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_fetch_data_complete</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### Fetch History &amp; Engram</span>
+
+<span class="sd">    Fetch engrams based on the IDs provided by the retrieve service.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_document_plugin</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;history&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">ret_val</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fetch</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">DB</span><span class="o">.</span><span class="n">DBTables</span><span class="o">.</span><span class="n">HISTORY</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="p">[],</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">history</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">history</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_retrieval</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prompt_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">analysis</span><span class="p">:</span> <span class="n">PromptAnalysis</span><span class="p">,</span> <span class="n">retrieve_result</span><span class="p">:</span> <span class="n">RetrieveResult</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">engram_array</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Engram</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">engram_repository</span><span class="o">.</span><span class="n">load_batch_retrieve_result</span><span class="p">,</span> <span class="n">retrieve_result</span>
+        <span class="p">)</span>
+
+        <span class="c1"># assembled main_prompt, render engrams.</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;prompt_str&#39;</span><span class="p">:</span> <span class="n">prompt_str</span><span class="p">,</span>
+            <span class="s1">&#39;analysis&#39;</span><span class="p">:</span> <span class="n">analysis</span><span class="p">,</span>
+            <span class="s1">&#39;retrieve_result&#39;</span><span class="p">:</span> <span class="n">retrieve_result</span><span class="p">,</span>
+            <span class="s1">&#39;engram_array&#39;</span><span class="p">:</span> <span class="n">engram_array</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_fetch_data_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">exc</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">exception</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="n">retrieval</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;_fetch_retrieval&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;_fetch_history&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">main_prompt_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main_prompt</span><span class="p">(</span>
+                <span class="n">retrieval</span><span class="p">[</span><span class="s1">&#39;prompt_str&#39;</span><span class="p">],</span>
+                <span class="n">retrieval</span><span class="p">[</span><span class="s1">&#39;analysis&#39;</span><span class="p">],</span>
+                <span class="n">retrieval</span><span class="p">[</span><span class="s1">&#39;engram_array&#39;</span><span class="p">],</span>
+                <span class="n">retrieval</span><span class="p">[</span><span class="s1">&#39;retrieve_result&#39;</span><span class="p">],</span>
+                <span class="n">history</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">main_prompt_task</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_main_prompt_complete</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### Main Prompt</span>
+
+<span class="sd">    Combine the previous stages to generate the response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main_prompt</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prompt_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="p">:</span> <span class="n">PromptAnalysis</span><span class="p">,</span>
+        <span class="n">engram_array</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Engram</span><span class="p">],</span>
+        <span class="n">retrieve_result</span><span class="p">:</span> <span class="n">RetrieveResult</span><span class="p">,</span>
+        <span class="n">history_array</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">ResponseMetric</span><span class="o">.</span><span class="n">ENGRAMS_FETCHED</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">engram_array</span><span class="p">))</span>
+
+        <span class="n">engram_dict_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">asdict</span><span class="p">(</span><span class="n">engram</span><span class="p">)</span> <span class="k">for</span> <span class="n">engram</span> <span class="ow">in</span> <span class="n">engram_array</span><span class="p">]</span>
+
+        <span class="c1"># build main prompt here</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">PromptMainPrompt</span><span class="p">(</span>
+            <span class="n">prompt_str</span><span class="o">=</span><span class="n">prompt_str</span><span class="p">,</span>
+            <span class="n">input_data</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;engram_list&#39;</span><span class="p">:</span> <span class="n">engram_dict_list</span><span class="p">,</span>
+                <span class="s1">&#39;history&#39;</span><span class="p">:</span> <span class="n">history_array</span><span class="p">,</span>
+                <span class="s1">&#39;working_memory&#39;</span><span class="p">:</span> <span class="n">retrieve_result</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">,</span>
+                <span class="s1">&#39;analysis&#39;</span><span class="p">:</span> <span class="n">retrieve_result</span><span class="o">.</span><span class="n">analysis</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm_main</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">submit_streaming</span><span class="p">,</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">websocket_manager</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">web_socket_manager</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="n">main_prompt</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">render_prompt</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span>
+                <span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">DEBUG_MAIN_PROMPT_INPUT</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;main_prompt&#39;</span><span class="p">:</span> <span class="n">main_prompt</span><span class="p">,</span> <span class="s1">&#39;ask_id&#39;</span><span class="p">:</span> <span class="n">retrieve_result</span><span class="o">.</span><span class="n">ask_id</span><span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_main</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;llm_response&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">,</span> <span class="s1">&#39;USD &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;context&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;/context&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="n">response_inst</span> <span class="o">=</span> <span class="n">Response</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()),</span> <span class="n">response</span><span class="p">,</span> <span class="n">retrieve_result</span><span class="p">,</span> <span class="n">prompt</span><span class="o">.</span><span class="n">prompt_str</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response_inst</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_main_prompt_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">ResponseMetric</span><span class="o">.</span><span class="n">MAIN_PROMPTS_RUN</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">MAIN_PROMPT_COMPLETE</span><span class="p">,</span> <span class="n">asdict</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">asdict</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### Ack</span>
+
+<span class="sd">    Acknowledge and return metrics</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_acknowledge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">message_in</span>
+
+        <span class="n">metrics_packet</span><span class="p">:</span> <span class="n">MetricPacket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">get_and_reset_packet</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span>
+            <span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">STATUS</span><span class="p">,</span>
+            <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="n">metrics_packet</span><span class="p">},</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": 0.0, "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
