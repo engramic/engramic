@@ -121,7 +121,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
     ### Looking At The Code ###
     
-    Run the program. The plugins will automatically download all dependencies on the first run and check for updates on subsequent runs. Configuration for plugins are defined by [profiles](/profiles/), in this case, the profile is named "standard"
+    Run the program. The plugins will automatically download all dependencies on the first run and check for updates on subsequent runs. Configuration for plugins are defined by [profiles](profiles.md), in this case, the profile is named "standard"
 
     Hit **Run** and you'll see the result in the terminal window. This example adds Storage, Codify, and Consolidate service, but doesn't actually use them.
     
