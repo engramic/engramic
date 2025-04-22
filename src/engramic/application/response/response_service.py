@@ -33,34 +33,39 @@ class ResponseMetric(Enum):
 
 class ResponseService(Service):
     """
-    ResponseService orchestrates response generation using retrieved engrams,
-    conversation history, and plugin-based LLM processing. It integrates with
-    plugins, websockets, and metrics to generate contextual AI responses.
+    ResponseService orchestrates AI response generation by integrating retrieval
+    results, historical context, and prompt engineering. It coordinates plugin-managed
+    large language models (LLMs), websockets for streaming, and metrics tracking.
 
     Attributes:
-        plugin_manager (PluginManager): Manages access to LLM and DB plugins.
-        web_socket_manager (WebsocketManager): Handles streaming responses.
-        db_document_plugin (dict): Document DB plugin instance.
-        engram_repository (EngramRepository): Repository to load Engram data.
-        llm_main (dict): LLM plugin for main response generation.
-        instructions (Prompt): Placeholder prompt for prompt engineering.
-        metrics_tracker (MetricsTracker): Tracks internal performance metrics.
+        plugin_manager (PluginManager): Provides access to LLM and DB plugins.
+        web_socket_manager (WebsocketManager): Manages live streaming over websocket.
+        db_document_plugin (dict): Document store plugin interface.
+        engram_repository (EngramRepository): Access point for loading engrams.
+        llm_main (dict): Plugin for executing the main LLM-based response generation.
+        instructions (Prompt): Placeholder prompt object for main prompt design.
+        metrics_tracker (MetricsTracker): Tracks internal response metrics.
 
     Methods:
-        start(): Subscribe to service topics and initialize websocket manager.
-        stop(): Shutdown websocket manager and stop service.
-        init_async(): Establish DB connection via plugin.
-        on_retrieve_complete(retrieve_result_in): Handle retrieval completion,
-            fetch engrams and history, and trigger main prompt.
-        on_fetch_data_complete(fut): Callback after data is fetched.
-        on_main_prompt_complete(fut): Callback after main prompt completes.
-        on_acknowledge(message_in): Reset and send metrics status packet.
-        _fetch_history(): Fetch history from the database.
-        _fetch_retrieval(prompt_str, analysis, retrieve_result): Fetch engrams
-            using the retrieval result.
+        start(): Subscribes to service topics and initializes websocket manager.
+        stop(): Shuts down the websocket manager and stops the service.
+        init_async(): Initializes the DB plugin connection asynchronously.
+        on_retrieve_complete(retrieve_result_in): Triggered when retrieval results are received.
+            Initiates engram and history fetch processes.
+        _fetch_history(): Asynchronously fetches historical conversation context.
+        _fetch_retrieval(prompt_str, analysis, retrieve_result): Loads engrams using retrieve result.
+        on_fetch_data_complete(fut): Callback fired after both history and engrams are loaded;
+            launches the main prompt generation task.
         main_prompt(prompt_str, analysis, engram_array, retrieve_result, history_array):
-            Run LLM with contextual prompt data and return Response.
+            Constructs and submits the main prompt to the LLM plugin; formats and returns the response.
+        on_main_prompt_complete(fut): Callback fired after main prompt response is generated;
+            sends result and updates metrics.
+        on_acknowledge(message_in): Sends current metrics snapshot to monitoring topics.
 
+    Notes:
+        - Asynchronous database and model operations are handled via `asyncio.to_thread`.
+        - Debug mode transmits intermediate prompt input and final output via websocket topics.
+        - Metrics are captured throughout the response generation pipeline to monitor performance.
     """
 
     def __init__(self, host: Host) -> None:

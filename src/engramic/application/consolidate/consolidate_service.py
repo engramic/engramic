@@ -63,7 +63,7 @@ class ConsolidateService(Service):
         start(): Subscribes the service to message topics.
         stop(): Stops the service and clears subscriptions.
         on_observation_complete(observation_dict): Handles post-processing when an observation completes.
-        generate_summary(observation): Creates a summary of the observation content.
+        _ generate_summary(observation): Creates a summary of the observation content. (not implemented yet)
         on_summary(summary_fut): Callback after summary generation completes.
         generate_summary_embeddings(meta): Generates and attaches embeddings for a summary.
         generate_engrams(observation): Constructs engrams from observation data.
@@ -82,7 +82,6 @@ class ConsolidateService(Service):
         self.db_document: dict[str, Any] = self.plugin_manager.get_plugin('db', 'document')
         self.observation_repository = ObservationRepository(self.db_document)
         self.engram_builder: dict[str, Engram] = {}
-        self.index_builder: dict[str, Index] = {}
         self.metrics_tracker: MetricsTracker[ConsolidateMetric] = MetricsTracker[ConsolidateMetric]()
 
     def start(self) -> None:

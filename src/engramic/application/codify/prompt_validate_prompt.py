@@ -14,6 +14,8 @@ Your task is to study the article searching for suitable long term memories call
 
 Engrams are important or unique topics. Something unimportant that just happened isn't a long term memory, that will be saved in working memory. Something that I should remember to inform and contribute to my existence or make me smarter is a long term memory. Write responses in absolute terms such as a four digit year rather than saying "last year".
 
+Always use proper nouns and avoid pronouns.
+
 % if engram_list:
 Source engrams are listed below. You will be responding with meta and destination engrams.
 

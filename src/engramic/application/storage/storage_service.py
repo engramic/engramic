@@ -32,33 +32,33 @@ class StorageMetric(Enum):
 
 class StorageService(Service):
     """
-    A service responsible for persisting various data artifacts generated during the Engramic runtime process.
+    A service responsible for persisting runtime data artifacts within the Engramic system.
 
-    The StorageService listens to multiple system topics and asynchronously saves different types of data,
-    including observations, engrams, metadata, and history responses. It utilizes plugin-based repositories
-    for storage and maintains metrics on saved entities for monitoring and reporting.
+    StorageService listens for various system events and saves corresponding data—including observations,
+    engrams, metadata, and prompt histories—via plugin-based repositories. It also tracks metrics for each
+    type of saved entity to facilitate performance monitoring and operational insights.
 
     Attributes:
-        plugin_manager (PluginManager): Manages system plugins including the database plugin.
-        db_document_plugin: The database document plugin used by repositories.
-        history_repository (HistoryRepository): Handles persistence of history data.
-        observation_repository (ObservationRepository): Handles persistence of observations.
-        engram_repository (EngramRepository): Handles persistence of engrams.
-        meta_repository (MetaRepository): Handles persistence of metadata.
-        metrics_tracker (MetricsTracker): Tracks and reports storage metrics for each saved entity type.
+        plugin_manager (PluginManager): Provides access to system plugins, including database integrations.
+        db_document_plugin: Plugin used by repositories for data persistence.
+        history_repository (HistoryRepository): Manages saving of prompt/response history data.
+        observation_repository (ObservationRepository): Handles saving of Observation entities.
+        engram_repository (EngramRepository): Handles saving of Engram entities.
+        meta_repository (MetaRepository): Handles saving of Meta configuration entities.
+        metrics_tracker (MetricsTracker): Tracks counts of saved items for metric reporting.
 
     Methods:
-        start(): Subscribes to message topics and prepares the service for operation.
-        init_async(): Initializes database connections asynchronously.
-        on_engram_complete(engram_dict): Callback to handle completed engrams and trigger storage.
-        on_observation_complete(response): Callback to handle completed observations and trigger storage.
-        on_prompt_complete(response_dict): Callback to handle completed prompt responses and trigger history storage.
-        on_meta_complete(meta_dict): Callback to handle completed meta information and trigger storage.
-        save_observation(response): Asynchronously saves an observation and updates metrics.
-        save_history(response): Asynchronously saves a history response and updates metrics.
-        save_engram(engram): Asynchronously saves an engram and updates metrics.
-        save_meta(meta): Asynchronously saves meta information and updates metrics.
-        on_acknowledge(message_in): Collects metrics and sends a status update on acknowledgment.
+        start(): Registers the service to relevant message topics and begins operation.
+        init_async(): Connects to the database plugin asynchronously before full service startup.
+        on_engram_complete(engram_dict): Callback for storing completed engram batches.
+        on_observation_complete(response): Callback for storing completed observations.
+        on_prompt_complete(response_dict): Callback for storing completed prompt/response history.
+        on_meta_complete(meta_dict): Callback for storing finalized meta configuration.
+        save_observation(response): Coroutine to persist observations and update metrics.
+        save_history(response): Coroutine to persist prompt/response history and update metrics.
+        save_engram(engram): Coroutine to persist engram data and update metrics.
+        save_meta(meta): Coroutine to persist metadata and update metrics.
+        on_acknowledge(message_in): Collects current metrics and publishes service status.
     """
 
     def __init__(self, host: Host) -> None:
