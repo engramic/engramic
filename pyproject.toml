@@ -68,6 +68,7 @@ dependencies = [
 build = "mkdocs build"
 serve = "mkdocs serve -a 0.0.0.0:8000"
 deploy-docs = "hatch version | cut -d. -f1,2 | xargs mike deploy --push"
+deploy-docs-local = "hatch version | cut -d. -f1,2 | xargs mike deploy"
 set-default-docs = "hatch version | cut -d. -f1,2 | xargs mike set-default --push"
 
 [[tool.hatch.envs.hatch-test.matrix]]

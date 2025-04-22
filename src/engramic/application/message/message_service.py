@@ -19,23 +19,30 @@ if TYPE_CHECKING:
 
 class MessageService(BaseMessageService):
     """
-    A system-level message handling service that provides runtime profiling capabilities and reports metrics.
+    A system-level message handling service that provides runtime CPU profiling and metrics reporting.
 
-    The MessageService listens for system-level control messages, such as those initiating or ending
-    profiling sessions, and acknowledgment messages for metrics reporting. It extends BaseMessageService
-    to provide core message routing functionality, with additional support for CPU profiling via `cProfile`.
+    MessageService extends BaseMessageService to handle system-level control messages, enabling
+    dynamic profiling using Python's built-in `cProfile` module and responding to acknowledgment
+    messages for metrics tracking. It operates by subscribing to control topics and exposing
+    runtime observability features.
+
+    Responsibilities:
+    - Handles `START_PROFILER` and `END_PROFILER` messages to control a CPU profiler.
+    - Responds to `ACKNOWLEDGE` messages by emitting a status update with performance metrics.
+    - Uses the `metrics_tracker` inherited from BaseMessageService to report accumulated metrics.
 
     Attributes:
-        profiler (cProfile.Profile | None): An optional CPU profiler instance used to monitor performance
-            during execution. Initialized and controlled via START_PROFILER and END_PROFILER messages.
+        profiler (cProfile.Profile | None): An optional CPU profiler used to capture runtime performance data.
+            The profiler is started and stopped in response to specific control messages and saves output
+            to a file named 'profile_output.prof'.
 
     Methods:
-        init_async(): Initializes the service asynchronously, resetting any existing profiler instance.
-        start(): Subscribes to system topics to enable profiler control and metric acknowledgment.
-        stop(): Stops the message service.
-        start_profiler(data): Starts the CPU profiler if not already running.
-        end_profiler(data): Stops the CPU profiler and writes the profiling data to a file.
-        on_acknowledge(message_in): Sends a status update containing tracked metrics upon acknowledgment.
+        init_async(): Resets the profiler during asynchronous initialization.
+        start(): Subscribes to relevant system topics for profiler control and metric acknowledgment.
+        stop(): Gracefully shuts down the message service.
+        start_profiler(data): Initializes and starts the CPU profiler.
+        end_profiler(data): Stops the profiler and dumps results to a profile file.
+        on_acknowledge(message_in): Sends a metric snapshot and service status in response to ACKNOWLEDGE messages.
     """
 
     def __init__(self, host: Host) -> None:
@@ -50,9 +57,10 @@ class MessageService(BaseMessageService):
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.START_PROFILER, self.start_profiler)
         self.subscribe(Service.Topic.END_PROFILER, self.end_profiler)
+        super().start()
 
-    def stop(self) -> None:
-        super().stop()
+    async def stop(self) -> None:
+        await super().stop()
 
     def start_profiler(self, data: dict[Any, Any]) -> None:
         if data is not None:

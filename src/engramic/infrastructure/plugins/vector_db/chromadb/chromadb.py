@@ -49,6 +49,8 @@ class ChromaDB(VectorDB):
         if args.get('threshold') is not None:
             n_results = args['n_results']
 
+        # all_items = self.collection[collection_name].get()
+
         results = self.collection[collection_name].query(query_embeddings=embeddings_typed, n_results=n_results)
 
         ret_ids = []

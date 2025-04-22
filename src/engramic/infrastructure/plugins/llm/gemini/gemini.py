@@ -28,10 +28,12 @@ class Gemini(LLM):
         return cast(type[BaseModel], model)
 
     def extract_toml_block(self, ret_string: str) -> str:
-        # Match content between ```toml and the next ```
-        match = re.search(r'```toml\s*(.*?)\s*```', ret_string, re.DOTALL)
-        if match:
-            return match.group(1).strip()
+        # Step 1: Remove the first ```toml (and any whitespace after)
+        ret_string = re.sub(r'^```toml\s*', '', ret_string.strip())
+
+        # Step 2: Remove the last closing ```
+        ret_string = re.sub(r'```$', '', ret_string.strip())
+
         return ret_string.strip()
 
     @llm_impl
@@ -47,22 +49,31 @@ class Gemini(LLM):
             ),
         ]
 
+        temperature = 0.5
+        top_p = 0.95
+        top_k = 40
+
         if structured_schema is not None:
             pydantic_model = self.create_pydantic_model('dynamic_model', structured_schema)
 
+            if 'deterministic' in args and (not args.get('deterministic') or args['deterministic'].lower() == 'true'):
+                temperature = 0
+                top_p = 1
+                top_k = 1
+
             generate_content_config = types.GenerateContentConfig(
-                temperature=1,
-                top_p=0.95,
-                top_k=40,
+                temperature=temperature,
+                top_p=top_p,
+                top_k=top_k,
                 max_output_tokens=8192,
                 response_mime_type='application/json',
                 response_schema=pydantic_model,
             )
         else:
             generate_content_config = types.GenerateContentConfig(
-                temperature=1,
-                top_p=0.95,
-                top_k=40,
+                temperature=temperature,
+                top_p=top_p,
+                top_k=top_k,
                 max_output_tokens=8192,
                 response_mime_type='text/plain',
             )

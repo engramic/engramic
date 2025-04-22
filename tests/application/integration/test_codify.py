@@ -17,6 +17,7 @@ class MiniService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.run_task(self.send_messages())
+        super().start()
 
     async def send_messages(self) -> None:
         main_propmpt_response = self.host.mock_data_collector['ResponseService-0-output']
@@ -45,7 +46,7 @@ class MiniService(Service):
         assert str(generated_response['meta']) == str(expected_results['meta'])
         assert str(generated_response['engram_list']) == str(expected_results['engram_list'])
 
-        self.host.trigger_shutdown()
+        self.host.shutdown()
 
 
 @pytest.mark.timeout(10)  # seconds

@@ -144,7 +144,7 @@ class Ask(Retrieval):
     async def _fetch_history(self) -> list[dict[str, Any]]:
         plugin = self.prompt_db_document_plugin
         args = plugin['args']
-        args['history'] = 1
+        args['history'] = 10
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)
         history_dict: list[dict[str, Any]] = ret_val[0]
@@ -166,7 +166,13 @@ class Ask(Retrieval):
         # add prompt engineering here and submit as the full prompt.
         prompt_gen = PromptGenConversation(prompt_str=self.prompt.prompt_str, input_data=input_data)
 
-        structured_schema = {'current_user_intent': str, 'working_memory': str}
+        structured_schema = {
+            'current_user_intent': str,
+            'working_memory_step_1': str,
+            'working_memory_step_2': str,
+            'working_memory_step_3': str,
+            'working_memory_step_4': str,
+        }
 
         ret = await asyncio.to_thread(
             plugin['func'].submit,
@@ -177,7 +183,10 @@ class Ask(Retrieval):
 
         json_parsed: dict[str, str] = json.loads(ret[0]['llm_response'])
 
-        self.conversation_direction = json_parsed
+        self.conversation_direction = {}
+        self.conversation_direction['current_user_intent'] = json_parsed['current_user_intent']
+
+        self.conversation_direction['working_memory'] = json_parsed['working_memory_step_4']
 
         if __debug__:
             self.service.send_message_async(
@@ -233,6 +242,7 @@ class Ask(Retrieval):
         self.service.host.update_mock_data(plugin, ret)
 
         list_str: list[str] = ret[0]['query_set']
+        # logging.warning(list_str)
         return list_str
 
     def on_vector_fetch_direction_meta_complete(self, fut: Future[Any]) -> None:
@@ -266,8 +276,11 @@ class Ask(Retrieval):
     async def _analyze_prompt(self, meta_list: list[Meta]) -> dict[str, str]:
         plugin = self.prompt_analysis_plugin
         # add prompt engineering here and submit as the full prompt.
-        prompt = PromptAnalyzePrompt(prompt_str=self.prompt.prompt_str, input_data={'meta_list': meta_list})
-        structured_response = {'response_length': str}
+        prompt = PromptAnalyzePrompt(
+            prompt_str=self.prompt.prompt_str,
+            input_data={'meta_list': meta_list, 'working_memory': self.conversation_direction['working_memory']},
+        )
+        structured_response = {'response_length': str, 'user_prompt_type': str, 'thinking_steps': str}
         ret = await asyncio.to_thread(
             plugin['func'].submit,
             prompt=prompt,
@@ -380,8 +393,15 @@ class Ask(Retrieval):
         ret = fut.result()
         logging.debug('Query Result: %s', ret)
 
+        if self.prompt_analysis is None:
+            error = 'on_query_index_db failed: prompt_analysis is None and likely failed during an earlier process.'
+            raise RuntimeError
+
         retrieve_result = RetrieveResult(
-            self.id, engram_id_array=list(ret), conversation_direction=self.conversation_direction
+            self.id,
+            engram_id_array=list(ret),
+            conversation_direction=self.conversation_direction,
+            analysis=asdict(self.prompt_analysis)['prompt_analysis'],
         )
 
         if self.prompt_analysis is None:

@@ -22,8 +22,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # This service is built only to subscribe to the main prompt completion message.
 class TestService(Service):
     def start(self):
-        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, on_main_prompt_complete)
+        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
         return super().start()
+
+    def on_main_prompt_complete(self, message_in: dict[str, Any]) -> None:
+        response = Response(**message_in)
+        logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
 
 
 def main() -> None:
@@ -34,9 +38,9 @@ def main() -> None:
             TestService,
             RetrieveService,
             ResponseService,
-            StorageService,
-            CodifyService,
-            ConsolidateService,
+            CodifyService,  # not used in this example
+            ConsolidateService,  # not used in this example
+            StorageService,  # not used in this example
         ],
     )
 
@@ -45,11 +49,6 @@ def main() -> None:
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()
-
-
-def on_main_prompt_complete(message_in: dict[str, Any]) -> None:
-    response = Response(**message_in)
-    logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
 
 
 if __name__ == '__main__':

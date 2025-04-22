@@ -32,34 +32,40 @@ class RetrieveMetric(Enum):
 
 class RetrieveService(Service):
     """
-    Service responsible for handling semantic prompt retrieval. It communicates with vector and document databases via plugins and tracks operational metrics for observability.
+    Manages semantic prompt retrieval and indexing by coordinating between vector/document databases,
+    tracking metrics, and responding to system events.
+
+    This service is responsible for receiving prompt submissions, retrieving relevant information using
+    vector similarity, and handling the indexing and metadata enrichment process. It interfaces with
+    plugin-managed databases and provides observability through metrics tracking.
 
     Attributes:
-        plugin_manager (PluginManager): Plugin manager to access database and vector services.
-        vector_db_plugin (dict): Plugin for interacting with the vector database.
-        db_plugin (dict): Plugin for document database operations.
-        metrics_tracker (MetricsTracker): Tracks various retrieval-related metrics.
-        meta_repository (MetaRepository): Handles persistence and loading of Meta objects.
+        plugin_manager (PluginManager): Access point for system plugins, including vector and document DBs.
+        vector_db_plugin (dict): Plugin used for vector database operations (e.g., semantic search).
+        db_plugin (dict): Plugin for interacting with the document database.
+        metrics_tracker (MetricsTracker): Collects and resets retrieval-related metrics for monitoring.
+        meta_repository (MetaRepository): Handles Meta object persistence and transformation.
 
     Methods:
-        init_async(): Initializes the database connection.
-        start(): Subscribes to service topics for prompt submission, indexing, and metadata completion.
-        stop(): Stops the service and cleans up subscriptions.
+        init_async(): Initializes database connections and plugin setup asynchronously.
+        start(): Subscribes to system topics for prompt processing and indexing lifecycle.
+        stop(): Cleans up the service and halts processing.
 
-        submit(prompt): Initiates the retrieval process for a given prompt and logs metrics.
-        on_submit_prompt(data): Handles incoming prompt strings from messaging, wraps them in a Prompt object, and triggers retrieval.
+        submit(prompt: Prompt): Begins the retrieval process and logs submission metrics.
+        on_submit_prompt(data: str): Converts raw prompt string to a Prompt object and submits for processing.
 
-        on_index_complete(index_message): Callback that handles completed indices and submits them to the vector DB.
-        on_meta_complete(meta_dict): Callback for completed metadata, converts and submits to vector DB.
+        on_index_complete(index_message: dict): Converts index payload into Index objects and queues for insertion.
+        _insert_engram_vector(index_list: list[Index], engram_id: str): Asynchronously inserts semantic indices into vector DB.
 
-        insert_meta_vector(meta): Asynchronously inserts metadata summaries into the vector DB.
-        insert_engram_vector(index_list, engram_id): Asynchronously inserts semantic indices into the vector DB.
+        on_meta_complete(meta_dict: dict): Loads and inserts metadata summary into the vector DB.
+        insert_meta_vector(meta: Meta): Runs metadata vector insertion in a background thread.
 
-        on_acknowledge(message_in): Handles status reporting and resets the current metric tracker.
+        on_acknowledge(message_in: str): Emits service metrics to the status channel and resets the tracker.
     """
 
     def __init__(self, host: Host) -> None:
         super().__init__(host)
+
         self.plugin_manager: PluginManager = host.plugin_manager
         self.vector_db_plugin = host.plugin_manager.get_plugin('vector_db', 'db')
         self.db_plugin = host.plugin_manager.get_plugin('db', 'document')
@@ -75,9 +81,10 @@ class RetrieveService(Service):
         self.subscribe(Service.Topic.SUBMIT_PROMPT, self.on_submit_prompt)
         self.subscribe(Service.Topic.INDEX_COMPLETE, self.on_index_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
+        super().start()
 
-    def stop(self) -> None:
-        super().stop()
+    async def stop(self) -> None:
+        await super().stop()
 
     # when called from monitor service
     def on_submit_prompt(self, data: str) -> None:
