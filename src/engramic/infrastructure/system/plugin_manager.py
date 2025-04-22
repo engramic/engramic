@@ -48,11 +48,11 @@ class PluginManager:
 
         if not plugin_paths:
             error = 'ENGRAMIC_PLUGIN_PATHS environment variable is not set.'
-            raise OSError(error)
+            logging.info('ENGRAMIC_PLUGIN_PATHS not set.')
 
-        if not os.path.isdir(plugin_paths):
+        if plugin_paths is None or not os.path.isdir(plugin_paths):
             file_not_found = f'Plugin directory does not exist: {self.default_plugin_path}'
-            raise FileNotFoundError(file_not_found)
+            logging.info(file_not_found)
 
         if plugin_paths:
             paths = plugin_paths.split(';')

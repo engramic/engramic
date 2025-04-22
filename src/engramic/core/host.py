@@ -205,7 +205,7 @@ class Host:
             self.stop_event.wait()
 
             for service in self.services:
-                completed = self.services[service].cleanup_complete.wait(timeout=7)
+                completed = self.services[service].cleanup_complete.wait(timeout=9)
                 if not completed:
                     logging.warning(
                         "Event cleanup_complete not set. This means a service didn't shut down correctly. Try subscribe to shudown method by calling super().start() in all service's start method. %s",
