@@ -1,4 +1,4 @@
-# Engramic API Reference (v{{ version }})
+# Engramic API Reference
 
 <p align="center">
   <img src="assets/logo_200.png" alt="Engramic Logo">
