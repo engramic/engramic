@@ -29,8 +29,8 @@
       "module": "pytest",
       //"args": ["${workspaceFolder}/tests/application/integration/test_retrieve.py"],
       //"args": ["${workspaceFolder}/tests/application/integration/test_response.py"],
-      "args": ["${workspaceFolder}/tests/application/integration/test_codify.py"],
-      //"args": ["${workspaceFolder}/tests/application/integration/test_consolidate.py"],
+      //"args": ["${workspaceFolder}/tests/application/integration/test_codify.py"],
+      "args": ["${workspaceFolder}/tests/application/integration/test_consolidate.py"],
       "console": "integratedTerminal"
     },
     {
@@ -39,6 +39,19 @@
       "request": "launch",
       "program": "${workspaceFolder}/tests/application/integration/generate_test_data.py",
       "console": "integratedTerminal"
+    },
+    {
+      "name": "Run Production - Standard Profile",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/standard_profile/standard_profile.py",
+      "console": "integratedTerminal",
+      "pythonArgs": ["-O"],
+      "envFile": "${workspaceFolder}/.env.prod",
+      "env": {
+        "ENV": "production",
+        "LOG_LEVEL": "INFO"
+      }
     }
   ]
 }

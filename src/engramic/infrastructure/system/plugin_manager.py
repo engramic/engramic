@@ -14,6 +14,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from enum import Enum
+from importlib.resources import as_file, files
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -23,6 +24,8 @@ import tomli
 from engramic.infrastructure.system.engram_profiles import EngramProfiles
 
 if TYPE_CHECKING:
+    from importlib.abc import Traversable
+
     from engramic.core.host import Host
 
 
@@ -32,7 +35,7 @@ class ResponseType(Enum):
 
 
 class PluginManager:
-    PLUGIN_DEFAULT_ROOT = 'src/engramic/infrastructure/plugins'
+    PLUGIN_DEFAULT_ROOT = 'engramic.resources.plugins'
 
     @dataclass
     class PluginManagerResponse:
@@ -42,26 +45,28 @@ class PluginManager:
 
     def __init__(self, host: Host, profile_name: str, *, ignore_profile: bool = False):
         self.host = host
-        self.default_plugin_path = ''
+        self.default_plugin_path: Traversable | None = None
+        self.custom_plugin_paths: list[str] = []
 
-        plugin_paths = os.getenv('ENGRAMIC_PLUGIN_PATHS')
+        # custom_plugin_paths = os.getenv('CUSTOM_PLUGIN_PATHS')
 
-        if not plugin_paths:
-            error = 'ENGRAMIC_PLUGIN_PATHS environment variable is not set.'
-            logging.info('ENGRAMIC_PLUGIN_PATHS not set.')
+        # if not custom_plugin_paths:
+        #    error = 'CUSTOM_PLUGIN_PATHS environment variable is not set.'
+        #    logging.info('CUSTOM_PLUGIN_PATHS environment variable not set.')
 
-        if plugin_paths is None or not os.path.isdir(plugin_paths):
-            file_not_found = f'Plugin directory does not exist: {self.default_plugin_path}'
-            logging.info(file_not_found)
+        # if custom_plugin_paths:
+        #    paths = custom_plugin_paths.split(';')
+        #    self.custom_plugin_paths = paths[0]
+        #    if len(paths) > 1:
+        #        error = 'Multiple plugin paths not currently supported.'
+        #        raise ValueError(error)
 
-        if plugin_paths:
-            paths = plugin_paths.split(';')
-            self.default_plugin_path = paths[0]
-            if len(paths) > 1:
-                error = 'Multiple plugin paths not currently supported.'
-                raise ValueError(error)
-        else:
-            self.default_plugin_path = PluginManager.PLUGIN_DEFAULT_ROOT
+        self.default_plugin_path = files('engramic.resources.plugins')
+
+        with as_file(self.default_plugin_path) as path:
+            if path is None or not os.path.isdir(path):
+                file_not_found = f'Plugin directory does not exist: {path}'
+                logging.info(file_not_found)
 
         if profile_name is None and not ignore_profile:
             error = 'Profile name empty'
@@ -123,23 +128,24 @@ class PluginManager:
     def import_plugins(self) -> None:
         current_profile = self.profiles.get_currently_set_profile()
 
-        if current_profile:
-            for category in current_profile:
-                category_path = os.path.join(self.default_plugin_path, category)
-                if os.path.isdir(category_path):
-                    usage = current_profile[category]
-                    for items in usage:
-                        plugin_entry = usage[items]
-                        plugin_name = plugin_entry['name'].lower()
+        if current_profile and self.default_plugin_path:
+            with as_file(self.default_plugin_path) as plugin_root_path:
+                for category in current_profile:
+                    category_path = plugin_root_path / category
+                    if category_path.is_dir():
+                        usage = current_profile[category]
+                        for items in usage:
+                            plugin_entry = usage[items]
+                            plugin_name = plugin_entry['name'].lower()
 
-                        plugin_path = os.path.join(category_path, plugin_name)
-                        plugin_file = os.path.join(plugin_path, f'{plugin_name}.py')
-                        module_name = f'{category}.{plugin_name}'
-                        spec = importlib.util.spec_from_file_location(module_name, plugin_file)
-                        if spec is not None and spec.loader is not None:
-                            module = importlib.util.module_from_spec(spec)
-                            spec.loader.exec_module(module)
-                            sys.modules[module_name] = module
+                            plugin_path = category_path / plugin_name
+                            plugin_file = plugin_path / f'{plugin_name}.py'
+                            module_name = f'{category}.{plugin_name}'
+                            spec = importlib.util.spec_from_file_location(module_name, plugin_file)
+                            if spec is not None and spec.loader is not None:
+                                module = importlib.util.module_from_spec(spec)
+                                spec.loader.exec_module(module)
+                                sys.modules[module_name] = module
 
     def get_plugin(self, category: str, usage: str) -> dict[str, Any]:
         if self.profiles is None:
@@ -178,10 +184,11 @@ class PluginManager:
         raise RuntimeError(error)
 
     def _get_packages(self, key: str, plugin_name: dict[str, str]) -> list[tuple[str, Any]]:
-        system_plugin_root_dir = Path(self.default_plugin_path)
-        plugin_root_dir = system_plugin_root_dir / key / plugin_name['name'].lower()
+        packages: list[tuple[str, Any]] = []
+        if self.default_plugin_path:
+            plugin_root_dir = self.default_plugin_path / key / plugin_name['name'].lower()
 
-        packages = self._parse_plugin_toml(str(plugin_root_dir))
+            packages = self._parse_plugin_toml(str(plugin_root_dir))
         return packages
 
     def _parse_plugin_toml(self, plugin_root_dir: str) -> list[tuple[str, Any]]:
