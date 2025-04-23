@@ -1,0 +1,49 @@
+name: Publish - TestPyPI
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Hatch
+        run: pip install --user hatch
+
+      - name: Add Hatch to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Run formatting & linting
+        run: hatch fmt
+
+      - name: Create .env file
+        run: |
+          echo "LOCAL_STORAGE_ROOT_PATH=./local_storage" >> .env
+
+      - name: Run tests on the entire python matrix
+        run: hatch test -a
+
+      - name: 🔨 Build the package
+        run: hatch build
+
+      - name: 🔧 Configure TestPyPI credentials
+        run: |
+          mkdir -p ~/.config/hatch
+          cat <<EOF > ~/.config/hatch/config.toml
+          [publish.index.repos.test]
+          url = "https://test.pypi.org/legacy/"
+          username = "${{ secrets.TEST_PYPI_USERNAME }}"
+          password = "${{ secrets.TEST_PYPI_PASSWORD }}"
+          EOF
+
+      - name: 🚀 Publish to TestPyPI
+        run: hatch publish -r test
