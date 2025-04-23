@@ -810,23 +810,31 @@
 <p>Please contact us at info@engramic.org if you have any issues with these instructions.</p>
 <details class="note">
 <summary>1. Pre-Requisites - OS &amp; IDE</summary>
-<p>We are currently testing Engramic on <strong>WSL on Windows</strong> using <strong>Visual Studio Code</strong>. It <em>may</em> run on other configurations—we'll begin cross-platform testing soon. If you'd like to help us, please reach out at <a href="mailto:info@engramic.org">info@engramic.org</a>.</p>
+<p>We are currently testing Engramic on <strong>WSL on Windows</strong> using <strong>Visual Studio Code</strong> With Ubuntu 24.0.1 LTS. It <em>may</em> run on other configurations—we'll begin cross-platform testing soon. If you'd like to help us, please reach out at <a href="mailto:info@engramic.org">info@engramic.org</a>.</p>
+<p>Engramic is availible via pip, however, working from source is recommended for this release.</p>
+<div class="highlight"><pre><span></span><code>pip install engramic
+</code></pre></div>
+<p>To set up your dev environment, you will need the following:</p>
+<ul>
+<li>Visual Studio Code</li>
+<li>Git</li>
+<li>Pipx</li>
+<li>Hatch</li>
+<li>MS VS Code WSL Extension</li>
+<li>MS Python Debugger</li>
+<li>Google Gemini API key (optional)</li>
+</ul>
 </details>
 <details class="note">
 <summary>2. Clone or Fork From <a href="https://github.com/engramic/engramic">GitHub</a></summary>
 <p>Clone or fork the latest version from the <code>main</code> branch of the Engramic GitHub repository:</p>
 <p>📎 <a href="https://github.com/engramic/engramic">https://github.com/engramic/engramic</a></p>
-<p>Engramic is availible via pip, however, working directly from the code is recomended at this time.</p>
-<div class="highlight"><pre><span></span><code>pip install engramic
-</code></pre></div>
 </details>
 <details class="note">
 <summary>3. Install <a href="https://hatch.pypa.io/1.12/install/#command-line-installer_1">Hatch</a></summary>
 <p>We use <strong><a href="https://hatch.pypa.io">Hatch</a></strong> as our Python project manager. It handles all dependencies, Python versioning, testing, versioning, scripts, and virtual environments.</p>
 <p>🔗 <a href="https://hatch.pypa.io/1.12/install/#command-line-installer_1">Hatch Installation</a></p>
-<p>We recommend using <code>pipx</code> as described in the Hatch installation instructions.</p>
-<p>⚠️ You may see a browser download warning when downloading the Hatch installer.</p>
-<p>Watch a <a href="https://www.youtube.com/watch?v=aY4lpy9vV0Q&amp;t=372s">video</a> of using Hatch in Engramic.</p>
+<p>We recommend installing with <code>pipx</code> as described in the Hatch installation instructions. Restart your terminal after running pipx ensurepath.</p>
 </details>
 <details class="note">
 <summary>4. Initialize the Environment</summary>
@@ -835,16 +843,26 @@
 <li>Navigate to the root of the Engramic project in your terminal.</li>
 <li>
 <p>Run:</p>
-<div class="highlight"><pre><span></span><code>hatch shell
+<div class="highlight"><pre><span></span><code>hatch env create
 </code></pre></div>
+<p>Enter into the default shell ("default" has no name after "shell".)
+<div class="highlight"><pre><span></span><code>hatch shell
+</code></pre></div></p>
 </li>
 </ol>
-<p>This will install all dependencies (should be quick—we work hard to minimize dependencies).</p>
+<p>This will install all dependencies (should be quick—we work hard to minimize dependencies).
+Watch a <a href="https://www.youtube.com/watch?v=aY4lpy9vV0Q&amp;t=372s">video</a> of Hatch in Engramic.</p>
 <ol>
 <li>
-<p>Open the project in VS Code:</p>
+<p>Open Visual Studio Code and install the WSL extension.</p>
+</li>
+<li>
+<p>Launch VS Code from the WSL terminal:</p>
 <div class="highlight"><pre><span></span><code>code .
 </code></pre></div>
+</li>
+<li>
+<p>In Windows, in VS Code, install the Python Debugger extension from Microsoft.</p>
 </li>
 </ol>
 </details>
@@ -857,9 +875,13 @@
 <li>Choose the environment that looks like:<br />
 <code>Python X.XX.X ('engramic')</code></li>
 </ol>
+<p>Note: If you aren't sure of the path, you can type the following while in the hatch shell:</p>
+<div class="highlight"><pre><span></span><code>python -c &quot;import sys;print(sys.executable)&quot;
+</code></pre></div>
+<p>If you are stuck, make sure your top, middle search bar in VS Code reads: engramic [WSL: Ubuntu-24.04] (or your distro). If not, your issue is probably related to the WSL extension.</p>
 </details>
 <details class="note">
-<summary>6. Run the Mock Version</summary>
+<summary>6. Run the Mock Example</summary>
 <h3 id="running-the-code">Running The Code</h3>
 <p>The code is available at:
 <div class="highlight"><pre><span></span><code>    engramic/examples/mock_profile/mock_profile.py
@@ -868,43 +890,41 @@
 <li>Open the <strong>Run and Debug</strong> sidebar in VS Code.</li>
 <li>Choose <strong>"Example - Mock"</strong> and run it.</li>
 </ol>
-<blockquote>
-<p>You may get a Windows Security warning for Python — that's expected.</p>
-</blockquote>
-<p>Congrats! 🎉 You've just run the mock version of the system using mock plugins. You Should see the output message in Terminal Window.</p>
+<p>Congrats! 🎉 You've just run the mock version of the system using mock plugins. You should see an output message in terminal window.</p>
 <h3 id="looking-at-the-code">Looking At The Code</h3>
 <p>The mock version doesn't actually use AI calls, just emulated API calls that return static responses via the Mock plugins. In this example, you can see how to create a Host, MessageService, RetrieveService, and a ResponseService. Also, we have created a service called TestService whose only job is to recieve the Response call from the subscirbed callback on_main_prompt_complete.</p>
 </details>
 <details class="note">
-<summary>7. Run the Standard Version</summary>
+<summary>7. Run the Standard Example</summary>
 <h3 id="running-the-code_1">Running The Code</h3>
 <p>Now, let's run an example with actual AI. This example uses Google Gemini.</p>
 <div class="highlight"><pre><span></span><code>    engramic/examples/standard_profile/standard_profile.py
 </code></pre></div>
 <ol>
 <li>
-<p>In <strong>Run and Debug</strong>, select <strong>"Example - Standard"</strong>.</p>
-</li>
-<li>
 <p>For this example, you'll need a <strong>Gemini API key</strong>:</p>
 <ul>
 <li>Create a Google Cloud account if you don't already have one.</li>
-<li>Follow Google's documentation to create an API key.</li>
+<li>Follow Google's documentation to create a Generative Language API key.</li>
 </ul>
 </li>
 <li>
-<p>Add a <code>.env</code> file to the root of the project with the following content:</p>
+<p>Add a <code>.env</code> file to the root of the project with the following content (multiple plugin paths coming soon.):</p>
 <div class="highlight"><pre><span></span><code>GEMINI_API_KEY=PUT_YOUR_KEY_HERE_WITH_NO_QUOTES_OR_ANYTHING_ELSE
-ENGRAMIC_PLUGIN_PATHS=/your/absolute/directory/path/engramic/src/engramic/infrastructure/plugins
-LOCAL_STORAGE_ROOT_PATH=/your/absolute/directory/path/engramic/local_storage
+ENGRAMIC_PLUGIN_PATHS=./src/engramic/infrastructure/plugins
+LOCAL_STORAGE_ROOT_PATH=./local_storage
 </code></pre></div>
 <p>Locate this line and change it if you would like to.</p>
 <div class="highlight"><pre><span></span><code><span class="n">retrieve_service</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">Prompt</span><span class="p">(</span><span class="s1">&#39;Briefly tell me about Chamath Palihapitiya.&#39;</span><span class="p">))</span>
 </code></pre></div>
 </li>
+<li>
+<p>In <strong>Run and Debug</strong>, select <strong>"Example - Standard"</strong>.</p>
+<p><em>Note: this takes some time on first run. Be patient.</em></p>
+</li>
 </ol>
 <h3 id="looking-at-the-code_1">Looking At The Code</h3>
-<p>Run the program. The plugins will automatically download all dependencies on the first run and check for updates on subsequent runs. Configuration for plugins are defined by <a href="../profiles/">profiles</a>, in this case, the profile is named "standard"</p>
+<p>Run the program. The plugins will automatically download all dependencies on the first run and check for updates on subsequent runs. Configuration for plugins are defined by <a href="../profiles/">profiles</a>, in this case, the profile is named "standard". Each plugin contains it's dependencies in a plugin.toml file.</p>
 <p>Hit <strong>Run</strong> and you'll see the result in the terminal window. This example adds Storage, Codify, and Consolidate service, but doesn't actually use them.</p>
 <p>Let's try those services in the next demo.</p>
 </details>
@@ -919,7 +939,7 @@ LOCAL_STORAGE_ROOT_PATH=/your/absolute/directory/path/engramic/local_storage
 </ol>
 <p>You should see three outputs, Response, Meta Summary, and Engrams.</p>
 <h3 id="looking-at-the-code_2">Looking at The Code</h3>
-<p>This time, we've added another call to our TestService. Services support manage sync and async threads. Some features that services perform run on the main thread, such as subscribing, while others such as sending messages or running tasks (not demonstrated) must run on the async thread. The Codify service is listening for the SET_TRAINING_MODE call.</p>
+<p>This time, we've added another call to our TestService. Services support sync and async threads. Some features that services perform run on the main thread, such as subscribing, while others such as sending messages or running tasks (not demonstrated) must run on the async thread. The Codify service is listening for the SET_TRAINING_MODE call.</p>
 <div class="highlight"><pre><span></span><code>    class TestService(Service):
         def start(self):
             self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE,on_main_prompt_complete)
@@ -931,7 +951,7 @@ LOCAL_STORAGE_ROOT_PATH=/your/absolute/directory/path/engramic/local_storage
             self.send_message_async(Service.Topic.SET_TRAINING_MODE,{&quot;training_mode&quot;:True})
             return None
 </code></pre></div>
-<p>Let's look the Observation, the output of the Codify service. Two types of data structures are output on the screen, the first is a set of Engrams, these are the memories extracted from the response of the training. The next is the Meta Summary. Meta data are summary information about all Engrams that were generated. This data structure is created to help the retrieval stage with awareness of it's memory set.</p>
+<p>Let's look at the Observation, the output of the Codify service. Two types of data structures are output on the screen, the first is a set of Engrams, these are the memories extracted from the response of the training. The next is the Meta Summary. Meta data are summary information about all Engrams that were generated. This data structure is created to help the retrieval stage with awareness of it's memory set.</p>
 <p>To delete all memories, enter into the hatch shell named "dev".</p>
 <div class="highlight"><pre><span></span><code>cd /engramic
 hatch shell dev
