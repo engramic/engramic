@@ -41,6 +41,7 @@ jobs:
           cat <<EOF > ~/.config/hatch/config.toml
           [publish.index.repos.test]
           url = "https://test.pypi.org/legacy/"
+          identity = "github"
           EOF
 
       - name: 🚀 Publish to TestPyPI
