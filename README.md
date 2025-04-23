@@ -32,7 +32,7 @@ During these early phases of development, we recommend working from source code,
 ### Starter Example 
 Run a mock version (no API key required) of Engramic.
 
-**Step 1**. Include the imports:
+**Step 1**. Include the imports & set logging:
 ```
 import logging
 from typing import Any
@@ -44,6 +44,8 @@ from engramic.core.host import Host
 from engramic.core.prompt import Prompt
 from engramic.core.response import Response
 from engramic.infrastructure.system import Service
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 ```
 
 **Step 2**. Create a test service and subscribe to the MAIN_PROMPT_COMPLETE message:
@@ -64,7 +66,16 @@ class TestService(Service):
 ```
 if __name__ == '__main__':
 
-    host = Host('mock', [MessageService, TestService, RetrieveService, ResponseService])
+    host = Host(
+        'mock',
+        [
+            # Order matters due to pub/sub dependencies.
+            MessageService,
+            RetrieveService,
+            ResponseService,
+            TestService,  #TestService must be last
+        ],
+    )
 
     retrieve_service = host.get_service(RetrieveService)
     retrieve_service.submit(Prompt('Tell me about the All In podcast.'))

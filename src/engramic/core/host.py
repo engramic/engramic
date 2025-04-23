@@ -13,6 +13,7 @@ import queue
 import signal
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from importlib.resources import as_file, files
 from threading import Thread
 from typing import TYPE_CHECKING, Any
 
@@ -324,11 +325,9 @@ class Host:
             logging.info('Mock data saved')
 
     def read_mock_data(self) -> None:
-        directory = 'tests/data'
-        filename = 'mock.txt'
-        full_path = os.path.join(directory, filename)
+        resource_path = files('engramic.resources').joinpath('mock.txt')
 
-        with open(full_path, encoding='utf-8') as f:
+        with as_file(resource_path) as path, open(path, encoding='utf-8') as f:
             data_in = f.read()
             self.mock_data_collector = json.loads(data_in, object_hook=self.custom_decoder)
 

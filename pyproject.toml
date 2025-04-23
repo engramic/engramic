@@ -72,7 +72,7 @@ deploy-docs-local = "hatch version | cut -d. -f1,2 | xargs mike deploy"
 set-default-docs = "hatch version | cut -d. -f1,2 | xargs mike set-default --push"
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.9", "3.10","3.11","3.12","3.13"]
+python = ["3.10","3.11","3.12","3.13"]
 
 [tool.coverage.run]
 source_pkgs = ["engramic", "tests"]
@@ -123,3 +123,11 @@ ignore = ["PLC0414","RET504","PLR6301","S105","TRY301","S702","S324","S608"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["engramic"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "examples/"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/engramic"]

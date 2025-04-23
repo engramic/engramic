@@ -123,7 +123,6 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
         ```env
         GEMINI_API_KEY=PUT_YOUR_KEY_HERE_WITH_NO_QUOTES_OR_ANYTHING_ELSE
-        ENGRAMIC_PLUGIN_PATHS=./src/engramic/infrastructure/plugins
         LOCAL_STORAGE_ROOT_PATH=./local_storage
         ```
 

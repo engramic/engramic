@@ -32,7 +32,16 @@ if __name__ == '__main__':
     # RetrieveService - Performs the query on all memories.
     # ResponseService - Combines all sources of information and performs the query.
 
-    host = Host('mock', [MessageService, TestService, RetrieveService, ResponseService])
+    host = Host(
+        'mock',
+        [
+            # Order matters due to pub/sub dependencies.
+            MessageService,
+            RetrieveService,
+            ResponseService,
+            TestService,  #TestService must be last
+        ],
+    )
 
     retrieve_service = host.get_service(RetrieveService)
     retrieve_service.submit(Prompt('Tell me about the All In podcast.'))

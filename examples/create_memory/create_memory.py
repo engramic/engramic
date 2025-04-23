@@ -25,7 +25,7 @@ class TestService(Service):
     def start(self):
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
-        return super().start()
+        super().start()
 
     def init_async(self):
         super().init_async()
@@ -45,14 +45,14 @@ class TestService(Service):
 def main() -> None:
     host = Host(
         'standard',
-        [
+        [  
             MessageService,
-            TestService,
             RetrieveService,
             ResponseService,
             StorageService,
             CodifyService,
             ConsolidateService,
+            TestService, #TestService must be last
         ],
     )
 

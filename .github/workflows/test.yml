@@ -37,7 +37,6 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "ENGRAMIC_PLUGIN_PATHS=./src/engramic/infrastructure/plugins" >> .env
           echo "LOCAL_STORAGE_ROOT_PATH=./local_storage" >> .env
 
       - name: Run tests on the entire python matrix

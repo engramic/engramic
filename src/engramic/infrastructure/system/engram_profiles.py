@@ -5,7 +5,9 @@
 from __future__ import annotations
 
 import logging
+import os
 import shutil
+from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
 
@@ -27,16 +29,20 @@ class EngramProfiles:
     def __init__(self) -> None:
         self.currently_set_profile: dict[Any, Any] | None = None
 
-        default_path = Path(EngramProfiles.DEFAULT_PROFILE_PATH)
+        default_path = files('engramic.resources').joinpath(EngramProfiles.DEFAULT_PROFILE_PATH)
+
         if not default_path.is_file():
             logging.error('Default TOML file not found: %s', EngramProfiles.DEFAULT_PROFILE_PATH)
-            raise FileNotFoundError
+            error = 'An engram_profiles.toml file must be located in your resources directory.'
+            raise FileNotFoundError(error)
 
-        local_path = Path(EngramProfiles.LOCAL_PROFILE_PATH)
+        cwd = os.getcwd()
+        local_path = Path(cwd, EngramProfiles.LOCAL_PROFILE_PATH)
         if not local_path.is_file():
             try:
-                shutil.copy(default_path, local_path)
-                logging.info('Created local config from default: %s', local_path)
+                with as_file(default_path) as resolved_path:
+                    shutil.copy(str(resolved_path), local_path)
+                    logging.info('Created local config from default: %s', local_path)
             except Exception:
                 logging.exception('Failed to copy default to local config.')
                 raise
