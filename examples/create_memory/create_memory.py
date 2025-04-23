@@ -25,11 +25,13 @@ class TestService(Service):
     def start(self):
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
-        super().start()
 
-    def init_async(self):
-        super().init_async()
-        self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
+        async def send_message() -> None:
+            self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
+
+        self.run_task(send_message())
+
+        super().start()
 
     def on_main_prompt_complete(self, message_in: dict[str, Any]) -> None:
         response = Response(**message_in)
@@ -45,14 +47,14 @@ class TestService(Service):
 def main() -> None:
     host = Host(
         'standard',
-        [  
+        [
             MessageService,
             RetrieveService,
             ResponseService,
             StorageService,
             CodifyService,
             ConsolidateService,
-            TestService, #TestService must be last
+            TestService,
         ],
     )
 

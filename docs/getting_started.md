@@ -13,7 +13,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     ```
 
     To set up your dev environment, you will need the following:
-    
+    - Python 3.10+
     - Visual Studio Code
     - Git
     - Pipx
@@ -161,19 +161,20 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
     ### Looking at The Code ###
 
-    This time, we've added another call to our TestService. Services support sync and async threads. Some features that services perform run on the main thread, such as subscribing, while others such as sending messages or running tasks (not demonstrated) must run on the async thread. The Codify service is listening for the SET_TRAINING_MODE call.
+    This time, we've added another call to our TestService. Services support sync and async threads. Some features that services perform run on the main thread, such as subscribing, while others such as sending messages or running tasks must run on the async thread. The Codify service is listening for the SET_TRAINING_MODE call sent by TestService.
 
     ```
         class TestService(Service):
             def start(self):
                 self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE,on_main_prompt_complete)
                 self.subscribe(Service.Topic.OBSERVATION_COMPLETE,on_observation_complete)
+                
+                async def send_message()->None:
+                    await self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
+
+                self.run_task(send_message())
+
                 return super().start()
-            
-            def init_async(self):
-                super().init_async()
-                self.send_message_async(Service.Topic.SET_TRAINING_MODE,{"training_mode":True})
-                return None
     ```
 
     Let's look at the Observation, the output of the Codify service. Two types of data structures are output on the screen, the first is a set of Engrams, these are the memories extracted from the response of the training. The next is the Meta Summary. Meta data are summary information about all Engrams that were generated. This data structure is created to help the retrieval stage with awareness of it's memory set.
