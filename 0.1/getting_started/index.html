@@ -814,16 +814,15 @@
 <p>Engramic is availible via pip, however, working from source is recommended for this release.</p>
 <div class="highlight"><pre><span></span><code>pip install engramic
 </code></pre></div>
-<p>To set up your dev environment, you will need the following:</p>
-<ul>
-<li>Visual Studio Code</li>
-<li>Git</li>
-<li>Pipx</li>
-<li>Hatch</li>
-<li>MS VS Code WSL Extension</li>
-<li>MS Python Debugger</li>
-<li>Google Gemini API key (optional)</li>
-</ul>
+<p>To set up your dev environment, you will need the following:
+- Python 3.10+
+- Visual Studio Code
+- Git
+- Pipx
+- Hatch
+- MS VS Code WSL Extension
+- MS Python Debugger
+- Google Gemini API key (optional)</p>
 </details>
 <details class="note">
 <summary>2. Clone or Fork From <a href="https://github.com/engramic/engramic">GitHub</a></summary>
@@ -938,17 +937,18 @@ LOCAL_STORAGE_ROOT_PATH=./local_storage
 </ol>
 <p>You should see three outputs, Response, Meta Summary, and Engrams.</p>
 <h3 id="looking-at-the-code_2">Looking at The Code</h3>
-<p>This time, we've added another call to our TestService. Services support sync and async threads. Some features that services perform run on the main thread, such as subscribing, while others such as sending messages or running tasks (not demonstrated) must run on the async thread. The Codify service is listening for the SET_TRAINING_MODE call.</p>
+<p>This time, we've added another call to our TestService. Services support sync and async threads. Some features that services perform run on the main thread, such as subscribing, while others such as sending messages or running tasks must run on the async thread. The Codify service is listening for the SET_TRAINING_MODE call sent by TestService.</p>
 <div class="highlight"><pre><span></span><code>    class TestService(Service):
         def start(self):
-            self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE,on_main_prompt_complete)
-            self.subscribe(Service.Topic.OBSERVATION_COMPLETE,on_observation_complete)
-            return super().start()
+            self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
+            self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
 
-        def init_async(self):
-            super().init_async()
-            self.send_message_async(Service.Topic.SET_TRAINING_MODE,{&quot;training_mode&quot;:True})
-            return None
+            async def send_message() -&gt; None:
+                self.send_message_async(Service.Topic.SET_TRAINING_MODE, {&#39;training_mode&#39;: True})
+
+            self.run_task(send_message())
+
+            super().start()
 </code></pre></div>
 <p>Let's look at the Observation, the output of the Codify service. Two types of data structures are output on the screen, the first is a set of Engrams, these are the memories extracted from the response of the training. The next is the Meta Summary. Meta data are summary information about all Engrams that were generated. This data structure is created to help the retrieval stage with awareness of it's memory set.</p>
 <p>To delete all memories, enter into the hatch shell named "dev".</p>
