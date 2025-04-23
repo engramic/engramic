@@ -41,8 +41,6 @@ jobs:
           cat <<EOF > ~/.config/hatch/config.toml
           [publish.index.repos.test]
           url = "https://test.pypi.org/legacy/"
-          username = "${{ secrets.TEST_PYPI_USERNAME }}"
-          password = "${{ secrets.TEST_PYPI_PASSWORD }}"
           EOF
 
       - name: 🚀 Publish to TestPyPI
