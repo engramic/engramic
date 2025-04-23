@@ -39,7 +39,7 @@ if __name__ == '__main__':
             MessageService,
             RetrieveService,
             ResponseService,
-            TestService,  #TestService must be last
+            TestService,
         ],
     )
 

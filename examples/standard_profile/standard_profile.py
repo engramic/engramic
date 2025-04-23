@@ -40,7 +40,7 @@ def main() -> None:
             CodifyService,  # not used in this example
             ConsolidateService,  # not used in this example
             StorageService,  # not used in this example
-            TestService,  #TestService must be last
+            TestService,
         ],
     )
 

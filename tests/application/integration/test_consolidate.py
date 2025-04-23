@@ -69,6 +69,6 @@ class MiniService(Service):
 
 @pytest.mark.timeout(10)  # seconds
 def test_consolidate_service_submission() -> None:
-    host = Host('mock', [MessageService, ConsolidateService, MiniService])  # miniservice must go last.
+    host = Host('mock', [MessageService, ConsolidateService, MiniService])
 
     host.wait_for_shutdown()

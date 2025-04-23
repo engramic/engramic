@@ -106,7 +106,7 @@ quote-style = "single"
 [tool.ruff.lint]
 preview = true
 extend-select = ["C901"]
-ignore = ["PLC0414","RET504","PLR6301","S105","TRY301","S702","S324","S608"] 
+ignore = ["PLC0414","RET504","PLR6301","S105","TRY301","S702","S324","S608","RUF029"] 
 
 #ignores
 #PLC0414 - Redundant "as" in init files
@@ -117,6 +117,7 @@ ignore = ["PLC0414","RET504","PLR6301","S105","TRY301","S702","S324","S608"]
 #S702 - Escaping mako text
 #S324 - MD5, not using for insecure hashing
 #S608 - Possible SQL injection vector through string-based query construction
+#RUF029 - Async function doesn't await.
 
 [tool.ruff.lint.extend-per-file-ignores]
 "docs/.hooks/*" = ["INP001", "T201"]
