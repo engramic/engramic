@@ -166,15 +166,15 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     ```
         class TestService(Service):
             def start(self):
-                self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE,on_main_prompt_complete)
-                self.subscribe(Service.Topic.OBSERVATION_COMPLETE,on_observation_complete)
-                
-                async def send_message()->None:
-                    await self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
+                self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
+                self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
+
+                async def send_message() -> None:
+                    self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
 
                 self.run_task(send_message())
 
-                return super().start()
+                super().start()
     ```
 
     Let's look at the Observation, the output of the Codify service. Two types of data structures are output on the screen, the first is a set of Engrams, these are the memories extracted from the response of the training. The next is the Meta Summary. Meta data are summary information about all Engrams that were generated. This data structure is created to help the retrieval stage with awareness of it's memory set.
