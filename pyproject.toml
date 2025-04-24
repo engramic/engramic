@@ -6,10 +6,9 @@ build-backend = "hatchling.build"
 name = "engramic"
 dynamic = ["version"]
 description = 'An open source (for companies less than 250 employees) AI library for processing, storing, and retrieving proprietary, unstructured data.'
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = { text = "Engramic Community License" }
-license-files = { paths = ["LICENSE.txt"] }
 keywords = ["AI", "LLM", "RAG", "Retrieval Augmented Generation", "Memory"]
 authors = [
   { name = "Preisz Consulting, LLC", email = "license@engramic.org" }
