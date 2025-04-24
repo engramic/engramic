@@ -38,12 +38,13 @@ jobs:
       - name: 🔧 Configure PRODUCTION PyPI credentials
         run: |
           mkdir -p ~/.config/hatch
-          cat <<EOF > ~/.config/hatch/config.toml
+          cat <<EOF >> ~/.config/hatch/config.toml
+          
           [publish.index.repos.main]
           url = "https://upload.pypi.org/legacy/"
-          username = "${{ secrets.PYPI_USERNAME }}"
-          password = "${{ secrets.PYPI_PASSWORD }}"
           EOF
 
       - name: 🚀 Publish to PyPI
-        run: hatch publish -r main
+        env:
+          MAIN_PYPI_PASSWORD: ${{ secrets.MAIN_PYPI_PASSWORD }}
+        run: hatch publish -r main -u __token__ -a "$MAIN_PYPI_PASSWORD"

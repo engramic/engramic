@@ -33,7 +33,7 @@ class MiniService(Service):
 
         # Remove 'id' from each engram in the engram_list
         for gen_engram, exp_engram in zip(
-            generated_response.get('engram_list', []), expected_results.get('engram_list', [])
+            generated_response.get('engram_list', []), expected_results.get('engram_list', []), strict=False
         ):
             gen_engram.pop('id', None)
             exp_engram.pop('id', None)

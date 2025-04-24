@@ -61,7 +61,7 @@ class EngramProfiles:
 
         version = self._data.get('version')
 
-        if not isinstance(version, (float, int)):  # Ensure version is a numeric type
+        if not isinstance(version, float | int):  # Ensure version is a numeric type
             logging.error('Invalid profile version type: %s', type(version))
             error = 'Invalid profile version'
             raise TypeError(error)
