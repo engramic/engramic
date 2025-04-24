@@ -5,7 +5,7 @@
 # Engramic: Build Apps that Answer, Learn, and Remember
 
 ## What is Engramic?
-Engramic is an advanced system designed to enhance AI applications with sophisticated context management and memory capabilities. Unlike conventional RAG implementations, Engramic goes beyond simple retrieval and response by integrating memory and learning mechanisms, enabling applications to synthisize it's data, improving it's undersanding over time.
+Engramic is an advanced system designed to enhance AI applications with sophisticated context management and memory capabilities. Unlike conventional RAG implementations, Engramic goes beyond simple retrieval and response by integrating memory and learning mechanisms, enabling applications to synthesize their data, improving it's undersanding over time.
 
 ## Core Features
 - **Context Management**: Maintain and utilize contextual awareness across multiple interactions.
@@ -27,7 +27,7 @@ The fastest way to begin working with Engramic is to download it from pip.
 pip install engramic
 ```
 
-During these early phases of development, we recommend working from source code, setting up your environment is designed to be straight forward. See the "Getting Started" section in our documentation. The complete code is available in examples/mock_profile/mock_profile.py.
+During these early phases of development, we recommend working from source code. Setting up your environment is designed to be straightforward. See the "Getting Started" section in our documentation. The complete code is available in examples/mock_profile/mock_profile.py.
 
 ### Starter Example 
 Run a mock version (no API key required) of Engramic.
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     host.wait_for_shutdown()
 ```
 
-This example uses plugins that emulate API calls (i.e. mocks) to LLMs, databases, etc. by returning deterministic data. Visit the documentation for the next "getting started" example to use non-mock plugins.
+This example uses plugins that emulate API calls (i.e. mocks) to LLMs, databases, etc. by returning deterministic data. Visit the documentation for the next "Getting Started" example to use non-mock plugins.
 
 ## Dependencies
 **Pure Python**
@@ -100,7 +100,7 @@ This example uses plugins that emulate API calls (i.e. mocks) to LLMs, databases
 ## Plugins
 Plugins are managed in the engram_profiles.toml file which is generated during the first run. Engramic currently includes the plugins listed below.
 
-*Note:Plugin dependencies are downloaded on first run of the plugin and can be viewed in the plugin.toml file located in the root directory of the plugin.*
+*Note: Plugin dependencies are downloaded on first run of the plugin and can be viewed in the plugin.toml file located in the root directory of the plugin.*
 
 Vector DB
 - ChomraDB

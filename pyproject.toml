@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = 'An open source (for companies less than 250 employees) AI library for processing, storing, and retrieving proprietary, unstructured data.'
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
-license = { text = "Engramic Community License" }
+license = { file = "LICENSE.txt" }
 keywords = ["AI", "LLM", "RAG", "Retrieval Augmented Generation", "Memory"]
 authors = [
   { name = "Preisz Consulting, LLC", email = "license@engramic.org" }
@@ -126,7 +126,14 @@ known-first-party = ["engramic"]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
-  "examples/"
+  "examples/",
+  ".github/",
+  ".vscode/",
+  "docs/",
+  "web/",
+  ".gitignore",
+  ".pre-commit-config.yaml",
+  "mkdocs.yml",
 ]
 
 [tool.hatch.build.targets.wheel]
