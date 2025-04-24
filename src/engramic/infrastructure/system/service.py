@@ -13,13 +13,13 @@ import uuid
 from abc import ABC, abstractmethod
 from concurrent.futures import Future
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import zmq
 import zmq.asyncio
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Sequence
+    from collections.abc import Awaitable, Callable, Sequence
 
     from engramic.core.host import Host
 
