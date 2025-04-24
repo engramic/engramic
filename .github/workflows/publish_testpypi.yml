@@ -6,8 +6,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
+
     steps:
       - name: 🧾 Checkout code
         uses: actions/checkout@v3
@@ -17,8 +16,6 @@ jobs:
         with:
           python-version: "3.11"
       
-      
-
       - name: Install Hatch
         run: pip install --user hatch
 
@@ -44,8 +41,7 @@ jobs:
           cat <<EOF > ~/.config/hatch/config.toml
           [publish.index.repos.test]
           url = "https://test.pypi.org/legacy/"
-          identity = "github"
           EOF
 
       - name: 🚀 Publish to TestPyPI
-        run: hatch publish -r test
+        run: hatch publish -r test -u __token__ -a {{ secrets.TEST_PYPI_PASSWORD }}
