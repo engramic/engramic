@@ -46,5 +46,5 @@ jobs:
 
       - name: 🚀 Publish to PyPI
         env:
-          TEST_PYPI_PASSWORD: ${{ secrets.MAIN_PYPI_PASSWORD }}
+          MAIN_PYPI_PASSWORD: ${{ secrets.MAIN_PYPI_PASSWORD }}
         run: hatch publish -r main -u __token__ -a "$MAIN_PYPI_PASSWORD"
