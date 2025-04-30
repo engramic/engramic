@@ -100,31 +100,14 @@ class ConsolidateService(Service):
         observation = self.observation_repository.load_dict(observation_dict)
         self.metrics_tracker.increment(ConsolidateMetric.OBSERVATIONS_RECIEVED)
 
-        summary_observation = self.run_task(self._generate_summary(observation))
-        summary_observation.add_done_callback(self.on_summary)
+        self.run_task(self._generate_summary_embeddings(observation.meta))
 
         generate_engrams = self.run_task(self._generate_engrams(observation))
         generate_engrams.add_done_callback(self.on_engrams)
 
     """
-    ### Summarize
-
-    Will be used in the future when we pull in data from other sources.
+    ### Generate meta embeddings
     """
-
-    async def _generate_summary(self, observation: Observation) -> Meta:
-        if (
-            observation.meta.summary_full is not None and not observation.meta.summary_full.text
-        ):  # native LLM observations have a summary already.
-            not_test = 'not tested yet'
-            raise NotImplementedError(not_test)
-            self.metrics_tracker.increment(ConsolidateMetric.SUMMARIES_GENERATED)
-
-        return observation.meta
-
-    def on_summary(self, summary_fut: Future[Any]) -> None:
-        result = summary_fut.result()
-        self.run_task(self._generate_summary_embeddings(result))
 
     async def _generate_summary_embeddings(self, meta: Meta) -> None:
         if meta.summary_full is None:
@@ -185,13 +168,34 @@ class ConsolidateService(Service):
             prompt=prompt,
             structured_schema=response_schema,
             args=self.host.mock_update_args(plugin, index),
+            images=None,
         )
+
+        load_json = json.loads(indices[0]['llm_response'])
+        response_json: dict[str, Any] = {'index_text_array': []}
+
+        # generate context
+        context_string = 'Context: '
+
+        if engram.context is None:
+            error = 'None context found in engram.'
+            raise RuntimeError(error)
+
+        for item, key in engram.context.items():
+            if key != 'null':
+                context_string += f'{item}: {key}\n'
+
+        # add in the context to each index.
+        for index_item in load_json['index_text_array']:
+            response_json['index_text_array'].append(context_string + ' Content: ' + index_item)
 
         self.host.update_mock_data(plugin, indices, index)
 
         self.metrics_tracker.increment(ConsolidateMetric.INDICES_GENERATED, len(indices))
 
-        response_json = json.loads(indices[0]['llm_response'])
+        if len(response_json['index_text_array']) == 0:
+            error = 'An empty index was created.'
+            raise RuntimeError(error)
 
         return {'id': id_in, 'indices': response_json['index_text_array']}
 
@@ -214,6 +218,7 @@ class ConsolidateService(Service):
         engram_id: str = id_and_index_dict['id']
 
         plugin = self.embedding_gen_embed
+
         embedding_list_ret = await asyncio.to_thread(
             plugin['func'].gen_embed, strings=indices, args=self.host.mock_update_args(plugin, process_index)
         )

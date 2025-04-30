@@ -16,8 +16,10 @@ class Mock(LLM):
         self.mock_data = mock_data
 
     @llm_impl
-    def submit(self, prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
-        del structured_schema, prompt
+    def submit(
+        self, prompt: Prompt, images: list[str], structured_schema: dict[str, Any], args: dict[str, Any]
+    ) -> dict[str, Any]:
+        del structured_schema, prompt, images
 
         response_str: dict[str, Any] = self.mock_data[args['mock_lookup']]
         return response_str

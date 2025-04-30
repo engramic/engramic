@@ -37,15 +37,20 @@ class Gemini(LLM):
         return ret_string.strip()
 
     @llm_impl
-    def submit(self, prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    def submit(
+        self, prompt: Prompt, images: list[str], structured_schema: dict[str, Any], args: dict[str, Any]
+    ) -> dict[str, Any]:
         model = args['model']
+
+        parts = [types.Part.from_text(text=prompt.render_prompt())]
+
+        if images:
+            parts.extend([types.Part.from_bytes(mime_type='image/png', data=image_b64) for image_b64 in images])
 
         contents = [
             types.Content(
                 role='user',
-                parts=[
-                    types.Part.from_text(text=prompt.render_prompt()),
-                ],
+                parts=parts,
             ),
         ]
 

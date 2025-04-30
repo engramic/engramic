@@ -8,8 +8,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
     from engramic.core.index import Index
 
 
@@ -49,7 +47,7 @@ class Engram:
     library_ids: list[str] | None = None
     accuracy: int | None = 0
     relevancy: int | None = 0
-    created_date: datetime | None = None
+    created_date: int | None = None
 
     def generate_toml(self) -> str:
         def toml_escape(value: str) -> str:

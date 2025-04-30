@@ -9,7 +9,7 @@ from typing import Any
 
 @dataclass
 class Prompt:
-    prompt_str: str
+    prompt_str: str = ''
     input_data: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:

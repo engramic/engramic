@@ -38,6 +38,7 @@ class Service(ABC):
         ENGRAM_COMPLETE = 'engram_complete'
         META_COMPLETE = 'meta_complete'
         INDEX_COMPLETE = 'index_complete'
+        SUBMIT_DOCUMENT = 'submit_document'
         ACKNOWLEDGE = 'acknowledge'
         STATUS = 'status'
         SET_TRAINING_MODE = 'set_training_mode'

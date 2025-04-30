@@ -180,7 +180,11 @@ class CodifyService(Service):
 
         plugin = self.llm_validate
         validate_response = await asyncio.to_thread(
-            plugin['func'].submit, prompt=prompt, structured_schema=None, args=self.host.mock_update_args(plugin)
+            plugin['func'].submit,
+            prompt=prompt,
+            structured_schema=None,
+            args=self.host.mock_update_args(plugin),
+            images=None,
         )
 
         self.host.update_mock_data(self.llm_validate, validate_response)

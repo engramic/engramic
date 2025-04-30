@@ -23,7 +23,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["pluggy","mako","tomli","pyzmq","cachetools","websockets"]
+dependencies = ["pluggy","mako","tomli","pyzmq","cachetools","websockets","pymupdf"]
 
 [tool.hatch.envs.dev]
 template = "default"

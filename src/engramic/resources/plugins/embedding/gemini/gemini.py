@@ -21,6 +21,7 @@ class Gemini(Embedding):
     @embedding_impl
     def gen_embed(self, strings: list[str], args: dict[str, Any]) -> dict[str, list[list[float]]]:
         del args
+
         result = self._api_client.models.embed_content(
             model='text-embedding-004', contents=strings, config=types.EmbedContentConfig(task_type='RETRIEVAL_QUERY')
         )
