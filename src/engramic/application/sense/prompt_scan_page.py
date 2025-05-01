@@ -31,13 +31,25 @@ class PromptScanPage(Prompt):
     <chapter></chapter> - A chapter title, typically only in large documents.
     <section></section> - A section of a document. Typically a large title on a page denoting that the subsequent pages are related to this title.
     <title></title>  - Reserved only for obvious document titles.
-    <h1></h1> - A typical heading in this document. A h1 is typically the start of a new idea and is clearly linked to the Main Topics described in the summary_initial.
-    <h3></h3> - A typical heading that is contained under a h1, supporting it with further detail. It adds detail to the Sub Topics described the summary_initial.
-    <engram></engram> - Group paragraphs and semanticaly related items into blocks of items that are semantically related. Never nest h1 and h3 tags inside of it the engram is always at a level just below that.
+    <h1></h1> - A main topic in this document.
+    <h3></h3> - A sub topic in this document, supporting main topics with further detail.
+    <engram></engram> - Group paragraphs and items that are semantically related. A good engram is a group of sub topics the size of one or two paragraphs.
     <p></p> - A block of text, might be a paragraphs or a couple of paragraphs but possibly only a line of text.
     <img></img> - An alt text description of the image. An img tag should never be empty.
 
+    A good engram looks like this:
 
+    <h1>Main topic</h1>
+    <engram>
+    <h3>Sub Topic</h3>
+        <p>Some text related to sub topic.</p>
+    <h3>Sub Topic</h3>
+    </engram>
+
+    % if page_split["is_continuation"]==True:
+    The beginning of this page contains text that continues from the previous page's main topic.
+    Your response should not begin with a h1 tag.
+    % endif
 
 
     Do not begin and end your response with a fence (i.e. three backticks)

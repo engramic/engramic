@@ -7,9 +7,12 @@ from mako.template import Template
 from engramic.core.prompt import Prompt
 
 
-class PromptGenInitialSummary(Prompt):
+class PromptGenMeta(Prompt):
     def render_prompt(self) -> str:
         rendered_template = Template("""
+
+
+
     These are the initial pages of a pdf named ${file_name} from location ${file_path} and you are only seeing the first several pages. From the images, extract the following:
 
 

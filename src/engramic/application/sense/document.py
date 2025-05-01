@@ -20,7 +20,8 @@ from typing import TYPE_CHECKING, Any
 import fitz
 
 from engramic.application.sense.prompt_gen_full_summary import PromptGenFullSummary
-from engramic.application.sense.prompt_gen_initial_summary import PromptGenInitialSummary
+from engramic.application.sense.prompt_gen_meta import PromptGenMeta
+from engramic.application.sense.prompt_gen_page_splits import PromptGenPageSplits
 from engramic.application.sense.prompt_scan_page import PromptScanPage
 from engramic.core.engram import Engram
 from engramic.core.index import Index
@@ -38,6 +39,7 @@ if TYPE_CHECKING:
 
 class Document(Media):
     DPI = 72
+    TEST_PAGE_LIMIT = 30
 
     def __init__(self, parent_service: SenseService, document_id: str, sense_inital_summary: dict[str, Any]):
         self.id = document_id
@@ -97,7 +99,7 @@ class Document(Media):
         args = plugin['args']
         summary_images = self.page_images[:4]
 
-        prompt = PromptGenInitialSummary(input_data={'file_path': self.file_path, 'file_name': self.file_name})
+        prompt = PromptGenMeta(input_data={'file_path': self.file_path, 'file_name': self.file_name})
 
         structured_response = {
             'file_path': str,
@@ -126,7 +128,49 @@ class Document(Media):
         result = future.result()
         self.inital_scan = result
 
-        self.total_pages = 4
+        future = self.service.run_task(self._page_splits())
+        future.add_done_callback(self._on_page_splits)
+
+    async def _page_splits(self) -> None:
+        plugin = self.sense_initial_summary
+        args = plugin['args']
+
+        self.page_splits: list[dict[str,Any]] = []
+        # first page is always false
+        self.page_splits.append({'is_continuation': False})
+
+        for i in range(1, len(self.page_images)):
+            if i >= Document.TEST_PAGE_LIMIT:
+                break
+
+            prompt = PromptGenPageSplits(
+                input_data={'file_path': self.file_path, 'file_name': self.file_name, 'page': i + 1}
+            )
+
+            structured_schema = {
+                'last_main_topic_image_0': str,
+                'first_line_text_image_1': str,
+                'is_continuation': bool,
+            }
+
+            images = []
+            images.extend([self.page_images[i - 1], self.page_images[i]])
+
+            ret = await asyncio.to_thread(
+                self.sense_initial_summary['func'].submit,
+                prompt=prompt,
+                images=images,
+                structured_schema=structured_schema,
+                args=args,
+            )
+
+            self.page_splits.append(json.loads(ret[0]['llm_response']))
+
+    def _on_page_splits(self, future: Future[Any]) -> None:
+        result = future.result()
+        del result
+
+        self.total_pages = min(Document.TEST_PAGE_LIMIT, self.total_pages)
         coroutines = [self._scan_page(i) for i in range(self.total_pages)]
 
         # Assume run_tasks returns a Future or an awaitable that wraps the coroutine execution
@@ -139,6 +183,7 @@ class Document(Media):
 
         initial_scan_copy = copy.copy(self.inital_scan)
         initial_scan_copy.update({'page_number': page_num + 1})
+        initial_scan_copy.update({'page_split': self.page_splits[page_num]})
 
         prompt_scan = PromptScanPage(input_data=initial_scan_copy)
 
