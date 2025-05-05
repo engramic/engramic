@@ -12,7 +12,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from engramic.application.consolidate.prompt_gen_indices import PromptGenIndices
-from engramic.core import Engram, Index, Meta
+from engramic.core import Engram, Index
 from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.observation import Observation
@@ -94,13 +94,13 @@ class ConsolidateService(Service):
 
     def on_observation_complete(self, observation_dict: dict[str, Any]) -> None:
         if __debug__:
-            self.host.update_mock_data_input(self, observation_dict)
+            self.host.update_mock_data_input(self, observation_dict, observation_dict['input_id'])
 
         # should run a task for this.
         observation = self.observation_repository.load_dict(observation_dict)
         self.metrics_tracker.increment(ConsolidateMetric.OBSERVATIONS_RECIEVED)
 
-        self.run_task(self._generate_summary_embeddings(observation.meta))
+        self.run_task(self._generate_summary_embeddings(observation))
 
         generate_engrams = self.run_task(self._generate_engrams(observation))
         generate_engrams.add_done_callback(self.on_engrams)
@@ -109,22 +109,24 @@ class ConsolidateService(Service):
     ### Generate meta embeddings
     """
 
-    async def _generate_summary_embeddings(self, meta: Meta) -> None:
-        if meta.summary_full is None:
+    async def _generate_summary_embeddings(self, observation: Observation) -> None:
+        if observation.meta.summary_full is None:
             error = 'Summary full is none.'
             raise ValueError(error)
 
         plugin = self.embedding_gen_embed
         embedding_list_ret = await asyncio.to_thread(
-            plugin['func'].gen_embed, strings=[meta.summary_full.text], args=self.host.mock_update_args(plugin)
+            plugin['func'].gen_embed,
+            strings=[observation.meta.summary_full.text],
+            args=self.host.mock_update_args(plugin, 0, observation.input_id),
         )
 
-        self.host.update_mock_data(plugin, embedding_list_ret)
+        self.host.update_mock_data(plugin, embedding_list_ret, 0, observation.input_id)
 
         embedding_list = embedding_list_ret[0]['embeddings_list']
-        meta.summary_full.embedding = embedding_list[0]
+        observation.meta.summary_full.embedding = embedding_list[0]
 
-        self.send_message_async(Service.Topic.META_COMPLETE, asdict(meta))
+        self.send_message_async(Service.Topic.META_COMPLETE, asdict(observation.meta))
 
     """
     ### Generate Engrams
@@ -132,13 +134,15 @@ class ConsolidateService(Service):
     Create engrams from the observation.
     """
 
-    async def _generate_engrams(self, observation: Observation) -> list[Engram]:
+    async def _generate_engrams(self, observation: Observation) -> Observation:
         self.metrics_tracker.increment(ConsolidateMetric.ENGRAMS_GENERATED, len(observation.engram_list))
 
-        return observation.engram_list
+        return observation
 
-    def on_engrams(self, engram_list_fut: Future[Any]) -> None:
-        engram_list = engram_list_fut.result()
+    def on_engrams(self, observation_fut: Future[Any]) -> None:
+        observation = observation_fut.result()
+        engram_list = observation.engram_list
+        input_id = observation.input_id
 
         # Keep references so we can fill them in later
         for engram in engram_list:
@@ -149,13 +153,13 @@ class ConsolidateService(Service):
                 raise RuntimeError(error)
 
         # 1) Generate indices for each engram
-        index_tasks = [self._gen_indices(i, engram.id, engram) for i, engram in enumerate(engram_list)]
+        index_tasks = [self._gen_indices(i, engram.id, input_id, engram) for i, engram in enumerate(engram_list)]
 
         indices_future = self.run_tasks(index_tasks)
 
         indices_future.add_done_callback(self.on_indices_done)
 
-    async def _gen_indices(self, index: int, id_in: str, engram: Engram) -> dict[str, Any]:
+    async def _gen_indices(self, index: int, id_in: str, input_id: str, engram: Engram) -> dict[str, Any]:
         data_input = {'engram': engram}
 
         prompt = PromptGenIndices(prompt_str='', input_data=data_input)
@@ -167,7 +171,7 @@ class ConsolidateService(Service):
             plugin['func'].submit,
             prompt=prompt,
             structured_schema=response_schema,
-            args=self.host.mock_update_args(plugin, index),
+            args=self.host.mock_update_args(plugin, index, input_id),
             images=None,
         )
 
@@ -189,7 +193,10 @@ class ConsolidateService(Service):
         for index_item in load_json['index_text_array']:
             response_json['index_text_array'].append(context_string + ' Content: ' + index_item)
 
-        self.host.update_mock_data(plugin, indices, index)
+        self.host.update_mock_data(plugin, indices, index, input_id)
+
+        number_indicies = len(load_json['index_text_array'])
+        self.send_message_async(Service.Topic.INDEX_CREATED, {'input_id': input_id, 'count': number_indicies})
 
         self.metrics_tracker.increment(ConsolidateMetric.INDICES_GENERATED, len(indices))
 
@@ -197,7 +204,7 @@ class ConsolidateService(Service):
             error = 'An empty index was created.'
             raise RuntimeError(error)
 
-        return {'id': id_in, 'indices': response_json['index_text_array']}
+        return {'id': id_in, 'input_id': input_id, 'indices': response_json['index_text_array']}
 
     # Once all indices are generated, generate embeddings
     def on_indices_done(self, indices_list_fut: Future[Any]) -> None:
@@ -213,17 +220,18 @@ class ConsolidateService(Service):
 
         embed_future.add_done_callback(self.on_embeddings_done)
 
-    async def _gen_embeddings(self, id_and_index_dict: dict[str, Any], process_index: int) -> str:
+    async def _gen_embeddings(self, id_and_index_dict: dict[str, Any], process_index: int) -> dict[str, Any]:
         indices = id_and_index_dict['indices']
         engram_id: str = id_and_index_dict['id']
+        input_id: str = id_and_index_dict['input_id']
 
         plugin = self.embedding_gen_embed
 
         embedding_list_ret = await asyncio.to_thread(
-            plugin['func'].gen_embed, strings=indices, args=self.host.mock_update_args(plugin, process_index)
+            plugin['func'].gen_embed, strings=indices, args=self.host.mock_update_args(plugin, process_index, input_id)
         )
 
-        self.host.update_mock_data(plugin, embedding_list_ret, process_index)
+        self.host.update_mock_data(plugin, embedding_list_ret, process_index, input_id)
 
         embedding_list = embedding_list_ret[0]['embeddings_list']
 
@@ -242,28 +250,32 @@ class ConsolidateService(Service):
         serialized_index_array = [asdict(index) for index in index_array]
 
         # We can optionally notify about newly attached indices
-        self.send_message_async(Service.Topic.INDEX_COMPLETE, {'index': serialized_index_array, 'engram_id': engram_id})
+        self.send_message_async(
+            Service.Topic.INDEX_COMPLETE,
+            {'index': serialized_index_array, 'engram_id': engram_id, 'input_id': input_id},
+        )
 
         # Return the ID so we know which engram was updated
-        return engram_id
+        return {'engram_id': engram_id, 'input_id': input_id}
 
     # Once embeddings are generated, then we're truly done
     def on_embeddings_done(self, embed_fut: Future[Any]) -> None:
         ret = embed_fut.result()  # ret should have 'gen_embeddings' -> list of engram IDs
 
-        ids = ret['_gen_embeddings']  # which IDs got their embeddings updated
+        ret_dict = ret['_gen_embeddings']  # which IDs got their embeddings updated
+        input_id = ret_dict[0]['input_id']
 
-        # 3) Now that embeddings exist, we can send "ENGRAM_COMPLETE" for each
+        # Now that embeddings exist, we can send "ENGRAM_COMPLETE" for each
         engram_dict: list[dict[str, Any]] = []
-        engram_dict = [asdict(self.engram_builder[eid]) for eid in ids]
+        engram_dict = [asdict(self.engram_builder[eid['engram_id']]) for eid in ret_dict]
 
         self.send_message_async(Service.Topic.ENGRAM_COMPLETE, {'engram_array': engram_dict})
 
         if __debug__:
-            self.host.update_mock_data_output(self, {'engram_array': engram_dict})
+            self.host.update_mock_data_output(self, {'engram_array': engram_dict}, 0, input_id)
 
-        for eid in ids:
-            del self.engram_builder[eid]
+        for eid in ret_dict:
+            del self.engram_builder[eid['engram_id']]
 
     """
     ### Acknowledge

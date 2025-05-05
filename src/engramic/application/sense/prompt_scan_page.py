@@ -10,9 +10,29 @@ from engramic.core.prompt import Prompt
 class PromptScanPage(Prompt):
     def render_prompt(self) -> str:
         rendered_template = Template("""
-    You are viewing page ${page_number} from a document. This is the page as determined by counting pages, not scanned page in the image.
+    Read and label items on the page using the following tags. Use no other tags.
 
-    file_path - ${file_path}
+    If an item with a given tag doesn't exist skip that tag.
+    Never put tags around whitespace (e.g. <h1>\n</h1>)
+    Never,ever, make tags with empty inner text (e.g. <h1></h1>)
+
+
+    <page></page> - The page number if avaialble in image.
+    <header></header> - This would be a standard document header. Typically includes a company name, logo, date, or current section.
+    <title></title>  - Reserved only for document titles. They are typically in early pages, often the first page in smaller documents but larger documents sometimes have them on page two or three. They are large bold and may be accompanied by a author or a date.
+    <chapter></chapter> - A chapter title, typically only in large documents.
+    <section></section> - A major section of a document. Typically a very large title on it's very own page with very little else on the page. It's job to signal that the subsequent pages are related to this section. Sections are not that common and most pages do not have them.
+
+    <h1> tags. Use these header tags as you see appropriate given the visual and contextual cues on the page. h1 tags match the main topic.
+    <h3> tags. Use these header tags as you see appropriate given the visual and contextual cues on the page. h1 tags match the sub topic.
+
+    <p></p> - A block of text, might be a paragraphs or a couple of paragraphs but possibly only a line of text. Isn't typically bold and looks like most of the font on the page.
+    <img></img> - An alt text description of the image. An img tag should never be empty.
+
+    Do not use <ul> tags. Use only the tags you are given.
+
+    Contextual information about the document:
+    You are viewing page ${page_number} from a document.
     file_name - ${file_name}
     document_title - ${document_title}
     document_format - ${document_format}
@@ -20,39 +40,9 @@ class PromptScanPage(Prompt):
     toc - ${toc}
     summary_initial - ${summary_initial}
 
-    Read and label items on the page using the following tags. Use no other tags.
-    If an item doesn't exist, simply leave it empty.
-    Do not put tags around whitespace such as a group of returns.
-
-
-
-    <page></page> - The page number if avaialble in image.
-    <header></header> - This would be a standard header. Typically includes a company name, logo, date, or current section.
-    <chapter></chapter> - A chapter title, typically only in large documents.
-    <section></section> - A section of a document. Typically a large title on a page denoting that the subsequent pages are related to this title.
-    <title></title>  - Reserved only for obvious document titles.
-    <h1></h1> - A main topic in this document.
-    <h3></h3> - A sub topic in this document, supporting main topics with further detail.
-    <engram></engram> - Group paragraphs and items that are semantically related. A good engram is a group of sub topics the size of one or two paragraphs.
-    <p></p> - A block of text, might be a paragraphs or a couple of paragraphs but possibly only a line of text.
-    <img></img> - An alt text description of the image. An img tag should never be empty.
-
-    A good engram looks like this:
-
-    <h1>Main topic</h1>
-    <engram>
-    <h3>Sub Topic</h3>
-        <p>Some text related to sub topic.</p>
-    <h3>Sub Topic</h3>
-    </engram>
-
-    % if page_split["is_continuation"]==True:
-    The beginning of this page contains text that continues from the previous page's main topic.
-    Your response should not begin with a h1 tag.
-    % endif
-
-
     Do not begin and end your response with a fence (i.e. three backticks)
+
+    Begin with the page number.
 
     """).render(**self.input_data)
         return str(rendered_template)

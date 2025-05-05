@@ -11,7 +11,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from engramic.application.response.prompt_main_prompt import PromptMainPrompt
-from engramic.core import Engram, Prompt, PromptAnalysis
+from engramic.core import Engram, PromptAnalysis
 from engramic.core.host import Host
 from engramic.core.interface.db import DB
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
@@ -75,7 +75,6 @@ class ResponseService(Service):
         self.db_document_plugin = self.plugin_manager.get_plugin('db', 'document')
         self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
         self.llm_main = self.plugin_manager.get_plugin('llm', 'response_main')
-        self.instructions: Prompt = Prompt('Placeholder for prompt engineering for main prompt.')
         self.metrics_tracker: MetricsTracker[ResponseMetric] = MetricsTracker[ResponseMetric]()
         ##
         # Many methods are not ready to be until their async component is running.
@@ -209,7 +208,9 @@ class ResponseService(Service):
 
         response = response[0]['llm_response'].replace('$', 'USD ').replace('<context>', '').replace('</context>', '')
 
-        response_inst = Response(str(uuid.uuid4()), response, retrieve_result, prompt.prompt_str, analysis, model)
+        response_inst = Response(
+            str(uuid.uuid4()), prompt.prompt_id, response, retrieve_result, prompt.prompt_str, analysis, model
+        )
 
         return response_inst
 

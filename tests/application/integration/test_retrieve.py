@@ -6,7 +6,6 @@ import pytest
 from engramic.application.message.message_service import MessageService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.core.host import Host
-from engramic.core.prompt import Prompt
 from engramic.infrastructure.system.service import Service
 
 # Configure logging
@@ -21,11 +20,11 @@ class MiniService(Service):
         super().start()
 
     async def send_message(self) -> None:
-        prompt = Prompt(**self.host.mock_data_collector['RetrieveService-input'])
-        self.send_message_async(Service.Topic.SUBMIT_PROMPT, prompt.prompt_str)
+        rs_input = self.host.mock_data_collector['RetrieveService-0-input']
+        self.send_message_async(Service.Topic.SUBMIT_PROMPT, rs_input)
 
     def on_retrieve_complete(self, generated_results) -> None:
-        expected_results = self.host.mock_data_collector['RetrieveService-0-output']
+        expected_results = self.host.mock_data_collector['RetrieveService--0-output']
 
         assert str(generated_results['analysis']) == str(expected_results['analysis'])
         assert str(generated_results['prompt_str']) == str(expected_results['prompt_str'])
@@ -42,5 +41,6 @@ class MiniService(Service):
 @pytest.mark.timeout(10)  # seconds
 def test_retrieve_service_submission() -> None:
     host = Host('mock', [MessageService, RetrieveService, MiniService])
+
     host.shutdown()
     host.wait_for_shutdown()

@@ -20,17 +20,19 @@ class MiniService(Service):
         super().start()
 
     async def send_message(self) -> None:
-        retrieve_response = self.host.mock_data_collector['RetrieveService-0-output']
+        retrieve_response = self.host.mock_data_collector['RetrieveService--0-output']
         self.send_message_async(Service.Topic.RETRIEVE_COMPLETE, retrieve_response)
 
     def on_response_complete(self, generated_response) -> None:
-        expected_results = self.host.mock_data_collector['ResponseService-0-output']
+        expected_results = self.host.mock_data_collector['ResponseService--0-output']
         del generated_response['id']
         del expected_results['id']
         del generated_response['response_time']
         del expected_results['response_time']
         del generated_response['model']
         del expected_results['model']
+        del generated_response['input_id']
+        del expected_results['input_id']
         assert str(generated_response) == str(expected_results)
         self.host.shutdown()
 

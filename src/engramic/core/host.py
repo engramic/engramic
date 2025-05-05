@@ -251,10 +251,10 @@ class Host:
 
         return 'unknown_coroutine'
 
-    def update_mock_data_input(self, service: Service, value: dict[str, Any]) -> None:
+    def update_mock_data_input(self, service: Service, value: dict[str, Any], index: int = 0) -> None:
         if self.generate_mock_data:
             service_name = service.__class__.__name__
-            concat = f'{service_name}-input'
+            concat = f'{service_name}-{index}-input'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'
@@ -262,10 +262,12 @@ class Host:
 
             self.mock_data_collector[concat] = value
 
-    def update_mock_data_output(self, service: Service, value: dict[str, Any], index: int = 0) -> None:
+    def update_mock_data_output(
+        self, service: Service, value: dict[str, Any], index: int = 0, input_id: str = ''
+    ) -> None:
         if self.generate_mock_data:
             service_name = service.__class__.__name__
-            concat = f'{service_name}-{index}-output'
+            concat = f'{service_name}-{input_id}-{index}-output'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'
@@ -273,13 +275,15 @@ class Host:
 
             self.mock_data_collector[concat] = value
 
-    def update_mock_data(self, plugin: dict[str, Any], response: list[dict[str, Any]], index_in: int = 0) -> None:
+    def update_mock_data(
+        self, plugin: dict[str, Any], response: list[dict[str, Any]], index_in: int = 0, input_id: str = ''
+    ) -> None:
         if self.generate_mock_data:
             caller_name = inspect.stack()[1].function
             usage = plugin['usage']
             index = index_in
 
-            concat = f'{caller_name}-{usage}-{index}'
+            concat = f'{caller_name}-{usage}-{input_id}-{index}'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'
@@ -331,13 +335,13 @@ class Host:
             data_in = f.read()
             self.mock_data_collector = json.loads(data_in, object_hook=self.custom_decoder)
 
-    def mock_update_args(self, plugin: dict[str, Any], index_in: int = 0) -> dict[str, Any]:
+    def mock_update_args(self, plugin: dict[str, Any], index_in: int = 0, input_id: str = '') -> dict[str, Any]:
         args: dict[str, Any] = copy.deepcopy(plugin['args'])
 
         if self.is_mock_profile:
             caller_name = inspect.stack()[1].function
             usage = plugin['usage']
-            concat = f'{caller_name}-{usage}-{index_in}'
+            concat = f'{caller_name}-{usage}-{input_id}-{index_in}'
             args.update({'mock_lookup': concat})
 
         return args

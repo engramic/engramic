@@ -117,7 +117,13 @@ class CodifyService(Service):
         analysis = PromptAnalysis(**response_dict['analysis'])
         retrieve_result = RetrieveResult(**response_dict['retrieve_result'])
         response = Response(
-            response_dict['id'], response_dict['response'], retrieve_result, prompt_str, analysis, model
+            response_dict['id'],
+            response_dict['input_id'],
+            response_dict['response'],
+            retrieve_result,
+            prompt_str,
+            analysis,
+            model,
         )
         self.metrics_tracker.increment(CodifyMetric.RESPONSE_RECIEVED)
         fetch_engram_step = self.run_task(self._fetch_engrams(response))
@@ -153,6 +159,7 @@ class CodifyService(Service):
     ) -> dict[str, Any]:
         meta_array: list[Meta] = await asyncio.to_thread(self.meta_repository.load_batch, meta_id_array)
         # assembled main_prompt, render engrams.
+
         return {'engram_array': engram_array, 'meta_array': meta_array, 'response': response}
 
     def on_fetch_meta_complete(self, fut: Future[Any]) -> None:
@@ -215,6 +222,11 @@ class CodifyService(Service):
 
         return_observation = self.observation_repository.load_toml_dict(
             self.observation_repository.normalize_toml_dict(toml_data, response)
+        )
+
+        self.send_message_async(
+            Service.Topic.ENGRAM_CREATED,
+            {'input_id': return_observation.input_id, 'count': len(return_observation.engram_list)},
         )
 
         # if this observation is from multiple sources, it must be merged the sources into it's meta.

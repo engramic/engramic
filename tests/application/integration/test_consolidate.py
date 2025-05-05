@@ -26,12 +26,13 @@ class MiniService(Service):
         super().start()
 
     async def send_messages(self) -> None:
-        observation = self.host.mock_data_collector['CodifyService-0-output']
+        observation = self.host.mock_data_collector['CodifyService--0-output']
+        self.input_id = observation['input_id']
         self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
         self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, observation)
 
     def on_engram_complete(self, generated_response_in) -> None:
-        expected_results = self.host.mock_data_collector['ConsolidateService-0-output']['engram_array']
+        expected_results = self.host.mock_data_collector[f'ConsolidateService-{self.input_id}-0-output']['engram_array']
         generated_response = generated_response_in['engram_array']
 
         for msg in generated_response:
@@ -54,16 +55,17 @@ class MiniService(Service):
 
         assert gen_str == exp_str
 
-        self.callback_ctr += 1
+        # if message_in['input_id'] == self.input_id:
+        #    self.callback_ctr += 1
 
-        if self.callback_ctr == 3:
-            self.host.shutdown()
+        # if self.callback_ctr == 3:
+        #    self.host.shutdown()
 
     def on_index_complete(self, message_in: dict[str, Any]) -> None:
-        del message_in
-        self.callback_ctr += 1
+        if message_in['input_id'] == self.input_id:
+            self.callback_ctr += 1
 
-        if self.callback_ctr == 3:
+        if self.callback_ctr == 6:
             self.host.shutdown()
 
 
