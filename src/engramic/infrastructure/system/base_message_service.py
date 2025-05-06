@@ -5,6 +5,7 @@
 import asyncio
 import json
 import logging
+import time
 from concurrent.futures import Future
 from enum import Enum
 from typing import Any
@@ -62,9 +63,10 @@ class BaseMessageService(Service):
 
     def _on_complete_listener(self, future: Future[Any]) -> None:
         wait = future.result()
+        time.sleep(0.2)  # make sure messages are recieved.
         del wait
-        self.pub_socket.close(linger=0)
-        self.pull_socket.close(linger=0)
+        self.pub_socket.close()
+        self.pull_socket.close()
         self.pub_pull_context.term()
 
         # base class sockets
@@ -77,7 +79,6 @@ class BaseMessageService(Service):
         if self.context is not None:
             self.context.term()
 
-        logging.debug('Message service sockets closed.')
         self.cleanup_complete.set()
         self.host.trigger_stop_event()
 

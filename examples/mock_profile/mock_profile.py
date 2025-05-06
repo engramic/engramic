@@ -44,7 +44,7 @@ if __name__ == '__main__':
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Tell me about the All In podcast.'))
+    retrieve_service.submit(Prompt('This is a mock input.'))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

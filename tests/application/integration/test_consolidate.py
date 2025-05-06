@@ -20,10 +20,10 @@ class MiniService(Service):
         super().__init__(host)
 
     def start(self) -> None:
+        super().start()
         self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engram_complete)
         self.subscribe(Service.Topic.INDEX_COMPLETE, self.on_index_complete)
         self.run_task(self.send_messages())
-        super().start()
 
     async def send_messages(self) -> None:
         observation = self.host.mock_data_collector['CodifyService--0-output']
@@ -55,11 +55,11 @@ class MiniService(Service):
 
         assert gen_str == exp_str
 
-        # if message_in['input_id'] == self.input_id:
-        #    self.callback_ctr += 1
+        if generated_response_in['input_id'] == self.input_id:
+            self.callback_ctr += 1
 
-        # if self.callback_ctr == 3:
-        #    self.host.shutdown()
+        if self.callback_ctr == 6:
+            self.host.shutdown()
 
     def on_index_complete(self, message_in: dict[str, Any]) -> None:
         if message_in['input_id'] == self.input_id:
@@ -69,7 +69,7 @@ class MiniService(Service):
             self.host.shutdown()
 
 
-@pytest.mark.timeout(10)  # seconds
+@pytest.mark.timeout(100)  # seconds
 def test_consolidate_service_submission() -> None:
     host = Host('mock', [MessageService, ConsolidateService, MiniService])
 

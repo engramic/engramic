@@ -15,14 +15,14 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 class MiniService(Service):
     def start(self) -> None:
+        super().start()
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.run_task(self.send_messages())
-        super().start()
 
     async def send_messages(self) -> None:
-        main_propmpt_response = self.host.mock_data_collector['ResponseService--0-output']
+        main_prompt_response = self.host.mock_data_collector['ResponseService--0-output']
         self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
-        self.send_message_async(Service.Topic.MAIN_PROMPT_COMPLETE, main_propmpt_response)
+        self.send_message_async(Service.Topic.MAIN_PROMPT_COMPLETE, main_prompt_response)
 
     def on_observation_complete(self, generated_response) -> None:
         expected_results = self.host.mock_data_collector['CodifyService--0-output']

@@ -49,4 +49,7 @@ class SenseService(Service):
             error = 'Only resource documents are currently supported.'
             raise NotImplementedError(error)
 
-        self.send_message_async(Service.Topic.INPUT_CREATED, {'input_id': document.get_source_id()})
+        async def send_message() -> None:
+            self.send_message_async(Service.Topic.INPUT_CREATED, {'input_id': document.get_source_id()})
+
+        self.run_task(send_message())

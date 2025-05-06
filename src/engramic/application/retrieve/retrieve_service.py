@@ -100,7 +100,10 @@ class RetrieveService(Service):
         retrieval = Ask(str(uuid.uuid4()), prompt, self.plugin_manager, self.metrics_tracker, self.db_plugin, self)
         retrieval.get_sources()
 
-        self.send_message_async(Service.Topic.INPUT_CREATED, {'input_id': prompt.prompt_id})
+        async def send_message() -> None:
+            self.send_message_async(Service.Topic.INPUT_CREATED, {'input_id': prompt.prompt_id})
+
+        self.run_task(send_message())
 
     def on_index_complete(self, index_message: dict[str, Any]) -> None:
         raw_index: list[dict[str, Any]] = index_message['index']

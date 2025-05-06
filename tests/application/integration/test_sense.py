@@ -16,9 +16,9 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 class MiniService(Service):
     def start(self) -> None:
+        super().start()
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_completed)
         self.run_task(self.send_message())
-        super().start()
 
     async def send_message(self) -> None:
         sense_service_input = self.host.mock_data_collector['SenseService-0-input']
@@ -52,7 +52,7 @@ class MiniService(Service):
         self.host.shutdown()
 
 
-@pytest.mark.timeout(100)  # seconds
+@pytest.mark.timeout(10)  # seconds
 def test_sense_service_submission() -> None:
     host = Host('mock', [MessageService, SenseService, MiniService])
     host.wait_for_shutdown()

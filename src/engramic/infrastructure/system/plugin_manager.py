@@ -47,6 +47,8 @@ class PluginManager:
         self.host = host
         self.default_plugin_path: Traversable | None = None
         self.custom_plugin_paths: list[str] = []
+        self.plugin_managers: dict[str, Any] = {}
+        self.modules: dict[str, Any] = {}
 
         # custom_plugin_paths = os.getenv('CUSTOM_PLUGIN_PATHS')
 
@@ -161,27 +163,43 @@ class PluginManager:
                 module_name = name.lower()
                 args = profile[category][usage]
 
-                plugin = sys.modules.get(f'{category}.{module_name}')
+                module_lookup = f'{category}.{module_name}'
 
-                plugin_class = getattr(plugin, name, None)
+                if module_lookup not in self.modules:
+                    plugin = sys.modules.get(f'{category}.{module_name}')
+                    plugin_class = getattr(plugin, name, None)
 
-                if not plugin_class:
-                    # If it's not found, raise an error
-                    runtime_error = f'Class {name} not found in module {category}.{module_name}'
-                    raise RuntimeError(runtime_error)
+                    if not plugin_class:
+                        # If it's not found, raise an error
+                        runtime_error = f'Class {name} not found in module {category}.{module_name}'
+                        raise RuntimeError(runtime_error)
 
-                pm = pluggy.PluginManager(category)
+                    if profile['name'] == 'mock':
+                        self.modules[module_lookup] = plugin_class(self.host.mock_data_collector)
+                    else:
+                        self.modules[module_lookup] = plugin_class()
 
-                if profile['name'] == 'mock':
-                    pm.register(plugin_class(self.host.mock_data_collector))
-                else:
-                    pm.register(plugin_class())
+                plugin_class = self.modules[module_lookup]
+
+                if category not in self.plugin_managers:
+                    self.plugin_managers[category] = pluggy.PluginManager(category)
+
+                pm = self.plugin_managers[category]
+
+                if plugin_class not in pm.get_plugins():
+                    pm.register(plugin_class)
 
                 return {'func': pm.hook, 'args': args, 'usage': usage}
 
         logging.error('Plugin %s.%s failed to load.', category, usage)
         error = 'Plugin failed to load'
         raise RuntimeError(error)
+
+    def shutdown_plugins(self) -> None:
+        for category in self.plugin_managers:
+            pm = self.plugin_managers[category]
+            for plugin in list(pm.get_plugins()):
+                pm.unregister(plugin)
 
     def _get_packages(self, key: str, plugin_name: dict[str, str]) -> list[tuple[str, Any]]:
         packages: list[tuple[str, Any]] = []

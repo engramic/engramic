@@ -36,7 +36,7 @@ class Service(ABC):
         MAIN_PROMPT_COMPLETE = 'main_prompt_complete'
         START_PROFILER = 'start_profiler'
         END_PROFILER = 'end_profiler'
-        OBSERVATION_COMPLETE = 'end_codify'
+        OBSERVATION_COMPLETE = 'observation_complete'
         ENGRAM_CREATED = 'engram_created'
         ENGRAM_COMPLETE = 'engram_complete'
         META_COMPLETE = 'meta_complete'
@@ -78,6 +78,7 @@ class Service(ABC):
         self.sub_socket.connect('tcp://127.0.0.1:5557')
         self.push_socket = self.context.socket(zmq.PUSH)
         self.push_socket.connect('tcp://127.0.0.1:5556')
+
         if self.__class__.__name__ != 'MessageService':
             self.background_future = self.run_background(self._listen_for_published_messages())
             self.background_future.add_done_callback(self.on_run_background_end)

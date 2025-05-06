@@ -24,10 +24,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # This service is built only to subscribe to the main prompt completion message.
 class TestService(Service):
     def start(self):
+        super().start()
         self.subscribe(Service.Topic.INPUT_COMPLETED, self.on_input_complete)
-
         self.run_task(self.send_message())
-        return super().start()
 
     def init_async(self):
         super().init_async()

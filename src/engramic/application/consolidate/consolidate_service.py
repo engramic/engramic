@@ -269,7 +269,7 @@ class ConsolidateService(Service):
         engram_dict: list[dict[str, Any]] = []
         engram_dict = [asdict(self.engram_builder[eid['engram_id']]) for eid in ret_dict]
 
-        self.send_message_async(Service.Topic.ENGRAM_COMPLETE, {'engram_array': engram_dict})
+        self.send_message_async(Service.Topic.ENGRAM_COMPLETE, {'engram_array': engram_dict, 'input_id': input_id})
 
         if __debug__:
             self.host.update_mock_data_output(self, {'engram_array': engram_dict}, 0, input_id)

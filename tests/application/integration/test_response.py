@@ -15,9 +15,9 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 class MiniService(Service):
     def start(self) -> None:
+        super().start()
         self.run_task(self.send_message())
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_response_complete)
-        super().start()
 
     async def send_message(self) -> None:
         retrieve_response = self.host.mock_data_collector['RetrieveService--0-output']

@@ -15,9 +15,9 @@ logging.info('Using Python interpreter:%s', sys.executable)
 
 class MiniService(Service):
     def start(self) -> None:
+        super().start()
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
         self.run_task(self.send_message())
-        super().start()
 
     async def send_message(self) -> None:
         rs_input = self.host.mock_data_collector['RetrieveService-0-input']
@@ -42,5 +42,4 @@ class MiniService(Service):
 def test_retrieve_service_submission() -> None:
     host = Host('mock', [MessageService, RetrieveService, MiniService])
 
-    host.shutdown()
     host.wait_for_shutdown()
