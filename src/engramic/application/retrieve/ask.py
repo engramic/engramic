@@ -401,6 +401,7 @@ class Ask(Retrieval):
 
         retrieve_result = RetrieveResult(
             self.id,
+            self.prompt.prompt_id,
             engram_id_array=list(ret),
             conversation_direction=self.conversation_direction,
             analysis=asdict(self.prompt_analysis)['prompt_analysis'],

@@ -144,6 +144,8 @@ class ConsolidateService(Service):
         engram_list = observation.engram_list
         input_id = observation.input_id
 
+        self.send_message_async(Service.Topic.ENGRAM_CREATED, {'input_id': input_id, 'count': len(engram_list)})
+
         # Keep references so we can fill them in later
         for engram in engram_list:
             if self.engram_builder.get(engram.id) is None:

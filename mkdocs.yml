@@ -25,17 +25,22 @@ nav:
   - Getting Started: getting_started.md
   - Host & Services: host_and_services.md
   - Profiles: profiles.md
-  - How To's: how_to.md
+  - How To's:
+    - PDF Parse: howto/how_to_parse_documents.md
   - API Reference:
-      - Engram: reference/emgram.md
-      - Retrieve Service: 
-        - Retrieve Service: reference/retrieve_service.md
-        - Ask: reference/ask.md
-      - Response Service: reference/response_service.md
-      - Codify Service: reference/codify_service.md
-      - Consolidate Service: reference/consolidate_service.md
-      - Storage Service: reference/storage_service.md
-      - Message Service: reference/message_service.md
+    - Engram: reference/emgram.md
+    - Retrieve Service: 
+      - Retrieve Service: reference/retrieve_service.md
+      - Ask: reference/ask.md
+    - Response Service: reference/response_service.md
+    - Codify Service: reference/codify_service.md
+    - Consolidate Service: reference/consolidate_service.md
+    - Document Service:
+      - Sense Service: reference/sense_service.md
+      - Scan Service: reference/scan.md
+    - Storage Service: reference/storage_service.md
+    - Message Service: reference/message_service.md
+    - Progress Service: reference/progress_service.md
 
 plugins:
   - mkdocstrings:
@@ -46,11 +51,17 @@ plugins:
   - search
   - mike:
       version_selector: true
+  - mermaid2
 
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+        # make exceptions to highlighting of code:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid_custom
 
 extra:
   version:

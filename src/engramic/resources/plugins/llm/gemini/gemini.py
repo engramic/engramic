@@ -77,7 +77,9 @@ class Gemini(LLM):
             generate_content_config_args['response_mime_type'] = 'application/json'
 
         if model == 'gemini-2.5-flash-preview-04-17':
-            generate_content_config_args['thinking_config'] = types.ThinkingConfig(include_thoughts=False)
+            generate_content_config_args['thinking_config'] = types.ThinkingConfig(
+                include_thoughts=False, thinking_budget=0
+            )
 
         generate_content_config = types.GenerateContentConfig(**generate_content_config_args)
 
@@ -87,7 +89,12 @@ class Gemini(LLM):
             config=generate_content_config,
         )
 
+        # finish_reason = response.candidates[0].finish_reason
+
         ret_string = response.text
+
+        # if response.text == None:
+        #    var = 0
 
         return {'llm_response': self.extract_toml_block(ret_string)}
 

@@ -11,6 +11,32 @@ from engramic.infrastructure.system.service import Service
 
 
 class ProgressService(Service):
+    """
+    Tracks and manages the processing progress of inputs (currently prompts and documents) within the Engramic system.
+
+    This service listens for events related to engram and index creation, maintaining counters
+    that reflect the processing state of each input. Once all expected engrams and indices are
+    inserted, it emits a completion event for that input.
+
+    Attributes:
+        inputs (dict[str, InputProgress]): A mapping of input IDs to their corresponding progress state.
+
+    Inner Classes:
+        InputProgress (dataclass): Tracks per-input counters for engrams and indices:
+            - engram_ctr (int | None): Total engrams created for the input.
+            - index_created_ctr (int | None): Number of index creation operations triggered.
+            - index_ctr (int | None): Total indices expected for the input.
+            - index_insert_ctr (int | None): Number of successfully inserted indices.
+
+    Methods:
+        init_async(): Asynchronously initializes the service.
+        start(): Subscribes to system events relevant to input tracking and begins the service.
+        on_input_create(msg: dict): Initializes progress tracking for a new input.
+        on_engram_created(msg: dict): Increments the engram counter for the associated input.
+        on_index_created(msg: dict): Updates index creation and expected index count for the input.
+        _on_index_inserted(msg: dict): Increments the inserted index count and checks for input completion.
+    """
+
     @dataclass
     class InputProgress:
         engram_ctr: int | None = 0

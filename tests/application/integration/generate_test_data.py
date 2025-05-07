@@ -46,7 +46,9 @@ class TestService(Service):
 
         if input_id == self.prompt_id:
             sense_service = self.host.get_service(SenseService)
-            document = Document(True, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf')
+            document = Document(
+                Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+            )
             self.document_id = document.id
             sense_service.submit_document(document)
 

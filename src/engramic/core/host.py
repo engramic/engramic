@@ -332,9 +332,9 @@ class Host:
             logging.info('Mock data saved')
 
     def read_mock_data(self) -> None:
-        resource_path = files('engramic.resources').joinpath('mock.txt')
+        file_path = files('engramic.resources').joinpath('mock.txt')
 
-        with as_file(resource_path) as path, open(path, encoding='utf-8') as f:
+        with as_file(file_path) as path, open(path, encoding='utf-8') as f:
             data_in = f.read()
             self.mock_data_collector = json.loads(data_in, object_hook=self.custom_decoder)
 

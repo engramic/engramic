@@ -16,6 +16,7 @@ from concurrent.futures import Future
 from dataclasses import asdict
 from datetime import datetime, timezone
 from importlib.resources import files
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import fitz
@@ -23,6 +24,7 @@ import fitz
 from engramic.application.sense.prompt_gen_full_summary import PromptGenFullSummary
 from engramic.application.sense.prompt_gen_meta import PromptGenMeta
 from engramic.application.sense.prompt_scan_page import PromptScanPage
+from engramic.core.document import Document
 from engramic.core.engram import Engram
 from engramic.core.index import Index
 from engramic.core.interface.media import Media
@@ -35,15 +37,54 @@ if TYPE_CHECKING:
     from importlib.abc import Traversable
 
     from engramic.application.sense.sense_service import SenseService
-    from engramic.core.document import Document
 
 
 class Scan(Media):
+    """
+    Coordinates the semantic analysis of a submitted document, converting it into engrams and metadata
+    by orchestrating image extraction, LLM-driven summarization, and structured information parsing.
+
+    This class performs the following operations:
+    - Loads a PDF document and converts each page into Base64-encoded images.
+    - Generates an initial summary using a few preview pages.
+    - Scans each page with an LLM plugin to extract semantic content.
+    - Parses scan results into Engrams and assembles a full summary.
+    - Constructs a Meta object and emits an observation to the system.
+
+    Attributes:
+        id (str): Unique identifier for the scan session.
+        service (SenseService): Reference to the parent service orchestrating the scan.
+        page_images (list[str]): Base64-encoded representations of PDF pages.
+        sense_initial_summary (Plugin): Plugin used to generate an initial summary from early pages.
+
+    Constants:
+        DPI (int): Resolution used for image extraction.
+        DPI_DIVISOR (int): Used to calculate zoom level for rendering.
+        TEST_PAGE_LIMIT (int): Max number of pages scanned during test runs.
+        MAX_CHUNK_SIZE (int): Max text length before recursive engram chunking.
+        SHORT_SUMMARY_PAGE_COUNT (int): Number of pages used to generate initial summary.
+        SECTION, H1, H3 (int): Enum-like values to manage tag-based engram splitting depth.
+
+    Methods:
+        parse_media_resource(document): Loads and validates a PDF, then initiates conversion.
+        _convert_pages_to_images(pdf, start_page, end_page): Converts PDF pages to images asynchronously.
+        _page_to_image(pdf, page_number): Converts and encodes a single PDF page to Base64.
+        _on_pages_converted(future): Handles post-conversion logic, triggering initial summary.
+        _generate_short_summary(): Sends preview pages to the LLM for initial semantic scan.
+        _on_short_summary(future): Kicks off page-by-page scanning after initial summary.
+        _scan_page(page_num): Sends a single page to the LLM plugin and extracts structured data.
+        _on_pages_scanned(future): Extracts structured context and initiates full summary.
+        _process_engrams(text_in, context, depth): Recursively splits and constructs Engrams from HTML text.
+        _generate_full_summary(summary): Uses full document content to generate final semantic summary.
+        _on_generate_full_summary(future): Wraps summary and Engrams into a Meta and emits final Observation.
+    """
+
     DPI = 72
     DPI_DIVISOR = 72
-    TEST_PAGE_LIMIT = 30
+    TEST_PAGE_LIMIT = 100
     MAX_CHUNK_SIZE = 1200
     SHORT_SUMMARY_PAGE_COUNT = 4
+    MAX_DEPTH = 3
     SECTION = 0
     H1 = 1
     H3 = 2
@@ -52,15 +93,20 @@ class Scan(Media):
         self.id = scan_id
         self.service = parent_service
         self.page_images: list[str] = []
-        self.sense_initial_summary = self.service.sense_inital_summary
+        self.sense_initial_summary = self.service.sense_initial_summary
 
     def parse_media_resource(self, document: Document) -> None:
-        resource_path: Traversable = files(document.resource_path).joinpath(document.file_name)
+        file_path: Traversable | Path
+        if document.root_directory == Document.Root.RESOURCE:
+            file_path = files(document.file_path).joinpath(document.file_name)
+        elif document.root_directory == Document.Root.DATA:
+            file_path = Path(document.file_path) / document.file_name
+
         self.document = document
-        self.source_id = document.get_source_id()
+        self.source_id = document.id
 
         try:
-            with resource_path.open('rb') as file_ptr:
+            with file_path.open('rb') as file_ptr:
                 pdf_document: fitz.Document = fitz.open(stream=file_ptr.read(), filetype='pdf')
 
                 total_pages = pdf_document.page_count
@@ -111,9 +157,7 @@ class Scan(Media):
         plugin = self.sense_initial_summary
         summary_images = self.page_images[: Scan.SHORT_SUMMARY_PAGE_COUNT]
 
-        prompt = PromptGenMeta(
-            input_data={'file_path': self.document.resource_path, 'file_name': self.document.file_name}
-        )
+        prompt = PromptGenMeta(input_data={'file_path': self.document.file_path, 'file_name': self.document.file_name})
 
         structured_response = {
             'file_path': str,
@@ -191,20 +235,16 @@ class Scan(Media):
         for page in result['_scan_page']:
             assembled += page
 
-        # matches1 = re.findall(rf'<h1[^>]*>(.*?)</h1>', assembled, re.DOTALL | re.IGNORECASE)
-        # matches2 = re.findall(rf'<h3[^>]*>(.*?)</h3>', assembled, re.DOTALL | re.IGNORECASE)
+        # matches1 = re.findall(r'<h1[^>]*>(.*?)</h1>', assembled, re.DOTALL | re.IGNORECASE)
+        # matches2 = re.findall(r'<h3[^>]*>(.*?)</h3>', assembled, re.DOTALL | re.IGNORECASE)
 
         self._process_engrams(assembled, context)
-
-        self.service.send_message_async(
-            Service.Topic.ENGRAM_CREATED, {'input_id': self.document.id, 'count': len(self.engrams)}
-        )
 
         future = self.service.run_task(self._generate_full_summary(assembled))
         future.add_done_callback(self._on_generate_full_summary)
 
     def _process_engrams(self, text_in: str, context: dict[str, str], depth: int = 0) -> None:
-        if len(text_in) > Scan.MAX_CHUNK_SIZE:
+        if len(text_in) > Scan.MAX_CHUNK_SIZE and depth < Scan.MAX_DEPTH:
             tag = ''
             if depth == Scan.SECTION:
                 tag = 'section'

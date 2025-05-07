@@ -224,11 +224,6 @@ class CodifyService(Service):
             self.observation_repository.normalize_toml_dict(toml_data, response)
         )
 
-        self.send_message_async(
-            Service.Topic.ENGRAM_CREATED,
-            {'input_id': return_observation.input_id, 'count': len(return_observation.engram_list)},
-        )
-
         # if this observation is from multiple sources, it must be merged the sources into it's meta.
         if len(engram_array) > 0:
             return_observation_merged: Observation = return_observation.merge_observation(

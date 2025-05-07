@@ -32,6 +32,8 @@ class MiniService(Service):
         # delete the ask ids since they are auto generated and won't match.
         del generated_results['retrieve_response']['ask_id']
         del expected_results['retrieve_response']['ask_id']
+        del generated_results['retrieve_response']['input_id']
+        del expected_results['retrieve_response']['input_id']
 
         assert str(generated_results['retrieve_response']) == str(expected_results['retrieve_response'])
 

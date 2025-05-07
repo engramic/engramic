@@ -100,9 +100,12 @@ class ResponseService(Service):
         prompt_str = retrieve_result_in['prompt_str']
         prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
         retrieve_result = RetrieveResult(**retrieve_result_in['retrieve_response'])
+        input_id = retrieve_result.input_id
         self.metrics_tracker.increment(ResponseMetric.RETRIEVES_RECIEVED)
         fetch_engrams_task = self.run_tasks([
-            self._fetch_retrieval(prompt_str=prompt_str, analysis=prompt_analysis, retrieve_result=retrieve_result),
+            self._fetch_retrieval(
+                prompt_str=prompt_str, input_id=input_id, analysis=prompt_analysis, retrieve_result=retrieve_result
+            ),
             self._fetch_history(),
         ])
         fetch_engrams_task.add_done_callback(self.on_fetch_data_complete)
@@ -123,7 +126,7 @@ class ResponseService(Service):
         return history
 
     async def _fetch_retrieval(
-        self, prompt_str: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult
+        self, prompt_str: str, input_id: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult
     ) -> dict[str, Any]:
         engram_array: list[Engram] = await asyncio.to_thread(
             self.engram_repository.load_batch_retrieve_result, retrieve_result
@@ -132,6 +135,7 @@ class ResponseService(Service):
         # assembled main_prompt, render engrams.
         return {
             'prompt_str': prompt_str,
+            'input_id': input_id,
             'analysis': analysis,
             'retrieve_result': retrieve_result,
             'engram_array': engram_array,
@@ -148,6 +152,7 @@ class ResponseService(Service):
         main_prompt_task = self.run_task(
             self.main_prompt(
                 retrieval['prompt_str'],
+                retrieval['input_id'],
                 retrieval['analysis'],
                 retrieval['engram_array'],
                 retrieval['retrieve_result'],
@@ -165,6 +170,7 @@ class ResponseService(Service):
     async def main_prompt(
         self,
         prompt_str: str,
+        input_id: str,
         analysis: PromptAnalysis,
         engram_array: list[Engram],
         retrieve_result: RetrieveResult,
@@ -209,7 +215,7 @@ class ResponseService(Service):
         response = response[0]['llm_response'].replace('$', 'USD ').replace('<context>', '').replace('</context>', '')
 
         response_inst = Response(
-            str(uuid.uuid4()), prompt.prompt_id, response, retrieve_result, prompt.prompt_str, analysis, model
+            str(uuid.uuid4()), input_id, response, retrieve_result, prompt.prompt_str, analysis, model
         )
 
         return response_inst

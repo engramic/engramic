@@ -8,6 +8,7 @@ from dataclasses import dataclass
 @dataclass
 class RetrieveResult:
     ask_id: str
+    input_id: str
     engram_id_array: list[str]
     conversation_direction: dict[str, str]
     analysis: dict[str, str]

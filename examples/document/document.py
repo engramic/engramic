@@ -30,7 +30,9 @@ class TestService(Service):
         self.subscribe(Service.Topic.INPUT_COMPLETED, self.on_input_complete)
 
         sense_service = self.host.get_service(SenseService)
-        document = Document(True, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf')
+        document = Document(
+            Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+        )
         self.document_id = document.id
         sense_service.submit_document(document)
 

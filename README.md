@@ -27,6 +27,9 @@ The fastest way to begin working with Engramic is to download it from pip.
 pip install engramic
 ```
 
+**!!!Important**. Engramic must be run from within a virtual environment (e.g. venv).
+
+
 During these early phases of development, we recommend working from source code. Setting up your environment is designed to be straightforward. See the "Getting Started" section in our documentation. The complete code is available in examples/mock_profile/mock_profile.py.
 
 ### Starter Example 
@@ -69,11 +72,10 @@ if __name__ == '__main__':
     host = Host(
         'mock',
         [
-            # Order matters due to pub/sub dependencies.
             MessageService,
             RetrieveService,
             ResponseService,
-            TestService,  #TestService must be last
+            TestService,
         ],
     )
 

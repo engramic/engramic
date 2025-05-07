@@ -59,7 +59,8 @@ dependencies = [
   "mkdocs-material",
   "mkdocstrings[python]",
   "pylint",
-  "mike"
+  "mike",
+  "mkdocs-mermaid2-plugin"
 ]
 
 [tool.hatch.envs.docs.scripts]
