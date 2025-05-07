@@ -37,15 +37,20 @@ class Gemini(LLM):
         return ret_string.strip()
 
     @llm_impl
-    def submit(self, prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    def submit(
+        self, prompt: Prompt, images: list[str], structured_schema: dict[str, Any], args: dict[str, Any]
+    ) -> dict[str, Any]:
         model = args['model']
+
+        parts = [types.Part.from_text(text=prompt.render_prompt())]
+
+        if images:
+            parts.extend([types.Part.from_bytes(mime_type='image/png', data=image_b64) for image_b64 in images])
 
         contents = [
             types.Content(
                 role='user',
-                parts=[
-                    types.Part.from_text(text=prompt.render_prompt()),
-                ],
+                parts=parts,
             ),
         ]
 
@@ -53,30 +58,30 @@ class Gemini(LLM):
         top_p = 0.95
         top_k = 40
 
+        if 'deterministic' in args and (not args.get('deterministic') or args['deterministic'].lower() == 'true'):
+            temperature = 0
+            top_p = 1
+            top_k = 1
+
+        generate_content_config_args = {
+            'temperature': temperature,
+            'top_p': top_p,
+            'top_k': top_k,
+            'max_output_tokens': 8192,
+            'response_mime_type': 'text/plain',
+        }
+
         if structured_schema is not None:
             pydantic_model = self.create_pydantic_model('dynamic_model', structured_schema)
+            generate_content_config_args['response_schema'] = pydantic_model
+            generate_content_config_args['response_mime_type'] = 'application/json'
 
-            if 'deterministic' in args and (not args.get('deterministic') or args['deterministic'].lower() == 'true'):
-                temperature = 0
-                top_p = 1
-                top_k = 1
+        if model == 'gemini-2.5-flash-preview-04-17':
+            generate_content_config_args['thinking_config'] = types.ThinkingConfig(
+                include_thoughts=False, thinking_budget=0
+            )
 
-            generate_content_config = types.GenerateContentConfig(
-                temperature=temperature,
-                top_p=top_p,
-                top_k=top_k,
-                max_output_tokens=8192,
-                response_mime_type='application/json',
-                response_schema=pydantic_model,
-            )
-        else:
-            generate_content_config = types.GenerateContentConfig(
-                temperature=temperature,
-                top_p=top_p,
-                top_k=top_k,
-                max_output_tokens=8192,
-                response_mime_type='text/plain',
-            )
+        generate_content_config = types.GenerateContentConfig(**generate_content_config_args)
 
         response = self._api_client.models.generate_content(
             model=model,
@@ -84,7 +89,12 @@ class Gemini(LLM):
             config=generate_content_config,
         )
 
+        # finish_reason = response.candidates[0].finish_reason
+
         ret_string = response.text
+
+        # if response.text == None:
+        #    var = 0
 
         return {'llm_response': self.extract_toml_block(ret_string)}
 

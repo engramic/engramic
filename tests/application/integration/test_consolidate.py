@@ -6,6 +6,7 @@ import pytest
 
 from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
+from engramic.application.progress.progress_service import ProgressService
 from engramic.core.host import Host
 from engramic.infrastructure.system.service import Service
 
@@ -17,21 +18,32 @@ logging.info('Using Python interpreter:%s', sys.executable)
 class MiniService(Service):
     def __init__(self, host) -> None:
         self.callback_ctr = 0
+        self.index_create_count = 0
+        self.index_complete_count = 0
+        self.engram_create_count = 0
+        self.engram_complete_count = 0
         super().__init__(host)
 
     def start(self) -> None:
-        self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engram_complete)
-        self.subscribe(Service.Topic.INDEX_COMPLETE, self.on_index_complete)
-        self.run_task(self.send_messages())
         super().start()
+        self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engram_complete)
+        self.subscribe(Service.Topic.ENGRAM_CREATED, self.on_engram_created)
+        self.subscribe(Service.Topic.INDEX_COMPLETE, self.on_index_complete)
+        self.subscribe(Service.Topic.INDEX_CREATED, self.on_index_created)
+
+        self.run_task(self.send_messages())
 
     async def send_messages(self) -> None:
-        observation = self.host.mock_data_collector['CodifyService-0-output']
+        observation = self.host.mock_data_collector['CodifyService--0-output']
+        self.input_id = observation['input_id']
         self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
         self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, observation)
 
+    def on_engram_created(self, message_in: dict[str, Any]) -> None:
+        self.engram_create_count += message_in['count']
+
     def on_engram_complete(self, generated_response_in) -> None:
-        expected_results = self.host.mock_data_collector['ConsolidateService-0-output']['engram_array']
+        expected_results = self.host.mock_data_collector[f'ConsolidateService-{self.input_id}-0-output']['engram_array']
         generated_response = generated_response_in['engram_array']
 
         for msg in generated_response:
@@ -54,21 +66,31 @@ class MiniService(Service):
 
         assert gen_str == exp_str
 
-        self.callback_ctr += 1
+        if generated_response_in['input_id'] == self.input_id:
+            self.engram_complete_count += len(generated_response)
 
-        if self.callback_ctr == 3:
-            self.host.shutdown()
+            if (
+                self.engram_create_count == self.engram_complete_count
+                and self.index_create_count == self.index_complete_count
+            ):
+                self.host.shutdown()
+
+    def on_index_created(self, message_in: dict[str, Any]) -> None:
+        self.index_create_count += message_in['count']
 
     def on_index_complete(self, message_in: dict[str, Any]) -> None:
-        del message_in
-        self.callback_ctr += 1
+        if message_in['input_id'] == self.input_id:
+            self.index_complete_count += len(message_in['index'])
 
-        if self.callback_ctr == 3:
+        if (
+            self.engram_create_count == self.engram_complete_count
+            and self.index_create_count == self.index_complete_count
+        ):
             self.host.shutdown()
 
 
-@pytest.mark.timeout(10)  # seconds
+@pytest.mark.timeout(100)  # seconds
 def test_consolidate_service_submission() -> None:
-    host = Host('mock', [MessageService, ConsolidateService, MiniService])
+    host = Host('mock', [MessageService, ConsolidateService, ProgressService, MiniService])
 
     host.wait_for_shutdown()

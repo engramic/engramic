@@ -12,6 +12,9 @@ llm.validate = {name="Mock"}
 llm.summary = {name="Mock"}
 llm.gen_indices = {name="Mock"}
 embedding.gen_embed = {name="Mock"}
+llm.sense_initial_summary = {name="Mock"}
+llm.sense_scan = {name="Mock"}
+llm.sense_full_summary = {name="Mock"}
 
 [standard]
 type = "pointer"
@@ -29,5 +32,8 @@ llm.validate = {name="Gemini",model="gemini-2.0-flash"}
 llm.summary = {name="Gemini",model="gemini-2.0-flash"}
 llm.gen_indices = {name="Gemini",model="gemini-2.0-flash"}
 embedding.gen_embed = {name="Gemini",model="text-embedding-004"}
+llm.sense_initial_summary = {name="Gemini",model="gemini-2.0-flash"}
+llm.sense_scan = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.sense_full_summary = {name="Gemini",model="gemini-2.0-flash"}
 
 

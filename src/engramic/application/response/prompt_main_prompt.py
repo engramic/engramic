@@ -19,12 +19,13 @@ Next, form your upcoming response using a mix of the following:
 2. You use user_intent to stay focused on meeting the user's needs.
 3. You use engramic_working_memory above to understand the current state of the conversation.
 4. You use long term memory to include your experience and wisdom.
-5. You use a source as reference material.
+5. You use sources as reference material to answer questions. Never fabricate answers if you can't back it up with a source.
 6. You use engramic_previous_response as a reference of the ongoing conversation. Only reference this if the user asks you about the previous response.
 
 
 Never expose your working memory, only use it as reference.
 If information in your sources conflict, share detialed context and prefer newer sources (version, date, time, etc.) of information but also referencing the discrpency.
+
 
 
 
@@ -46,7 +47,9 @@ If information in your sources conflict, share detialed context and prefer newer
             % if engram.get("context"):
                 <context>
                 % for key, value in engram["context"].items():
-                    ${key}: ${value}
+                    % if value != "null":
+                        ${key}: ${value}
+                    % endif
                 % endfor
                 </context>
             % endif

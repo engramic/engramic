@@ -65,8 +65,8 @@ class Host:
         self.init_async_done_event = threading.Event()
 
         self.thread = Thread(target=self._start_async_loop, daemon=False, name='Async Thread')
-        self.thread.start()
 
+        self.thread.start()
         self.init_async_done_event.wait()
 
         self.stop_event: threading.Event = threading.Event()
@@ -111,6 +111,8 @@ class Host:
             if name == 'MessageService':
                 continue
             self.services[name].init_async()
+
+        await asyncio.sleep(0.1)  # make sure handshake occured.
 
     def run_task(self, coro: Awaitable[None]) -> Future[Any]:
         """Runs an async task and returns a Future that can be awaited later."""
@@ -212,7 +214,6 @@ class Host:
                         "Event cleanup_complete not set. This means a service didn't shut down correctly. Try subscribe to shudown method by calling super().start() in all service's start method. %s",
                         service,
                     )
-
         finally:
             tasks = [t for t in asyncio.all_tasks(self.loop) if not t.done()]
             if len(tasks) > 0:
@@ -221,8 +222,10 @@ class Host:
                 logging.warning('Tasks remaining. %s', tasks)
             del tasks
 
-            future = asyncio.run_coroutine_threadsafe(self.loop.shutdown_asyncgens(), self.loop)
+            # shutdown all plugins
+            self.plugin_manager.shutdown_plugins()
 
+            future = asyncio.run_coroutine_threadsafe(self.loop.shutdown_asyncgens(), self.loop)
             future.result()
 
             self.loop.call_soon_threadsafe(self.loop.stop)
@@ -234,8 +237,8 @@ class Host:
             self.loop.close()
 
             logging.debug('Clean exit.')
+            # import psutil
             # debug_str = f'Memory: {psutil.virtual_memory().percent}%, Threads: {len(psutil.Process().threads())}'
-            # logging.debug(debug_str)
 
     def _get_coro_name(self, coro: Awaitable[None]) -> str:
         """Extracts the coroutine function name if possible, otherwise generates a fallback name."""
@@ -251,10 +254,10 @@ class Host:
 
         return 'unknown_coroutine'
 
-    def update_mock_data_input(self, service: Service, value: dict[str, Any]) -> None:
+    def update_mock_data_input(self, service: Service, value: dict[str, Any], index: int = 0) -> None:
         if self.generate_mock_data:
             service_name = service.__class__.__name__
-            concat = f'{service_name}-input'
+            concat = f'{service_name}-{index}-input'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'
@@ -262,10 +265,12 @@ class Host:
 
             self.mock_data_collector[concat] = value
 
-    def update_mock_data_output(self, service: Service, value: dict[str, Any], index: int = 0) -> None:
+    def update_mock_data_output(
+        self, service: Service, value: dict[str, Any], index: int = 0, input_id: str = ''
+    ) -> None:
         if self.generate_mock_data:
             service_name = service.__class__.__name__
-            concat = f'{service_name}-{index}-output'
+            concat = f'{service_name}-{input_id}-{index}-output'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'
@@ -273,13 +278,15 @@ class Host:
 
             self.mock_data_collector[concat] = value
 
-    def update_mock_data(self, plugin: dict[str, Any], response: list[dict[str, Any]], index_in: int = 0) -> None:
+    def update_mock_data(
+        self, plugin: dict[str, Any], response: list[dict[str, Any]], index_in: int = 0, input_id: str = ''
+    ) -> None:
         if self.generate_mock_data:
             caller_name = inspect.stack()[1].function
             usage = plugin['usage']
             index = index_in
 
-            concat = f'{caller_name}-{usage}-{index}'
+            concat = f'{caller_name}-{usage}-{input_id}-{index}'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'
@@ -325,19 +332,19 @@ class Host:
             logging.info('Mock data saved')
 
     def read_mock_data(self) -> None:
-        resource_path = files('engramic.resources').joinpath('mock.txt')
+        file_path = files('engramic.resources').joinpath('mock.txt')
 
-        with as_file(resource_path) as path, open(path, encoding='utf-8') as f:
+        with as_file(file_path) as path, open(path, encoding='utf-8') as f:
             data_in = f.read()
             self.mock_data_collector = json.loads(data_in, object_hook=self.custom_decoder)
 
-    def mock_update_args(self, plugin: dict[str, Any], index_in: int = 0) -> dict[str, Any]:
+    def mock_update_args(self, plugin: dict[str, Any], index_in: int = 0, input_id: str = '') -> dict[str, Any]:
         args: dict[str, Any] = copy.deepcopy(plugin['args'])
 
         if self.is_mock_profile:
             caller_name = inspect.stack()[1].function
             usage = plugin['usage']
-            concat = f'{caller_name}-{usage}-{index_in}'
+            concat = f'{caller_name}-{usage}-{input_id}-{index_in}'
             args.update({'mock_lookup': concat})
 
         return args

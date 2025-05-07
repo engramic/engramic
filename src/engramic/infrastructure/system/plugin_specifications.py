@@ -19,8 +19,10 @@ llm_spec = pluggy.HookspecMarker('llm')
 
 class LLMSpec(LLM):
     @llm_spec
-    def submit(self, prompt: Prompt, structured_schema: dict[str, Any], args: dict[str, Any]) -> dict[str, str]:
-        del prompt, structured_schema, args
+    def submit(
+        self, prompt: Prompt, images: list[str], structured_schema: dict[str, Any], args: dict[str, Any]
+    ) -> dict[str, str]:
+        del prompt, structured_schema, args, images
         """Submits an LLM request with the given prompt and arguments."""
         error_message = 'Subclasses must implement `submit`'
         raise NotImplementedError(error_message)

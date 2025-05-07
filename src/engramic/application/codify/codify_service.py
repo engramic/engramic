@@ -117,7 +117,13 @@ class CodifyService(Service):
         analysis = PromptAnalysis(**response_dict['analysis'])
         retrieve_result = RetrieveResult(**response_dict['retrieve_result'])
         response = Response(
-            response_dict['id'], response_dict['response'], retrieve_result, prompt_str, analysis, model
+            response_dict['id'],
+            response_dict['input_id'],
+            response_dict['response'],
+            retrieve_result,
+            prompt_str,
+            analysis,
+            model,
         )
         self.metrics_tracker.increment(CodifyMetric.RESPONSE_RECIEVED)
         fetch_engram_step = self.run_task(self._fetch_engrams(response))
@@ -153,6 +159,7 @@ class CodifyService(Service):
     ) -> dict[str, Any]:
         meta_array: list[Meta] = await asyncio.to_thread(self.meta_repository.load_batch, meta_id_array)
         # assembled main_prompt, render engrams.
+
         return {'engram_array': engram_array, 'meta_array': meta_array, 'response': response}
 
     def on_fetch_meta_complete(self, fut: Future[Any]) -> None:
@@ -180,7 +187,11 @@ class CodifyService(Service):
 
         plugin = self.llm_validate
         validate_response = await asyncio.to_thread(
-            plugin['func'].submit, prompt=prompt, structured_schema=None, args=self.host.mock_update_args(plugin)
+            plugin['func'].submit,
+            prompt=prompt,
+            structured_schema=None,
+            args=self.host.mock_update_args(plugin),
+            images=None,
         )
 
         self.host.update_mock_data(self.llm_validate, validate_response)

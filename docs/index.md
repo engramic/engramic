@@ -4,6 +4,8 @@
   <img src="assets/logo_200.png" alt="Engramic Logo">
 </p>
 
+Engramic is an inference engine. It's special because it natively supports long-term, contextual memory. This specialty makes it very adept at building applications that need to perform reliable question and answer over a corpus of data over time. Additionally, long-term, contextual memory provides the means for basic learning capabilities, resulting in deeper, more thoughtful responses.
+
 ---
 
 Engramic is pre-alpha. It's a great time to start working with these core systems for some developers, but we have yet to complete many important features and even the core systems may not be fully tested. In other words, use of this code base will require some development experience and the ability to work in maturing environments. The flip side, is that a new community is forming and as a pioneer, you have an opportunity to get in early so that you can someday tell your friends, *I used Engramic before it was cool*.
@@ -22,6 +24,19 @@ These features, along with others, will be available in the near future.
 For an evergreen overview of Engramic, visit our online [Knowledge Base](https://www.engramic.org/knowledge-base).
 
 ## Introduction to Engramic
+
+```mermaid
+flowchart LR
+    sense --> consolidate
+    prompt --> retrieve
+    consolidate --> retrieve
+    retrieve --> respond
+    respond --> stream 
+    codify --> consolidate
+    respond --> codify 
+```
+
+*Engramic's core services. Engramic uses a learning loop, building memories from responses and responses from memories*.
 
 ### Why Engramic?
 
@@ -64,3 +79,6 @@ Engramic is designed to learn from your unstructured, proprietary data using any
 
 - **Unified Memory**  
   All engrams are stored within a unified system, enabling both full and selective access to memory content.
+
+### Engramic Services
+

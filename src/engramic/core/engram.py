@@ -8,34 +8,33 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
     from engramic.core.index import Index
 
 
 @dataclass()
 class Engram:
     """
-    Represents a unit of memory, consisting of a text string (e.g., a phrase, sentence, or paragraph)
-    along with contextual information that helps in retrieval and responses.
+    Represents a unit of memory that encapsulates a text fragment with rich metadata
+    for semantic indexing and contextual relevance.
 
     Attributes:
-        id (str): A unique identifier for the engram.
-        locations (list[str]): One or more locations where the engram was generated such as file paths or URLs.
-        source_ids (list[str]): One or more identifiers linking the engram to its originating sources.
-        content (str): The textual content of the engram.
-        is_native_source (bool): Whether the content is directly extracted from a source (True) or derived/generated (False).
-        context (dict[str, str] | None): Optional key-value pairs providing additional context for the engram.
-        indices (list[Index] | None): Optional list of semantic indices associated with the engram, typically used for embedding-based search.
-        meta_ids (list[str] | None): Optional metadata identifiers associated with this Engram.
-        library_ids (list[str] | None): Optional identifiers grouping this engram into document collections or libraries.
-        accuracy (int | None): An optional accuracy score assigned to the engram by validation on the Codify Service).
-        relevancy (int | None): An optional relevancy score assigned to the engram by validation on the Codify Service).
-        created_date (datetime | None): The creation timestamp of the engram.
+        id (str): Unique identifier for the engram.
+        locations (list[str]): One or more file paths, URLs, or other locations associated with the engram.
+        source_ids (list[str]): Identifiers of the original source documents from which the engram was derived.
+        content (str): The main textual content of the engram.
+        is_native_source (bool): Indicates if the content was directly extracted (True) or generated (False).
+        context (dict[str, str] | None): Optional contextual metadata in key-value format to enhance retrieval or classification.
+        indices (list[Index] | None): Optional semantic indices, typically for vector-based retrieval.
+        meta_ids (list[str] | None): Optional list of metadata tags or identifiers relevant to the engram.
+        library_ids (list[str] | None): Optional identifiers linking this engram to document groups or libraries.
+        accuracy (int | None): Optional accuracy score assigned during validation (e.g., via Codify Service).
+        relevancy (int | None): Optional relevancy score assigned during validation (e.g., via Codify Service).
+        created_date (int | None): Optional Unix timestamp representing the creation time of the engram.
 
     Methods:
         generate_toml() -> str:
-            Serializes the engram to a TOML-formatted string, including all non-null attributes and flattening indices.
+            Serializes the engram into a TOML-formatted string, including non-null fields.
+            Nested indices are flattened, and context is rendered as an inline TOML table.
     """
 
     id: str
@@ -49,7 +48,7 @@ class Engram:
     library_ids: list[str] | None = None
     accuracy: int | None = 0
     relevancy: int | None = 0
-    created_date: datetime | None = None
+    created_date: int | None = None
 
     def generate_toml(self) -> str:
         def toml_escape(value: str) -> str:

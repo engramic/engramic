@@ -11,10 +11,10 @@ class PromptGenIndices(Prompt):
     def render_prompt(self) -> str:
         rendered_template = Template("""
 
-    Write a set of 5 to 10 indices, phrases of 5 to 8 words, that will be used by a vector database to search for data that will satisfy the user_prompt.
+    Write a set of indices, phrases of 5 to 8 words, that will be used by a vector database to search for data that will satisfy the user_prompt. Generate roughly 5 to 10 indicies depending on the user_prormpt and the knowledge available.
 
     % if len(meta_list)>0:
-    The domain_knowledge gives you insight into knowledge stored in your long term memory. It's here because it's the most closely related information you have stored about the user_prompt. Up to half of your indices should be based on domain_knowledge.
+    The domain_knowledge gives you insight into knowledge stored in your long term memory. It's here because it's the most closely related information you have stored about the user_prompt.
     % endif
 
     % for meta in meta_list:
