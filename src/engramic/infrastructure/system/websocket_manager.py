@@ -5,10 +5,14 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import TYPE_CHECKING
+from urllib.parse import parse_qs, urlparse
 
-import websockets.asyncio.server
-from websockets.asyncio.server import Server, ServerConnection  # noqa: TCH002
+import jwt
+
+# from websockets.asyncio.server import Server
+from websockets.legacy.server import WebSocketServerProtocol, serve
 
 if TYPE_CHECKING:
     from engramic.core.host import Host
@@ -17,32 +21,46 @@ if TYPE_CHECKING:
 
 class WebsocketManager:
     def __init__(self, host: Host):
-        self.websocket: Server | None = None
-        self.active_connection: ServerConnection | None = None
+        self.active_connection: WebSocketServerProtocol | None = None
         self.host = host
 
     def init_async(self) -> None:
         self.future = self.host.run_background(self.run_server())
 
-    # async def stop(self) -> None:
-    #    self.future.result()
-
     async def run_server(self) -> None:
-        self.websocket = await websockets.serve(self.handler, 'localhost', 8765)
+        self.websocket = await serve(self.handler, 'localhost', 8765)
         await self.websocket.wait_closed()
 
-    async def handler(self, websocket: ServerConnection) -> None:
+    async def handler(self, websocket: WebSocketServerProtocol) -> None:
+        # 1. Extract token from path (e.g., ?token=abc123)
+
+        query = urlparse(websocket.path).query
+        token = parse_qs(query).get('token', [None])[0]
+
+        if token is None:
+            error = 'Websocket did not contain token.'
+            raise RuntimeError(error)
+
+        token = token.strip()
+
+        if not token:
+            await websocket.close(code=4001, reason='Missing token')
+            return
+
+        # 2. Validate token
+        try:
+            payload = jwt.decode(token, os.getenv('JWT_SECRET_KEY'), algorithms=['HS256'])
+            del payload
+        except jwt.InvalidTokenError:
+            await websocket.close(code=4002, reason='Invalid token')
+            return
+
         self.active_connection = websocket
 
-        try:
-            # Listen for incoming messages
-            async for message in websocket:
-                logging.info('Received: %s', message)
+        await websocket.wait_closed()
 
-        except websockets.exceptions.ConnectionClosed:
-            logging.info('Client disconnected')
-        finally:
-            self.active_connection = None
+        info = 'Websocket closed'
+        logging.info(info)
 
     async def message_task(self, message: LLM.StreamPacket) -> None:
         if self.active_connection:
@@ -57,5 +75,5 @@ class WebsocketManager:
         if self.websocket:
             self.websocket.close()
             await self.websocket.wait_closed()
-            self.websocket = None
+            del self.websocket
             logging.debug('response web socket closed.')
