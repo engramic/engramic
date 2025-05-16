@@ -128,7 +128,7 @@ class Gemini(LLM):
 
         full_response = ''
         for chunk in response:
-            websocket_manager.send_message(LLM.StreamPacket(chunk, False, ''))
+            websocket_manager.send_message(LLM.StreamPacket(chunk.text, False, ''))
             full_response += chunk.text
 
         return {'llm_response': self.extract_toml_block(full_response)}
