@@ -32,6 +32,8 @@ class Service(ABC):
         SUBMIT_PROMPT = 'submit_prompt'
         INPUT_CREATED = 'input_created'
         INPUT_COMPLETED = 'input_completed'
+        LESSON_CREATED = 'lesson_created'
+        LESSON_COMPLETED = 'lesson_completed'
         RETRIEVE_COMPLETE = 'retrieve_complete'
         MAIN_PROMPT_COMPLETE = 'main_prompt_complete'
         START_PROFILER = 'start_profiler'

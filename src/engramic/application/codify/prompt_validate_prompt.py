@@ -48,7 +48,7 @@ A multi-line text requires tripple double quotes.
 <TOML_file_description>
 [[engram]]
 content = "extract memorable facts from the article."
-context = a dict:[str,str] that notes context that supports a broader undersanding of the content. Look for <context> xml tags.
+context = a tripple quote wrapped json string that notes context that supports a broader undersanding of the content. Look for <context> xml tags but don't use xml in the str. use escaped double quotes in the string for properties.
 % if engram_list:
 relevancy = value from 0 to 4
 accuracy = value from 0 to 4
@@ -56,6 +56,8 @@ meta_ids = [meta_guid_1,meta_guid_2,...] <-values are combined from source metas
 locations = [location1,location2,...] <-values are combined from source engrams.
 source_ids = [source_guid_1,source_guid_2,...] <-values are combined from source engrams.
 % endif
+
+
 
 the Meta table is a summary of the engram tables.
 [meta]

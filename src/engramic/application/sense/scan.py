@@ -260,7 +260,7 @@ class Scan(Media):
             clean_parts = [part.strip() for part in parts if part.strip()]
 
             for part in clean_parts:
-                match = re.search(rf'<{tag}[^>]*>(.*?)</{tag}>', text_in, re.DOTALL | re.IGNORECASE)
+                match = re.search(rf'<{tag}[^>]*>(.*?)</{tag}>', part, re.DOTALL | re.IGNORECASE)
                 context_copy = context
                 if match:
                     tag_str = match.group(1).strip()
@@ -312,7 +312,8 @@ class Scan(Media):
 
         meta = Meta(
             self.meta_id,
-            [self.inital_scan['file_path']],
+            Meta.SourceType.DOCUMENT.value,
+            [self.inital_scan['file_path'] + self.inital_scan['file_name']],
             [hashlib.md5(self.inital_scan['file_path'].encode('utf-8')).hexdigest()],
             results['keywords'].split(','),
             self.inital_scan['summary_initial'],

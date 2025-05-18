@@ -2,8 +2,8 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
-
-from dataclasses import dataclass
+import logging
+from dataclasses import dataclass, field
 from typing import Any
 
 from engramic.core.host import Host
@@ -38,15 +38,15 @@ class ProgressService(Service):
     """
 
     @dataclass
-    class InputProgress:
-        engram_ctr: int | None = 0
-        index_created_ctr: int | None = 0
-        index_ctr: int | None = 0
-        index_insert_ctr: int | None = 0
+    class Progress:
+        index_list: dict[Any, Any] = field(default_factory=dict)
+        engram_list: dict[Any, Any] = field(default_factory=dict)
+        lesson_id = ''  # optional lesson id
 
     def __init__(self, host: Host) -> None:
         super().__init__(host)
-        self.inputs: dict[str, Any] = {}
+        self.progress_items: dict[str, ProgressService.Progress] = {}
+        self.lesson_items: dict[str, dict[str, bool]] = {}
 
     def init_async(self) -> None:
         return super().init_async()
@@ -55,40 +55,73 @@ class ProgressService(Service):
         self.subscribe(Service.Topic.INPUT_CREATED, self.on_input_create)
         self.subscribe(Service.Topic.ENGRAM_CREATED, self.on_engram_created)
         self.subscribe(Service.Topic.INDEX_CREATED, self.on_index_created)
+        self.subscribe(Service.Topic.LESSON_CREATED, self.on_lesson_created)
         self.subscribe(Service.Topic.INDEX_INSERTED, self._on_index_inserted)
         super().start()
 
-    def on_input_create(self, msg: dict[Any, Any]) -> None:
+    def on_input_create(self, msg: dict[Any, Any], lesson_id: str | None = None) -> None:
         input_id = msg['input_id']
-        self.inputs[input_id] = ProgressService.InputProgress()
+
+        if input_id not in self.progress_items:
+            self.progress_items[input_id] = ProgressService.Progress()
+            if lesson_id:
+                self.progress_items[input_id].lesson_id = lesson_id
+        # else: lesson may have already created the entries.
 
     def on_engram_created(self, msg: dict[Any, Any]) -> None:
         input_id = msg['input_id']
-        counter = msg['count']
+        engram_id_array = msg['engram_id_array']
 
-        if input_id in self.inputs:
-            input_process = self.inputs[input_id]
-            input_process.engram_ctr += counter
+        if input_id in self.progress_items:
+            input_process = self.progress_items[input_id]
+            for engram_id in engram_id_array:
+                input_process.engram_list[engram_id] = False
 
     def on_index_created(self, msg: dict[Any, Any]) -> None:
         input_id = msg['input_id']
-        counter = msg['count']
+        index_id_array = msg['index_id_array']
 
-        if input_id in self.inputs:
-            document_process = self.inputs[input_id]
-            document_process.index_ctr += counter
-            document_process.index_created_ctr += 1
+        if input_id in self.progress_items:
+            input_process = self.progress_items[input_id]
+            for index_id in index_id_array:
+                input_process.index_list[index_id] = False
 
     def _on_index_inserted(self, msg: dict[Any, Any]) -> None:
         input_id = msg['input_id']
-        counter = msg['count']
+        index_id_array = msg['index_id_array']
 
-        if input_id in self.inputs:
-            input_process = self.inputs[input_id]
-            input_process.index_insert_ctr += counter
+        if input_id in self.progress_items:
+            input_process = self.progress_items[input_id]
+            for index_id in index_id_array:
+                input_process.index_list[index_id] = True
 
-            if (
-                input_process.engram_ctr == input_process.index_created_ctr
-                and input_process.index_ctr == input_process.index_insert_ctr
-            ):
+            if all(input_process.index_list.values()):
+                self.progress_items[input_id].engram_list = dict.fromkeys(input_process.engram_list, True)
+
+                lesson_id = self.progress_items[input_id].lesson_id
+
                 self.send_message_async(Service.Topic.INPUT_COMPLETED, {'input_id': input_id})
+
+                if not lesson_id:
+                    del self.progress_items[input_id]
+                else:
+                    self.lesson_items[lesson_id][input_id] = True
+                    if all(self.lesson_items[lesson_id].values()):
+                        self.send_message_async(Service.Topic.LESSON_COMPLETED, {'lesson_id': lesson_id})
+                        for input_id in list(self.lesson_items[lesson_id].keys()):
+                            del self.lesson_items[lesson_id][input_id]
+                            del self.progress_items[input_id]
+
+                        del self.lesson_items[lesson_id]
+        else:
+            logging.error('on_index_inserted call made with input not in progress items. Item removed prematurely?')
+
+    def on_lesson_created(self, msg: dict[Any, Any]) -> None:
+        lesson_id = msg['lesson_id']
+        input_id_array = msg['input_array']
+
+        self.lesson_items[lesson_id] = {}
+
+        for input_id in input_id_array:
+            self.lesson_items[lesson_id][input_id] = False
+            self.on_input_create({'input_id': input_id}, lesson_id)

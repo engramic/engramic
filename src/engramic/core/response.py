@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from engramic.core import PromptAnalysis
+    from engramic.core.prompt import Prompt
     from engramic.core.retrieve_result import RetrieveResult
 
 
@@ -19,7 +20,7 @@ class Response:
     input_id: str
     response: str
     retrieve_result: RetrieveResult
-    prompt_str: str
+    prompt: Prompt
     analysis: PromptAnalysis
     model: str
     response_time: float | None = None

@@ -32,6 +32,8 @@ class MiniService(Service):
 
         del expected_meta['id']
         del generated_meta['id']
+        del expected_meta['summary_full']['id']
+        del generated_meta['summary_full']['id']
 
         assert expected_meta == generated_meta
 

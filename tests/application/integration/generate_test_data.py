@@ -32,11 +32,10 @@ class TestService(Service):
         super().init_async()
 
     async def send_message(self) -> None:
-        self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
-
         retrive_service = self.host.get_service(RetrieveService)
         prompt = Prompt(
-            'What is the most notable applications of quantum networking? Why is maintaining quantum engablement over long distances notoriously difficult?'
+            'What is the most notable applications of quantum networking? Why is maintaining quantum engablement over long distances notoriously difficult?',
+            training_mode=True,
         )
         self.prompt_id = prompt.prompt_id
         retrive_service.submit(prompt)

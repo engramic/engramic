@@ -413,7 +413,7 @@ class Ask(Retrieval):
 
         retrieve_response = {
             'analysis': asdict(self.prompt_analysis),
-            'prompt_str': self.prompt.prompt_str,
+            'prompt': asdict(self.prompt),
             'retrieve_response': asdict(retrieve_result),
         }
 

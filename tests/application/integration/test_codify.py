@@ -43,6 +43,10 @@ class MiniService(Service):
             exp_engram.pop('meta_ids', None)
 
         assert len(generated_response['engram_list']) == len(expected_results['engram_list'])
+
+        del generated_response['meta']['summary_full']['id']
+        del expected_results['meta']['summary_full']['id']
+
         assert str(generated_response['meta']) == str(expected_results['meta'])
         assert str(generated_response['engram_list']) == str(expected_results['engram_list'])
 

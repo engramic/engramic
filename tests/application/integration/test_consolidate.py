@@ -40,7 +40,7 @@ class MiniService(Service):
         self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, observation)
 
     def on_engram_created(self, message_in: dict[str, Any]) -> None:
-        self.engram_create_count += message_in['count']
+        self.engram_create_count += len(message_in['engram_id_array'])
 
     def on_engram_complete(self, generated_response_in) -> None:
         expected_results = self.host.mock_data_collector[f'ConsolidateService-{self.input_id}-0-output']['engram_array']
@@ -76,7 +76,7 @@ class MiniService(Service):
                 self.host.shutdown()
 
     def on_index_created(self, message_in: dict[str, Any]) -> None:
-        self.index_create_count += message_in['count']
+        self.index_create_count += len(message_in['index_id_array'])
 
     def on_index_complete(self, message_in: dict[str, Any]) -> None:
         if message_in['input_id'] == self.input_id:

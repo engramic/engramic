@@ -144,7 +144,9 @@ class ConsolidateService(Service):
         engram_list = observation.engram_list
         input_id = observation.input_id
 
-        self.send_message_async(Service.Topic.ENGRAM_CREATED, {'input_id': input_id, 'count': len(engram_list)})
+        engram_ids = [engram.id for engram in engram_list]
+
+        self.send_message_async(Service.Topic.ENGRAM_CREATED, {'input_id': input_id, 'engram_id_array': engram_ids})
 
         # Keep references so we can fill them in later
         for engram in engram_list:
@@ -197,9 +199,6 @@ class ConsolidateService(Service):
 
         self.host.update_mock_data(plugin, indices, index, input_id)
 
-        number_indicies = len(load_json['index_text_array'])
-        self.send_message_async(Service.Topic.INDEX_CREATED, {'input_id': input_id, 'count': number_indicies})
-
         self.metrics_tracker.increment(ConsolidateMetric.INDICES_GENERATED, len(indices))
 
         if len(response_json['index_text_array']) == 0:
@@ -239,14 +238,19 @@ class ConsolidateService(Service):
 
         self.metrics_tracker.increment(ConsolidateMetric.EMBEDDINGS_GENERATED, len(embedding_list))
 
+        index_id_array = []
+
         # Convert raw embeddings to Index objects and attach them
         try:
             index_array: list[Index] = []
             for i, vec in enumerate(embedding_list):
                 index = Index(indices[i], vec)
                 index_array.append(index)
+                index_id_array.append(index.id)
         except Exception:
             logging.exception('Exception caught.')
+
+        self.send_message_async(Service.Topic.INDEX_CREATED, {'input_id': input_id, 'index_id_array': index_id_array})
 
         self.engram_builder[engram_id].indices = index_array
         serialized_index_array = [asdict(index) for index in index_array]

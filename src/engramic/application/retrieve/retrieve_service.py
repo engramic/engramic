@@ -89,7 +89,16 @@ class RetrieveService(Service):
     # when called from monitor service
     def on_submit_prompt(self, msg: dict[Any, Any]) -> None:
         prompt_str = msg['prompt_str']
-        self.submit(Prompt(prompt_str))
+
+        input_id = ''
+        if 'input_id' in msg:
+            input_id = msg['input_id']
+
+        training_mode = False
+        if 'training_mode' in msg:
+            training_mode = msg['training_mode']
+
+        self.submit(Prompt(prompt_str=prompt_str, prompt_id=input_id, training_mode=training_mode))
 
     # when used from main
     def submit(self, prompt: Prompt) -> None:
@@ -118,7 +127,9 @@ class RetrieveService(Service):
             collection_name='main', index_list=index_list, obj_id=engram_id, args=plugin['args']
         )
 
-        self.send_message_async(Service.Topic.INDEX_INSERTED, {'input_id': input_id, 'count': len(index_list)})
+        index_id_array = [index.id for index in index_list]
+
+        self.send_message_async(Service.Topic.INDEX_INSERTED, {'input_id': input_id, 'index_id_array': index_id_array})
 
         self.metrics_tracker.increment(RetrieveMetric.EMBEDDINGS_ADDED_TO_VECTOR)
 

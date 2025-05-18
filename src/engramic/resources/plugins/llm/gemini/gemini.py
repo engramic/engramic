@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import logging
 import os
 import re
 from typing import Any, cast, no_type_check
@@ -14,6 +15,9 @@ from engramic.core.interface.llm import LLM
 from engramic.core.prompt import Prompt
 from engramic.infrastructure.system.plugin_specifications import llm_impl
 from engramic.infrastructure.system.websocket_manager import WebsocketManager
+
+logging.getLogger('google_genai').setLevel(logging.WARNING)
+logging.getLogger('httpx').setLevel(logging.WARNING)
 
 
 class Gemini(LLM):

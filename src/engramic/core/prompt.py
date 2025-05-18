@@ -12,10 +12,13 @@ from typing import Any
 class Prompt:
     prompt_str: str = ''
     prompt_id: str = ''
+    training_mode: bool | None = False
     input_data: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        self.prompt_id = str(uuid.uuid4())
+        if not self.prompt_id:
+            self.prompt_id = str(uuid.uuid4())
+
         self.input_data.update({
             'prompt_str': self.prompt_str
         })  # include the prompt_str as input_data to be used in mako rendering.

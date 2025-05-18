@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -13,11 +14,12 @@ if TYPE_CHECKING:
 
 @dataclass()
 class Meta:
-    """
-    Test.
-    """
+    class SourceType(Enum):
+        DOCUMENT = 'document'
+        RESPONSE = 'response'
 
     id: str
+    type: str
     locations: list[str]
     source_ids: list[str]
     keywords: list[str]

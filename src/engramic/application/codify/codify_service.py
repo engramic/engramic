@@ -109,10 +109,10 @@ class CodifyService(Service):
         if __debug__:
             self.host.update_mock_data_input(self, response_dict)
 
-        if not self.training_mode:
+        prompt = Prompt(**response_dict['prompt'])
+        if not prompt.training_mode:
             return
 
-        prompt_str = response_dict['prompt_str']
         model = response_dict['model']
         analysis = PromptAnalysis(**response_dict['analysis'])
         retrieve_result = RetrieveResult(**response_dict['retrieve_result'])
@@ -121,7 +121,7 @@ class CodifyService(Service):
             response_dict['input_id'],
             response_dict['response'],
             retrieve_result,
-            prompt_str,
+            prompt,
             analysis,
             model,
         )
@@ -183,7 +183,7 @@ class CodifyService(Service):
             'response': response.response,
         }
 
-        prompt = PromptValidatePrompt(response.prompt_str, input_data=input_data)
+        prompt = PromptValidatePrompt(response.prompt.prompt_str, input_data=input_data)
 
         plugin = self.llm_validate
         validate_response = await asyncio.to_thread(

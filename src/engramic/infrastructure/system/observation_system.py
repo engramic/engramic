@@ -36,6 +36,7 @@ class ObservationSystem(Observation):
         index = Index(**observation_dict['meta']['summary_full'])
         new_meta = Meta(
             str(uuid.uuid4()),
+            observation_dict['meta']['type'],
             combined_locations,
             combined_source_ids,
             observation_dict['meta']['keywords'],

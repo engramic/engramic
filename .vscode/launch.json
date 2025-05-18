@@ -30,6 +30,13 @@
       "console": "integratedTerminal"
     },
     {
+      "name": "Example - Teach",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/teach/teach.py",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Integration Tests",
       "type": "debugpy",
       "request": "launch",

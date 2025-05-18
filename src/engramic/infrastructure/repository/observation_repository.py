@@ -2,6 +2,7 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import json
 import time
 import uuid
 from typing import Any
@@ -10,6 +11,7 @@ from cachetools import LRUCache
 
 from engramic.core.index import Index
 from engramic.core.interface.db import DB
+from engramic.core.meta import Meta
 from engramic.core.observation import Observation
 from engramic.core.response import Response
 from engramic.infrastructure.repository.engram_repository import EngramRepository
@@ -51,6 +53,10 @@ class ObservationRepository:
         if not isinstance(engrams, list):
             return False
 
+        meta = toml_data.get('meta')
+        if not meta or 'keywords' not in meta or 'summary_full' not in meta:
+            return False
+
         return all(self._validate_engram(engram) for engram in engrams)
 
     def _validate_engram(self, engram: dict[str, Any]) -> bool:
@@ -73,6 +79,7 @@ class ObservationRepository:
 
     def _normalize_meta(self, meta: dict[str, Any], response: Response) -> Any:
         meta_id = str(uuid.uuid4())
+        meta.setdefault('type', Meta.SourceType.RESPONSE.value)
         meta.setdefault('id', meta_id)
         meta.setdefault('source_ids', [response.hash])
         meta.setdefault('locations', [f'llm://{response.model}'])
@@ -90,6 +97,8 @@ class ObservationRepository:
         engram.setdefault('locations', [f'llm://{response.model}'])
         engram.setdefault('meta_ids', [meta_id])
         engram.setdefault('is_native_source', False)
+        if engram['context']:
+            engram['context'] = json.loads(engram['context'])
 
     def save(self, observation: Observation) -> bool:
         ret: bool = self.db_plugin['func'].insert_documents(
