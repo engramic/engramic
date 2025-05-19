@@ -34,6 +34,7 @@ class Service(ABC):
         INPUT_COMPLETED = 'input_completed'
         LESSON_CREATED = 'lesson_created'
         LESSON_COMPLETED = 'lesson_completed'
+        PROGRESS_UPDATED = 'progress_updated'
         RETRIEVE_COMPLETE = 'retrieve_complete'
         MAIN_PROMPT_COMPLETE = 'main_prompt_complete'
         START_PROFILER = 'start_profiler'
@@ -46,7 +47,6 @@ class Service(ABC):
         INDEX_COMPLETE = 'index_complete'
         INDEX_INSERTED = 'index_inserted'
         SUBMIT_DOCUMENT = 'submit_document'
-
         ACKNOWLEDGE = 'acknowledge'
         STATUS = 'status'
         SET_TRAINING_MODE = 'set_training_mode'

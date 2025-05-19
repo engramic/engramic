@@ -8,6 +8,7 @@ from typing import Any
 from engramic.application.codify.codify_service import CodifyService
 from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
+from engramic.application.progress.progress_service import ProgressService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.storage.storage_service import StorageService
@@ -40,6 +41,7 @@ def main() -> None:
             CodifyService,  # not used in this example
             ConsolidateService,  # not used in this example
             StorageService,  # not used in this example
+            ProgressService,
             TestService,
         ],
     )

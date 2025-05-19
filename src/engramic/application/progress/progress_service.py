@@ -41,12 +41,13 @@ class ProgressService(Service):
     class Progress:
         index_list: dict[Any, Any] = field(default_factory=dict)
         engram_list: dict[Any, Any] = field(default_factory=dict)
+        completed: bool = False
         lesson_id = ''  # optional lesson id
 
     def __init__(self, host: Host) -> None:
         super().__init__(host)
         self.progress_items: dict[str, ProgressService.Progress] = {}
-        self.lesson_items: dict[str, dict[str, bool]] = {}
+        self.lesson_items: dict[str, list[str]] = {}
 
     def init_async(self) -> None:
         return super().init_async()
@@ -61,11 +62,25 @@ class ProgressService(Service):
 
     def on_input_create(self, msg: dict[Any, Any], lesson_id: str | None = None) -> None:
         input_id = msg['input_id']
+        input_type = msg['type']
+
+        if input_type == 'prompt' and not lesson_id:
+            return  # Not tracking prompt's that aren't part of lesson right now
 
         if input_id not in self.progress_items:
             self.progress_items[input_id] = ProgressService.Progress()
             if lesson_id:
                 self.progress_items[input_id].lesson_id = lesson_id
+                self.send_message_async(
+                    Service.Topic.PROGRESS_UPDATED,
+                    {'progress_type': 'lesson', 'lesson_id': lesson_id, 'percent_inputs_complete': 0.0},
+                )
+            else:
+                self.send_message_async(
+                    Service.Topic.PROGRESS_UPDATED,
+                    {'progress_type': 'input', 'input_id': input_id, 'percent_engrams_complete': 0.0},
+                )
+
         # else: lesson may have already created the entries.
 
     def on_engram_created(self, msg: dict[Any, Any]) -> None:
@@ -89,30 +104,59 @@ class ProgressService(Service):
     def _on_index_inserted(self, msg: dict[Any, Any]) -> None:
         input_id = msg['input_id']
         index_id_array = msg['index_id_array']
+        engram_id = msg['engram_id']
 
         if input_id in self.progress_items:
             input_process = self.progress_items[input_id]
+
             for index_id in index_id_array:
                 input_process.index_list[index_id] = True
 
-            if all(input_process.index_list.values()):
-                self.progress_items[input_id].engram_list = dict.fromkeys(input_process.engram_list, True)
+            input_process.engram_list[engram_id] = True
 
-                lesson_id = self.progress_items[input_id].lesson_id
+            total_engram = len(input_process.engram_list)
+            sum_engrams = sum(input_process.engram_list.values())
 
+            lesson_id = self.progress_items[input_id].lesson_id
+
+            if not lesson_id:
+                self.send_message_async(
+                    Service.Topic.PROGRESS_UPDATED,
+                    {
+                        'progress_type': 'input',
+                        'input_id': input_id,
+                        'percent_engrams_complete': sum_engrams / total_engram,
+                    },
+                )
+
+            if all(input_process.engram_list.values()):
+                self.progress_items[input_id].completed = True
                 self.send_message_async(Service.Topic.INPUT_COMPLETED, {'input_id': input_id})
 
-                if not lesson_id:
-                    del self.progress_items[input_id]
-                else:
-                    self.lesson_items[lesson_id][input_id] = True
-                    if all(self.lesson_items[lesson_id].values()):
-                        self.send_message_async(Service.Topic.LESSON_COMPLETED, {'lesson_id': lesson_id})
-                        for input_id in list(self.lesson_items[lesson_id].keys()):
-                            del self.lesson_items[lesson_id][input_id]
-                            del self.progress_items[input_id]
+                if lesson_id:
+                    input_array = self.lesson_items[lesson_id]
 
+                    lesson_inputs = [self.progress_items[input_id].completed for input_id in input_array]
+
+                    total_inputs = len(lesson_inputs)
+                    sum_inputs = sum(lesson_inputs)
+
+                    self.send_message_async(
+                        Service.Topic.PROGRESS_UPDATED,
+                        {
+                            'progress_type': 'lesson',
+                            'lesson_id': lesson_id,
+                            'percent_inputs_complete': sum_inputs / total_inputs,
+                        },
+                    )
+
+                    if all(lesson_inputs):
+                        self.send_message_async(Service.Topic.LESSON_COMPLETED, {'lesson_id': lesson_id})
                         del self.lesson_items[lesson_id]
+
+                else:
+                    del self.progress_items[input_id]
+
         else:
             logging.error('on_index_inserted call made with input not in progress items. Item removed prematurely?')
 
@@ -120,8 +164,7 @@ class ProgressService(Service):
         lesson_id = msg['lesson_id']
         input_id_array = msg['input_array']
 
-        self.lesson_items[lesson_id] = {}
+        self.lesson_items[lesson_id] = input_id_array
 
         for input_id in input_id_array:
-            self.lesson_items[lesson_id][input_id] = False
-            self.on_input_create({'input_id': input_id}, lesson_id)
+            self.on_input_create({'input_id': input_id, 'type': 'prompt'}, lesson_id)

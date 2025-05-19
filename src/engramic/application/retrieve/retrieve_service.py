@@ -110,7 +110,7 @@ class RetrieveService(Service):
         retrieval.get_sources()
 
         async def send_message() -> None:
-            self.send_message_async(Service.Topic.INPUT_CREATED, {'input_id': prompt.prompt_id})
+            self.send_message_async(Service.Topic.INPUT_CREATED, {'input_id': prompt.prompt_id, 'type': 'prompt'})
 
         self.run_task(send_message())
 
@@ -129,7 +129,10 @@ class RetrieveService(Service):
 
         index_id_array = [index.id for index in index_list]
 
-        self.send_message_async(Service.Topic.INDEX_INSERTED, {'input_id': input_id, 'index_id_array': index_id_array})
+        self.send_message_async(
+            Service.Topic.INDEX_INSERTED,
+            {'input_id': input_id, 'engram_id': engram_id, 'index_id_array': index_id_array},
+        )
 
         self.metrics_tracker.increment(RetrieveMetric.EMBEDDINGS_ADDED_TO_VECTOR)
 
