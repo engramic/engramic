@@ -30,8 +30,11 @@ class TestService(Service):
         self.subscribe(Service.Topic.INPUT_COMPLETED, self.on_input_complete)
 
         sense_service = self.host.get_service(SenseService)
+        # document = Document(
+        #    Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+        # )
         document = Document(
-            Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+            Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
         )
         self.document_id = document.id
         sense_service.submit_document(document)
@@ -41,10 +44,11 @@ class TestService(Service):
         logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
 
     def on_input_complete(self, message_in: dict[str, Any]) -> None:
-        input_id = message_in['input_id']
-        if self.document_id == input_id:
+        source_id = message_in['source_id']
+        if self.document_id == source_id:
             retrieve_service = self.host.get_service(RetrieveService)
-            prompt = Prompt('List the roles at GH Star Collector.')
+            prompt = Prompt('Please tell me about IntroductiontoQuantumNetworking.pdf')
+            # prompt = Prompt('List the roles at GH Star Collector.')
             retrieve_service.submit(prompt)
 
 

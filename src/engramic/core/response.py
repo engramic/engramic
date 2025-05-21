@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 @dataclass
 class Response:
     id: str
-    input_id: str
+    source_id: str
     response: str
     retrieve_result: RetrieveResult
     prompt: Prompt

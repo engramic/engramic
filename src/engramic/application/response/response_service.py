@@ -101,11 +101,11 @@ class ResponseService(Service):
         prompt = Prompt(**retrieve_result_in['prompt'])
         prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
         retrieve_result = RetrieveResult(**retrieve_result_in['retrieve_response'])
-        input_id = retrieve_result.input_id
+        source_id = retrieve_result.source_id
         self.metrics_tracker.increment(ResponseMetric.RETRIEVES_RECIEVED)
         fetch_engrams_task = self.run_tasks([
             self._fetch_retrieval(
-                prompt=prompt, input_id=input_id, analysis=prompt_analysis, retrieve_result=retrieve_result
+                prompt=prompt, source_id=source_id, analysis=prompt_analysis, retrieve_result=retrieve_result
             ),
             self._fetch_history(),
         ])
@@ -127,7 +127,7 @@ class ResponseService(Service):
         return history
 
     async def _fetch_retrieval(
-        self, prompt: Prompt, input_id: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult
+        self, prompt: Prompt, source_id: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult
     ) -> dict[str, Any]:
         engram_array: list[Engram] = await asyncio.to_thread(
             self.engram_repository.load_batch_retrieve_result, retrieve_result
@@ -136,7 +136,7 @@ class ResponseService(Service):
         # assembled main_prompt, render engrams.
         return {
             'prompt': prompt,
-            'input_id': input_id,
+            'source_id': source_id,
             'analysis': analysis,
             'retrieve_result': retrieve_result,
             'engram_array': engram_array,
@@ -153,7 +153,7 @@ class ResponseService(Service):
         main_prompt_task = self.run_task(
             self.main_prompt(
                 retrieval['prompt'],
-                retrieval['input_id'],
+                retrieval['source_id'],
                 retrieval['analysis'],
                 retrieval['engram_array'],
                 retrieval['retrieve_result'],
@@ -171,7 +171,7 @@ class ResponseService(Service):
     async def main_prompt(
         self,
         prompt_in: Prompt,
-        input_id: str,
+        source_id: str,
         analysis: PromptAnalysis,
         engram_array: list[Engram],
         retrieve_result: RetrieveResult,
@@ -193,12 +193,14 @@ class ResponseService(Service):
         )
 
         plugin = self.llm_main
+        args = self.host.mock_update_args(plugin)
+        args.update({'skip_websocket': prompt_in.is_lesson})
 
         response = await asyncio.to_thread(
             plugin['func'].submit_streaming,
             prompt=prompt,
             websocket_manager=self.web_socket_manager,
-            args=self.host.mock_update_args(plugin),
+            args=args,
         )
 
         if __debug__:
@@ -215,7 +217,7 @@ class ResponseService(Service):
 
         response = response[0]['llm_response'].replace('$', 'USD ').replace('<context>', '').replace('</context>', '')
 
-        response_inst = Response(str(uuid.uuid4()), input_id, response, retrieve_result, prompt_in, analysis, model)
+        response_inst = Response(str(uuid.uuid4()), source_id, response, retrieve_result, prompt_in, analysis, model)
 
         return response_inst
 

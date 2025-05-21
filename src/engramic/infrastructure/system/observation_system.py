@@ -47,7 +47,7 @@ class ObservationSystem(Observation):
         engram_list = engram_repository.load_batch_dict(filtered_engrams_dict)
 
         merged_observation: Observation = ObservationSystem(
-            str(uuid.uuid4()), observation.input_id, new_meta, engram_list, time.time()
+            str(uuid.uuid4()), observation.source_id, new_meta, engram_list, time.time()
         )
 
         return merged_observation

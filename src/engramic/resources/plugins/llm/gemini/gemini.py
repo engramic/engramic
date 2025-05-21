@@ -146,7 +146,9 @@ class Gemini(LLM):
             if chunk.text is None:
                 error = 'Error in Gemini submit. Response.text is None.'
                 raise RuntimeError(error)
-            websocket_manager.send_message(LLM.StreamPacket(chunk.text, False, ''))
+            if not args['skip_websocket']:
+                websocket_manager.send_message(LLM.StreamPacket(chunk.text, False, ''))
+
             full_response += chunk.text
 
         return {'llm_response': self.extract_toml_block(full_response)}

@@ -13,6 +13,7 @@ class Prompt:
     prompt_str: str = ''
     prompt_id: str = ''
     training_mode: bool | None = False
+    is_lesson: bool | None = False
     input_data: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:

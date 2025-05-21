@@ -32,17 +32,17 @@ class ObservationRepository:
     def load_dict(self, dict_data: dict[str, Any]) -> Observation:
         engram_list = self.engram_repository.load_batch_dict(dict_data['engram_list'])
         meta = self.meta_repository.load(dict_data['meta'])
-        input_id = dict_data['input_id']
+        source_id = dict_data['source_id']
 
-        observation: Observation = ObservationSystem(str(uuid.uuid4()), input_id, meta, engram_list, time.time())
+        observation: Observation = ObservationSystem(str(uuid.uuid4()), source_id, meta, engram_list, time.time())
         return observation
 
     def load_toml_dict(self, toml_data: dict[str, Any]) -> ObservationSystem:
         engram_list = self.engram_repository.load_batch_dict(toml_data['engram'])
         meta = self.meta_repository.load(toml_data['meta'])
-        input_id = toml_data['input_id']
+        source_id = toml_data['source_id']
 
-        observation = ObservationSystem(str(uuid.uuid4()), input_id, meta, engram_list)
+        observation = ObservationSystem(str(uuid.uuid4()), source_id, meta, engram_list)
         return observation
 
     def validate_toml_dict(self, toml_data: dict[str, Any]) -> bool:
@@ -74,7 +74,7 @@ class ObservationRepository:
         for engram_dict in toml_data['engram']:
             self._normalize_engram(engram_dict, meta_id, response)
 
-        toml_data['input_id'] = response.input_id
+        toml_data['source_id'] = response.source_id
         return toml_data
 
     def _normalize_meta(self, meta: dict[str, Any], response: Response) -> Any:
@@ -98,7 +98,13 @@ class ObservationRepository:
         engram.setdefault('meta_ids', [meta_id])
         engram.setdefault('is_native_source', False)
         if engram['context']:
-            engram['context'] = json.loads(engram['context'])
+            try:
+                engram['context'] = json.loads(engram['context'])
+            except json.JSONDecodeError as e:
+                error = (
+                    f"Failed to decode JSON in 'context' in Normalize Engram (a formatting issue with LLM output): {e}"
+                )
+                raise RuntimeError(error) from e
 
     def save(self, observation: Observation) -> bool:
         ret: bool = self.db_plugin['func'].insert_documents(

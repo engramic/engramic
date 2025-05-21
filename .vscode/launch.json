@@ -56,15 +56,28 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "Run Production - Standard Profile",
+      "name": "Run Production",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/examples/standard_profile/standard_profile.py",
+      "program": "${workspaceFolder}/examples/production/production.py",
       "console": "integratedTerminal",
       "pythonArgs": ["-O"],
       "envFile": "${workspaceFolder}/.env.prod",
       "env": {
         "ENV": "production",
+        "LOG_LEVEL": "INFO"
+      }
+    },
+    {
+      "name": "Run Debug",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/production/production.py",
+      "console": "integratedTerminal",
+      "pythonArgs": [],
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "ENV": "debug",
         "LOG_LEVEL": "INFO"
       }
     }

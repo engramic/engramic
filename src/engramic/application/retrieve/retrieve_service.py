@@ -90,15 +90,21 @@ class RetrieveService(Service):
     def on_submit_prompt(self, msg: dict[Any, Any]) -> None:
         prompt_str = msg['prompt_str']
 
-        input_id = ''
-        if 'input_id' in msg:
-            input_id = msg['input_id']
+        source_id = ''
+        if 'source_id' in msg:
+            source_id = msg['source_id']
 
         training_mode = False
         if 'training_mode' in msg:
             training_mode = msg['training_mode']
 
-        self.submit(Prompt(prompt_str=prompt_str, prompt_id=input_id, training_mode=training_mode))
+        is_lesson = False
+        if 'is_lesson' in msg:
+            is_lesson = msg['is_lesson']
+
+        self.submit(
+            Prompt(prompt_str=prompt_str, prompt_id=source_id, training_mode=training_mode, is_lesson=is_lesson)
+        )
 
     # when used from main
     def submit(self, prompt: Prompt) -> None:
@@ -110,18 +116,18 @@ class RetrieveService(Service):
         retrieval.get_sources()
 
         async def send_message() -> None:
-            self.send_message_async(Service.Topic.INPUT_CREATED, {'input_id': prompt.prompt_id, 'type': 'prompt'})
+            self.send_message_async(Service.Topic.INPUT_CREATED, {'source_id': prompt.prompt_id, 'type': 'prompt'})
 
         self.run_task(send_message())
 
     def on_index_complete(self, index_message: dict[str, Any]) -> None:
         raw_index: list[dict[str, Any]] = index_message['index']
         engram_id: str = index_message['engram_id']
-        input_id: str = index_message['input_id']
+        source_id: str = index_message['source_id']
         index_list: list[Index] = [Index(**item) for item in raw_index]
-        self.run_task(self._insert_engram_vector(index_list, engram_id, input_id))
+        self.run_task(self._insert_engram_vector(index_list, engram_id, source_id))
 
-    async def _insert_engram_vector(self, index_list: list[Index], engram_id: str, input_id: str) -> None:
+    async def _insert_engram_vector(self, index_list: list[Index], engram_id: str, source_id: str) -> None:
         plugin = self.vector_db_plugin
         self.vector_db_plugin['func'].insert(
             collection_name='main', index_list=index_list, obj_id=engram_id, args=plugin['args']
@@ -131,7 +137,7 @@ class RetrieveService(Service):
 
         self.send_message_async(
             Service.Topic.INDEX_INSERTED,
-            {'input_id': input_id, 'engram_id': engram_id, 'index_id_array': index_id_array},
+            {'source_id': source_id, 'engram_id': engram_id, 'index_id_array': index_id_array},
         )
 
         self.metrics_tracker.increment(RetrieveMetric.EMBEDDINGS_ADDED_TO_VECTOR)

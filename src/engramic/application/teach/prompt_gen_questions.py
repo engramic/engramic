@@ -22,7 +22,7 @@ class PromptGenQuestions(Prompt):
     Make at least one question each for all of the of the major topics.
 
     Write the questions in this format:
-    Please answer this research question:
+    Please answer this research question in an outline format:
     location: ${meta['locations']} "Insert a who, what, where, why, how question depending on what is apropriate given the keywords or major topic."
 
     """).render(**self.input_data)

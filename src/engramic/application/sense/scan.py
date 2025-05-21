@@ -7,9 +7,9 @@ from __future__ import annotations
 import asyncio
 import base64
 import copy
-import hashlib
 import json
 import logging
+import os
 import re
 import uuid
 from concurrent.futures import Future
@@ -100,7 +100,12 @@ class Scan(Media):
         if document.root_directory == Document.Root.RESOURCE:
             file_path = files(document.file_path).joinpath(document.file_name)
         elif document.root_directory == Document.Root.DATA:
-            file_path = Path(document.file_path) / document.file_name
+            repo_root = os.getenv('REPO_ROOT')
+            if repo_root is None:
+                error = "Environment variable 'REPO_ROOT' is not set."
+                raise RuntimeError(error)
+            expanded_path = Path(repo_root + document.file_path).expanduser()
+            file_path = expanded_path / document.file_name
 
         self.document = document
         self.source_id = document.id
@@ -198,6 +203,7 @@ class Scan(Media):
         future.add_done_callback(self._on_pages_scanned)
 
     async def _scan_page(self, page_num: int) -> Any:
+        # logging.info(f"Scan Page: {page_num}")
         plugin = self.service.sense_scan_page
 
         initial_scan_copy = copy.copy(self.inital_scan)
@@ -273,7 +279,7 @@ class Scan(Media):
             engram = Engram(
                 str(uuid.uuid4()),
                 [self.inital_scan['file_path']],
-                [self.document.get_source_id()],
+                [self.document.id],
                 text_in,
                 True,
                 context,
@@ -314,7 +320,7 @@ class Scan(Media):
             self.meta_id,
             Meta.SourceType.DOCUMENT.value,
             [self.inital_scan['file_path'] + self.inital_scan['file_name']],
-            [hashlib.md5(self.inital_scan['file_path'].encode('utf-8')).hexdigest()],
+            [self.source_id],
             results['keywords'].split(','),
             self.inital_scan['summary_initial'],
             Index(results['summary_full']),

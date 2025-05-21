@@ -31,8 +31,8 @@ class MiniService(Service):
         del expected_results['response_time']
         del generated_response['model']
         del expected_results['model']
-        del generated_response['input_id']
-        del expected_results['input_id']
+        del generated_response['source_id']
+        del expected_results['source_id']
         assert str(generated_response) == str(expected_results)
         self.host.shutdown()
 

@@ -41,9 +41,9 @@ class TestService(Service):
         retrive_service.submit(prompt)
 
     def on_input_complete(self, message_in: dict[str, Any]) -> None:
-        input_id = message_in['input_id']
+        source_id = message_in['source_id']
 
-        if input_id == self.prompt_id:
+        if source_id == self.prompt_id:
             sense_service = self.host.get_service(SenseService)
             document = Document(
                 Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
@@ -51,7 +51,7 @@ class TestService(Service):
             self.document_id = document.id
             sense_service.submit_document(document)
 
-        if input_id == self.document_id:
+        if source_id == self.document_id:
             self.host.write_mock_data()
 
 

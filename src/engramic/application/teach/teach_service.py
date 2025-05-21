@@ -26,5 +26,5 @@ class TeachService(Service):
     def on_meta_complete(self, msg: dict[Any, Any]) -> None:
         meta = Meta(**msg)
         if meta.type == meta.SourceType.DOCUMENT.value:
-            lesson = Lesson(self, str(uuid.uuid4()))
+            lesson = Lesson(self, meta.source_ids[0], str(uuid.uuid4()))
             lesson.run_lesson(meta)

@@ -32,12 +32,12 @@ class TestService(Service):
         self.subscribe(Service.Topic.LESSON_COMPLETED, self.on_lesson_completed)
 
         sense_service = self.host.get_service(SenseService)
-        document = Document(
-            Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
-        )
         # document = Document(
-        #    Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+        #    Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
         # )
+        document = Document(
+            Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+        )
         self.document_id = document.id
         sense_service.submit_document(document)
 
@@ -52,8 +52,8 @@ class TestService(Service):
         lesson_id = message_in['lesson_id']
         if self.lesson_id == lesson_id:
             retrieve_service = self.host.get_service(RetrieveService)
-            retrieve_service.submit(Prompt('Please tell me about IntroductiontoQuantumNetworking.pdf'))
-            # retrieve_service.submit(Prompt('Please list all the roles at GH star collector.'))
+            # retrieve_service.submit(Prompt('Please tell me about IntroductiontoQuantumNetworking.pdf'))
+            retrieve_service.submit(Prompt('Please list all the roles at GH star collector.'))
 
 
 def main() -> None:

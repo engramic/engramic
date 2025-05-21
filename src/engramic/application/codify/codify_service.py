@@ -118,7 +118,7 @@ class CodifyService(Service):
         retrieve_result = RetrieveResult(**response_dict['retrieve_result'])
         response = Response(
             response_dict['id'],
-            response_dict['input_id'],
+            response_dict['source_id'],
             response_dict['response'],
             retrieve_result,
             prompt,
