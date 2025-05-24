@@ -183,7 +183,12 @@ class CodifyService(Service):
             'response': response.response,
         }
 
-        prompt = PromptValidatePrompt(response.prompt.prompt_str, input_data=input_data)
+        prompt = PromptValidatePrompt(
+            response.prompt.prompt_str,
+            input_data=input_data,
+            is_lesson=response.prompt.is_lesson,
+            training_mode=response.prompt.training_mode,
+        )
 
         plugin = self.llm_validate
         validate_response = await asyncio.to_thread(
@@ -245,7 +250,7 @@ class CodifyService(Service):
         if ret['return_observation'] is not None:
             self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(ret['return_observation']))
 
-        if __debug__:
+        if __debug__ and ret['return_observation'] is not None:
             self.host.update_mock_data_output(self, asdict(ret['return_observation']))
 
     """

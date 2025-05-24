@@ -184,6 +184,8 @@ class ResponseService(Service):
         # build main prompt here
         prompt = PromptMainPrompt(
             prompt_str=prompt_in.prompt_str,
+            is_lesson=prompt_in.is_lesson,
+            training_mode=prompt_in.training_mode,
             input_data={
                 'engram_list': engram_dict_list,
                 'history': history_array,

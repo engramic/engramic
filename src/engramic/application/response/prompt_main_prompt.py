@@ -30,9 +30,10 @@ Next, form your upcoming response using a mix of the following:
 
 
 Never expose your working memory, only use it as reference.
-Never list the context directly in a list, use it to enrich your respones when appropriate.
+Never list the context directly in a list, use it to enrich your responses when appropriate.
 If information in your sources conflict, share detialed context and prefer newer sources (version, date, time, etc.) of information but also referencing the discrpency.
-Answer in markdown, convert any HMTL not fenced if necessary.
+Answer in commonmark markdown, convert any HMTL not fenced if necessary.
+Deliver results related to the user_intent and resist explaining the work you are doing.
 
 
 
@@ -43,10 +44,12 @@ Answer in markdown, convert any HMTL not fenced if necessary.
 % endif
 
 <sources>
-    user_intent: ${working_memory['current_user_intent']}
-    <engramic_working_memory>
-        working_memory: ${working_memory['working_memory']}
-    </engramic_working_memory>
+    % if not is_lesson:
+        user_intent: ${working_memory['current_user_intent']}
+        <engramic_working_memory>
+            working_memory: ${working_memory['working_memory']}
+        </engramic_working_memory>
+    % endif
     % if len(engram_list) == 0:
         There were no sources found. User can try again with more detail if they are being vague.
     % endif
@@ -82,6 +85,7 @@ Answer in markdown, convert any HMTL not fenced if necessary.
         </long_term_memory>
     % endif
     % endfor
+    % if not is_lesson:
     <engramic_previous_response>
         Important! The following section contains your previous answers. This is not a source of truth, it is merely a source of history:
 
@@ -91,6 +95,7 @@ Answer in markdown, convert any HMTL not fenced if necessary.
                 % endfor
         % endfor
     </engramic_previous_response>
+    % endif
 </sources>
 <current_user_prompt>
     ${prompt_str}

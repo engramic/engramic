@@ -11,19 +11,33 @@ class PromptGenQuestions(Prompt):
     def render_prompt(self) -> str:
         rendered_template = Template("""
 
+
+    High Level Summary:
+    ${meta['summary_initial']}
+
     Document Summary:
     ${meta['summary_full']['text']}
 
-    Use the document summary to generate questions.
-    -Your questions should be thorough, capturing all of the items rather than some.
-    -Your questions should be detail orientied, capturing the nuance of the main topic.
-    -Use proper nouns in place of pronouns.
+    We are going to peform an analysis on this document, to this this, I need to you generate 10 study actions to understand the document better.
 
-    Make at least one question each for all of the of the major topics.
+    I need you to generate study actions that are the most apropriate for the entirety of the document, now is not the time to get overly specific, keep it high level. Consider the purpose of the document so that your study actions are the most relevant.
 
-    Write the questions in this format:
-    Please answer this research question in an outline format:
-    location: ${meta['locations']} "Insert a who, what, where, why, how question depending on what is apropriate given the keywords or major topic."
+    Go for it, generate ten relevant study actions based on the entirety of the document.
+    Popular study actions include:
+    location: ${meta['locations']} List all
+    location: ${meta['locations']} Summarize all topics
+    location: ${meta['locations']} interpret all of
+    location: ${meta['locations']} Make comparrisons of all
+    location: ${meta['locations']} Find trends of all
+
+    Include the location tag in each action.
+    Include the prefix about being concise, brief, so that they answers aren't overly verbose.
+    Include the suffix "all" to help the researcher be thorough.
+
+    Bias your questions towards lists if they exist in the Document Summary as that is a very popular request for your audience.
+    Your remaining questions should not be random, but rather, the most valuable for a business professional.
+
+    If it makes sense for the purpose of this document, feel free to make several study actions so that you can cover the broad base of the document.
 
     """).render(**self.input_data)
         return str(rendered_template)

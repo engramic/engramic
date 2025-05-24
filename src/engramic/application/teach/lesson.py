@@ -35,7 +35,7 @@ class Lesson:
 
         prompt = PromptGenQuestions(input_data={'meta': asdict(self.meta)})
 
-        structured_response = {'questions': list[str]}
+        structured_response = {'study_actions': list[str]}
 
         ret = plugin['func'].submit(
             prompt=prompt,
@@ -52,7 +52,7 @@ class Lesson:
 
     def on_questions_generated(self, future: Future[Any]) -> None:
         res = future.result()
-        questions = res['questions']
+        questions = res['study_actions']
 
         async def send_prompt(question: str, source_id: str) -> None:
             self.service.send_message_async(
@@ -60,8 +60,9 @@ class Lesson:
                 {'prompt_str': question, 'source_id': source_id, 'training_mode': True, 'is_lesson': True},
             )
 
+        # print(questions)
         source_array = []
-        for question in questions:
+        for question in reversed(questions):
             source_id = str(uuid.uuid4())
             source_array.append(source_id)
             self.service.run_task(send_prompt(question, source_id))

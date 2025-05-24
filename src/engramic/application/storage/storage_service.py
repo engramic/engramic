@@ -12,6 +12,7 @@ from engramic.core import Engram, Meta, Response
 from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.observation import Observation
+from engramic.core.prompt import Prompt
 from engramic.infrastructure.repository.engram_repository import EngramRepository
 from engramic.infrastructure.repository.history_repository import HistoryRepository
 from engramic.infrastructure.repository.meta_repository import MetaRepository
@@ -92,8 +93,11 @@ class StorageService(Service):
         self.run_task(self.save_observation(response))
 
     def on_prompt_complete(self, response_dict: dict[Any, Any]) -> None:
+        response_dict['prompt'] = Prompt(**response_dict['prompt'])
         response = Response(**response_dict)
-        self.run_task(self.save_history(response))
+
+        if not response.prompt.is_lesson:
+            self.run_task(self.save_history(response))
 
     def on_meta_complete(self, meta_dict: dict[str, str]) -> None:
         meta: Meta = self.meta_repository.load(meta_dict)

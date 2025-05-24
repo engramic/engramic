@@ -72,7 +72,6 @@ class ChromaDB(VectorDB):
     def insert(self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any]) -> None:
         # start = time.perf_counter()
         del args
-
         documents = []
         embeddings = []
         ids = []

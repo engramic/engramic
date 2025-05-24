@@ -21,7 +21,9 @@ class Prompt:
             self.prompt_id = str(uuid.uuid4())
 
         self.input_data.update({
-            'prompt_str': self.prompt_str
+            'prompt_str': self.prompt_str,
+            'training_mode': self.training_mode,
+            'is_lesson': self.is_lesson,
         })  # include the prompt_str as input_data to be used in mako rendering.
 
     def render_prompt(self) -> str:

@@ -16,6 +16,7 @@ Engrams are important or unique topics. Something unimportant that just happened
 
 Always use proper nouns and avoid pronouns.
 
+
 % if engram_list:
 Source engrams are listed below. You will be responding with meta and destination engrams.
 
@@ -40,6 +41,10 @@ If the article contains memorable data, you may choose to provide one, two, or t
 
 An engram should be a unique, complete thought, with enough information to fill an index card. Grab as much memorable information as you can, which may be as little as a single sentence or as big as a large table. You should avoid breaking up information that is semantically related. For exmaple, if there is a list, it would be better to have a single engram with the entire list than three engrams that split the contextually related information.
 
+% if is_lesson:
+This particular article is special and needs special treatment. You should try and generate one, maybe two engrams for this article. The information is designed to be cohesive and it's better to consolidate simlar topics agressively into as few engrams as possible.
+% endif
+
 In the meta section, insert keywords and an outline summary based on the content and context of all engrams.
 
 Valid TOML file:
@@ -48,7 +53,7 @@ A multi-line text requires tripple double quotes.
 <TOML_file_description>
 [[engram]]
 content = "extract memorable facts from the article."
-context = a tripple quote wrapped json string that notes context that supports a broader undersanding of the content. Look for <context> xml tags but don't use xml in the str. use escaped double quotes in the string for properties.
+context = a tripple quote wrapped valid json string (i.e. escape quotes correctly) that summarizes the context that supports a broader undersanding of the content. Pull the data from the context section of the citation but cherry pick the most relevant key-pair values. Use escaped double quotes in the string for properties.
 % if engram_list:
 relevancy = value from 0 to 4
 accuracy = value from 0 to 4
@@ -62,7 +67,7 @@ source_ids = [source_guid_1,source_guid_2,...] <-values are combined from source
 the Meta table is a summary of the engram tables.
 [meta]
 keywords = ["insert keyword1","insert keyword2",...]
-summary_full.text = "insert a dense summary outline of all the above engrams. Very important: Include context keys and values."
+summary_full.text = "Condense the outline to roughly 50 words by abstracting low level details into higher level overviews. Very important: Include context keys and values."
 summary_full.embedding = ""
 </TOML_file_description>
 
@@ -77,6 +82,7 @@ summary_full.embedding = ""
 %   for engram in engram_list:
     <citation>
         content: ${engram.content}
+        context: ${engram.context}
         meta_ids: ${engram.meta_ids}
         locations: ${engram.locations}
         source_ids: ${engram.source_ids}

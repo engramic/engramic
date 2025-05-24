@@ -43,7 +43,10 @@ class TestService(Service):
 
     def on_main_prompt_complete(self, message_in: dict[str, Any]) -> None:
         response = Response(**message_in)
-        logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
+        if not response.prompt['is_lesson']:
+            logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
+        else:
+            logging.info('Lesson Response. %s', response.prompt['prompt_str'])
 
     def on_lesson_created(self, message_in: dict[str, Any]) -> None:
         self.lesson_id = message_in['lesson_id']
@@ -52,8 +55,8 @@ class TestService(Service):
         lesson_id = message_in['lesson_id']
         if self.lesson_id == lesson_id:
             retrieve_service = self.host.get_service(RetrieveService)
-            # retrieve_service.submit(Prompt('Please tell me about IntroductiontoQuantumNetworking.pdf'))
-            retrieve_service.submit(Prompt('Please list all the roles at GH star collector.'))
+            # retrieve_service.submit(Prompt('Please tell me about QuantumNetworking'))
+            retrieve_service.submit(Prompt('Please write a numbered list of all of the roles at GH star collector.'))
 
 
 def main() -> None:

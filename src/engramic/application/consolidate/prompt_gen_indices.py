@@ -12,13 +12,20 @@ class PromptGenIndices(Prompt):
         return_str = Template("""
 Review the content and generate short yet context rich phrase indexes that can be used as an index to perform a relevance search seeking to find the content. An index should be at least 8 relevant words long but may be longer.
 
-If the information is a sentence, you may only need one or two indexes.
+Do not make redundant indexes.
 
-If the information is a paragraph and very dense with information, you may need four or five.
+You should make up to ${(len(engram.content) // 200)+1} indexes.
 
-If the information is more than a paragraph and very dense, you may need 8 to 10 indexes.
-<infomation>
+A third of your indexes should be a high level overview of your content.
+The remaining two thirds of your indexes should be focused on important details.
+
+<context>
+    ${engram.context}
+</context>
+<content>
     ${engram.content}
-</information>
+</content>
 """).render(**self.input_data)
+        # logging.info("=================================")
+        # logging.info(return_str)
         return str(return_str)

@@ -106,7 +106,10 @@ class Gemini(LLM):
         # finish_reason = response.candidates[0].finish_reason
 
         if response.text is None:
-            error = 'Error in Gemini submit. Response.text is None.'
+            finish_reason = 'Not Given.'
+            if hasattr(response, 'candidates') and response.candidates and len(response.candidates) > 0:
+                finish_reason = str(response.candidates[0].finish_reason)
+            error = f'Error in Gemini submit. Response.text is None. Finish Reason: {finish_reason}'
             raise RuntimeError(error)
 
         ret_string: str = str(response.text)
@@ -144,11 +147,15 @@ class Gemini(LLM):
         full_response = ''
         for chunk in response:
             if chunk.text is None:
-                error = 'Error in Gemini submit. Response.text is None.'
-                raise RuntimeError(error)
-            if not args['skip_websocket']:
+                finish_reason = 'Not Given.'
+                if hasattr(chunk, 'candidates') and chunk.candidates and len(chunk.candidates) > 0:
+                    finish_reason = str(chunk.candidates[0].finish_reason)
+                error = f'Error in Gemini submit. Response.text is None. Finish Reason: {finish_reason}'
+                logging.warning(error)
+            if not args['skip_websocket'] and chunk.text:
                 websocket_manager.send_message(LLM.StreamPacket(chunk.text, False, ''))
 
-            full_response += chunk.text
+            if chunk.text:
+                full_response += chunk.text
 
         return {'llm_response': self.extract_toml_block(full_response)}

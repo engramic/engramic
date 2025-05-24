@@ -96,6 +96,7 @@ class Scan(Media):
         self.sense_initial_summary = self.service.sense_initial_summary
 
     def parse_media_resource(self, document: Document) -> None:
+        logging.info('Parsing document: %s', document.file_name)
         file_path: Traversable | Path
         if document.root_directory == Document.Root.RESOURCE:
             file_path = files(document.file_path).joinpath(document.file_name)

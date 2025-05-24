@@ -96,6 +96,7 @@ class ConsolidateService(Service):
         if __debug__:
             self.host.update_mock_data_input(self, observation_dict, observation_dict['source_id'])
 
+        # print("run consolidate")
         # should run a task for this.
         observation = self.observation_repository.load_dict(observation_dict)
         self.metrics_tracker.increment(ConsolidateMetric.OBSERVATIONS_RECIEVED)
@@ -213,6 +214,11 @@ class ConsolidateService(Service):
         indices_list: dict[str, Any] = indices_list_fut.result()
         # indices_list should have a key like 'gen_indices' -> list[dict[str, Any]]
         index_sets: list[dict[str, Any]] = indices_list['_gen_indices']
+
+        # for index in index_sets:
+        #    indices = index['indices']
+        #    for sub_index in indices:
+        #        print(sub_index)
 
         # 2) Generate embeddings for each index set
         embed_tasks = [self._gen_embeddings(index_set, i) for i, index_set in enumerate(index_sets)]
