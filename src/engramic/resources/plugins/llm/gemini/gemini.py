@@ -2,6 +2,8 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import base64
+import logging
 import os
 import re
 from typing import Any, cast, no_type_check
@@ -14,6 +16,9 @@ from engramic.core.interface.llm import LLM
 from engramic.core.prompt import Prompt
 from engramic.infrastructure.system.plugin_specifications import llm_impl
 from engramic.infrastructure.system.websocket_manager import WebsocketManager
+
+logging.getLogger('google_genai').setLevel(logging.WARNING)
+logging.getLogger('httpx').setLevel(logging.WARNING)
 
 
 class Gemini(LLM):
@@ -45,7 +50,9 @@ class Gemini(LLM):
         parts = [types.Part.from_text(text=prompt.render_prompt())]
 
         if images:
-            parts.extend([types.Part.from_bytes(mime_type='image/png', data=image_b64) for image_b64 in images])
+            parts.extend([
+                types.Part.from_bytes(mime_type='image/png', data=base64.b64decode(image_b64)) for image_b64 in images
+            ])
 
         contents = [
             types.Content(
@@ -63,25 +70,32 @@ class Gemini(LLM):
             top_p = 1
             top_k = 1
 
-        generate_content_config_args = {
-            'temperature': temperature,
-            'top_p': top_p,
-            'top_k': top_k,
-            'max_output_tokens': 8192,
-            'response_mime_type': 'text/plain',
-        }
+        # Pre-define values
+        max_output_tokens = 8192
+        response_mime_type = 'text/plain'
+        response_schema = None
+        thinking_config = None
 
+        # Structured response case
         if structured_schema is not None:
             pydantic_model = self.create_pydantic_model('dynamic_model', structured_schema)
-            generate_content_config_args['response_schema'] = pydantic_model
-            generate_content_config_args['response_mime_type'] = 'application/json'
+            response_schema = pydantic_model
+            response_mime_type = 'application/json'
 
+        # Model-specific config
         if model == 'gemini-2.5-flash-preview-04-17':
-            generate_content_config_args['thinking_config'] = types.ThinkingConfig(
-                include_thoughts=False, thinking_budget=0
-            )
+            thinking_config = types.ThinkingConfig(include_thoughts=False, thinking_budget=0)
 
-        generate_content_config = types.GenerateContentConfig(**generate_content_config_args)
+        # Construct config explicitly
+        generate_content_config = types.GenerateContentConfig(
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            max_output_tokens=max_output_tokens,
+            response_mime_type=response_mime_type,
+            response_schema=response_schema,
+            thinking_config=thinking_config,
+        )
 
         response = self._api_client.models.generate_content(
             model=model,
@@ -91,10 +105,14 @@ class Gemini(LLM):
 
         # finish_reason = response.candidates[0].finish_reason
 
-        ret_string = response.text
+        if response.text is None:
+            finish_reason = 'Not Given.'
+            if hasattr(response, 'candidates') and response.candidates and len(response.candidates) > 0:
+                finish_reason = str(response.candidates[0].finish_reason)
+            error = f'Error in Gemini submit. Response.text is None. Finish Reason: {finish_reason}'
+            raise RuntimeError(error)
 
-        # if response.text == None:
-        #    var = 0
+        ret_string: str = str(response.text)
 
         return {'llm_response': self.extract_toml_block(ret_string)}
 
@@ -128,7 +146,16 @@ class Gemini(LLM):
 
         full_response = ''
         for chunk in response:
-            websocket_manager.send_message(LLM.StreamPacket(chunk.text, False, ''))
-            full_response += chunk.text
+            if chunk.text is None:
+                finish_reason = 'Not Given.'
+                if hasattr(chunk, 'candidates') and chunk.candidates and len(chunk.candidates) > 0:
+                    finish_reason = str(chunk.candidates[0].finish_reason)
+                error = f'Error in Gemini submit. Response.text is None. Finish Reason: {finish_reason}'
+                logging.warning(error)
+            if not args['skip_websocket'] and chunk.text:
+                websocket_manager.send_message(LLM.StreamPacket(chunk.text, False, ''))
+
+            if chunk.text:
+                full_response += chunk.text
 
         return {'llm_response': self.extract_toml_block(full_response)}

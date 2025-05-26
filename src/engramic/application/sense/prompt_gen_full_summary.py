@@ -10,7 +10,7 @@ from engramic.core.prompt import Prompt
 class PromptGenFullSummary(Prompt):
     def render_prompt(self) -> str:
         rendered_template = Template("""
-
+    Perform the actions listed below. You are going to generate a keyword phrase and an outline.
 
     This is meta data we already have:
 
@@ -19,15 +19,22 @@ class PromptGenFullSummary(Prompt):
     document_title - ${document_title}
     document_format - ${document_format}
     document_type - ${document_type}
-    toc - ${toc}
-    summary_initial - ${summary_initial}
+    table of contents - ${toc}
+    summary of first few pages - ${summary_initial}
 
     This is the full text:
     ${full_text}
 
-    Perform these two actions:
-    1. Generate a keyword phrase of 8 to 10 keywords that describe this document.
-    2. Concisely summarize this document as an outline that is two levels deep, saving the results in summary_full.
+    Perform these actions:
+    1. In keywords, generate a keyword phrase of 8 to 10 keywords that describe this document.
+    2. In summary_full, write an outline of this document.
+        a. Must be an outline.
+        b. Provide a title.
+        c. Maintain the top to bottom order of the document.
+        d. List all H1 topics. Group them if there are more than ten. IF there are more than 20, show only the groups.
+
+
+
 
     """).render(**self.input_data)
         return str(rendered_template)

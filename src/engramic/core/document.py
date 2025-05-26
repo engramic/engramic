@@ -33,8 +33,6 @@ class Document:
             self.file_name = self.file_name.lstrip('.\\/')
         elif self.root_directory == self.Root.DATA:
             # Use cross-platform local data path
-            base_path = self.get_data_root()  # ← replace hardcoded /engramic with this
-            self.file_path = base_path + '/' + self.file_path.strip('/\\')
             self.file_name = self.file_name.strip('/\\')
         else:
             error = f'Unknown root directory: {self.root_directory}'

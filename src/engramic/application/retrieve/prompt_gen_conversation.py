@@ -46,7 +46,7 @@ Steps
     % for ctr, item in enumerate(history_array['history']):
         <timestamp time="${item['response_time']}">
             <user_previous_prompt>
-                ${item['prompt_str']}
+                ${item['prompt']['prompt_str']}
             </user_previous_prompt>
             <engramic_previous_working_memory>
                 ${item['retrieve_result']['conversation_direction']['current_user_intent']}

@@ -26,6 +26,7 @@ class MetaRepository:
         if isinstance(meta_dict.get('summary_full'), dict):
             summary = meta_dict['summary_full']
             meta_dict['summary_full'] = Index(summary['text'], summary['embedding'])
+
         meta = Meta(**meta_dict)
         return meta
 
@@ -55,6 +56,7 @@ class MetaRepository:
             index = Index(**meta_data['summary_full'])
             meta = Meta(
                 meta_data['id'],
+                meta_data['type'],
                 meta_data['locations'],
                 meta_data['source_ids'],
                 meta_data['keywords'],

@@ -64,6 +64,6 @@ class SenseService(Service):
         scan.parse_media_resource(document)
 
         async def send_message() -> None:
-            self.send_message_async(Service.Topic.INPUT_CREATED, {'input_id': document.id})
+            self.send_message_async(Service.Topic.INPUT_CREATED, {'source_id': document.id, 'type': 'document'})
 
         self.run_task(send_message())

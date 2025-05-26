@@ -27,13 +27,13 @@ class MiniService(Service):
         expected_results = self.host.mock_data_collector['RetrieveService--0-output']
 
         assert str(generated_results['analysis']) == str(expected_results['analysis'])
-        assert str(generated_results['prompt_str']) == str(expected_results['prompt_str'])
+        assert str(generated_results['prompt']['prompt_str']) == str(expected_results['prompt']['prompt_str'])
 
         # delete the ask ids since they are auto generated and won't match.
         del generated_results['retrieve_response']['ask_id']
         del expected_results['retrieve_response']['ask_id']
-        del generated_results['retrieve_response']['input_id']
-        del expected_results['retrieve_response']['input_id']
+        del generated_results['retrieve_response']['source_id']
+        del expected_results['retrieve_response']['source_id']
 
         assert str(generated_results['retrieve_response']) == str(expected_results['retrieve_response'])
 

@@ -23,8 +23,12 @@ class PromptScanPage(Prompt):
     <chapter></chapter> - A chapter title, typically only in large documents.
     <section></section> - A major section of a document. Typically a very large title on it's very own page with very little else on the page. It's job to signal that the subsequent pages are related to this section. Sections are not that common and most pages do not have them.
 
-    <h1> tags. Use these header tags as you see appropriate given the visual and contextual cues on the page. h1 tags match the main topic.
-    <h3> tags. Use these header tags as you see appropriate given the visual and contextual cues on the page. h1 tags match the sub topic.
+    Choose your header tags carefully. Inspect the page and consider the following:
+    1. Appearance. A main topic typically uses bigger fonts compared to other headers on the page.
+    2. Context. A main topic will directly related to a main topic as defined in the summary_initial. A subtopic typically supports a main topic.
+
+    <h1> tags. Use these header tags to annotate main topics.
+    <h3> tags. Use these header tags as annotate sub topics.
 
     <p></p> - A block of text, might be a paragraphs or a couple of paragraphs but possibly only a line of text. Isn't typically bold and looks like most of the font on the page.
     <img></img> - An alt text description of the image. An img tag should never be empty.

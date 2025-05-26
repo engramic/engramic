@@ -15,7 +15,7 @@ from engramic.infrastructure.system.plugin_specifications import vector_db_impl
 
 
 class ChromaDB(VectorDB):
-    DEFAULT_THRESHOLD = 0.5
+    DEFAULT_THRESHOLD = 0.4
     DEFAULT_N_RESULTS = 2
 
     def __init__(self) -> None:
@@ -72,7 +72,6 @@ class ChromaDB(VectorDB):
     def insert(self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any]) -> None:
         # start = time.perf_counter()
         del args
-
         documents = []
         embeddings = []
         ids = []

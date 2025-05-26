@@ -62,8 +62,8 @@ The full code is avaiable in the source code at ```/engramic/examples/document/d
             logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
 
         def on_input_complete(self, message_in: dict[str, Any]) -> None:
-            input_id = message_in['input_id']
-            if self.document_id == input_id:
+            source_id = message_in['source_id']
+            if self.document_id == source_id:
                 retrieve_service = self.host.get_service(RetrieveService)
                 prompt = Prompt('List the roles at GH Star Collector.')
                 retrieve_service.submit(prompt)

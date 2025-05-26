@@ -35,15 +35,17 @@ class MiniService(Service):
 
     async def send_messages(self) -> None:
         observation = self.host.mock_data_collector['CodifyService--0-output']
-        self.input_id = observation['input_id']
+        self.source_id = observation['source_id']
         self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
         self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, observation)
 
     def on_engram_created(self, message_in: dict[str, Any]) -> None:
-        self.engram_create_count += message_in['count']
+        self.engram_create_count += len(message_in['engram_id_array'])
 
     def on_engram_complete(self, generated_response_in) -> None:
-        expected_results = self.host.mock_data_collector[f'ConsolidateService-{self.input_id}-0-output']['engram_array']
+        expected_results = self.host.mock_data_collector[f'ConsolidateService-{self.source_id}-0-output'][
+            'engram_array'
+        ]
         generated_response = generated_response_in['engram_array']
 
         for msg in generated_response:
@@ -66,7 +68,7 @@ class MiniService(Service):
 
         assert gen_str == exp_str
 
-        if generated_response_in['input_id'] == self.input_id:
+        if generated_response_in['source_id'] == self.source_id:
             self.engram_complete_count += len(generated_response)
 
             if (
@@ -76,10 +78,10 @@ class MiniService(Service):
                 self.host.shutdown()
 
     def on_index_created(self, message_in: dict[str, Any]) -> None:
-        self.index_create_count += message_in['count']
+        self.index_create_count += len(message_in['index_id_array'])
 
     def on_index_complete(self, message_in: dict[str, Any]) -> None:
-        if message_in['input_id'] == self.input_id:
+        if message_in['source_id'] == self.source_id:
             self.index_complete_count += len(message_in['index'])
 
         if (

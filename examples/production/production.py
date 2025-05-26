@@ -5,11 +5,17 @@
 import logging
 from typing import Any
 
+from engramic.application.codify.codify_service import CodifyService
+from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
+from engramic.application.progress.progress_service import ProgressService
+from engramic.application.repo.repo_service import RepoService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
+from engramic.application.sense.sense_service import SenseService
+from engramic.application.storage.storage_service import StorageService
+from engramic.application.teach.teach_service import TeachService
 from engramic.core.host import Host
-from engramic.core.prompt import Prompt
 from engramic.core.response import Response
 from engramic.infrastructure.system import Service
 
@@ -34,12 +40,19 @@ def main() -> None:
             MessageService,
             RetrieveService,
             ResponseService,
+            CodifyService,
+            ConsolidateService,
+            StorageService,
+            ProgressService,
+            SenseService,
+            RepoService,
+            TeachService,
             TestService,
         ],
     )
 
-    retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.'))
+    repo_service = host.get_service(RepoService)
+    repo_service.scan_folders()
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

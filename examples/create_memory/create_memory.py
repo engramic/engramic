@@ -8,6 +8,7 @@ from typing import Any
 from engramic.application.codify.codify_service import CodifyService
 from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
+from engramic.application.progress.progress_service import ProgressService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.storage.storage_service import StorageService
@@ -25,11 +26,6 @@ class TestService(Service):
     def start(self):
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
-
-        async def send_message() -> None:
-            self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
-
-        self.run_task(send_message())
 
         super().start()
 
@@ -54,12 +50,13 @@ def main() -> None:
             StorageService,
             CodifyService,
             ConsolidateService,
+            ProgressService,
             TestService,
         ],
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.'))
+    retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.', training_mode=True))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

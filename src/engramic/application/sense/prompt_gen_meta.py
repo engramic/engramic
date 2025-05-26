@@ -13,7 +13,7 @@ class PromptGenMeta(Prompt):
 
 
 
-    These are the initial pages of a pdf named ${file_name} from location ${file_path} and you are only seeing the first several pages. From the images, extract the following:
+    These images are the initial pages of a pdf named ${file_name} from location ${file_path} and you are only seeing the first several pages. From the images, extract the following:
 
 
     file_path - The file path of the document
@@ -24,12 +24,13 @@ class PromptGenMeta(Prompt):
     document_format - word_processing | presentation  | null
     document_type - legal | null
     toc - Table of contents in dict[str,Any] format.
-    summary_initial - Write an outline starting with the broadest description. In general terms of the document purpose, and not concrete terms, define what are main and subtopics listing the term "Main Topics:" and "Sub Topics". You may give examples of main and sub topics by useing (e.g. )
+    summary_initial - Write high-level outline of keywords. Keep this summary very, very brief. In general terms describe the high-level purpose of the document. Do not list  specific items or examples, rather, you should focus only on the highest level abstractions and summaries of what the document provides in it's entirety.
 
+    Do not use "like" for "for example", keep it abstract and high level.
 
     For example:
-    Description: The document is about dogs.
-    Main Topics: Dogs (e.g. terrier, mastif)
+    Description: The document is about animals.
+    Main Topics: Dogs (e.g. terrier, mastif), Cats (e.g. tabby, tuxedo)
     Sub Topics: Care (e.g. At home, veteranarian), Food (e.g. Feeding time, Ingredients)
 
     If a topic is not observable, simply provide null as a value.

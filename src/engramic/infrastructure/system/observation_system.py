@@ -36,6 +36,7 @@ class ObservationSystem(Observation):
         index = Index(**observation_dict['meta']['summary_full'])
         new_meta = Meta(
             str(uuid.uuid4()),
+            observation_dict['meta']['type'],
             combined_locations,
             combined_source_ids,
             observation_dict['meta']['keywords'],
@@ -46,7 +47,7 @@ class ObservationSystem(Observation):
         engram_list = engram_repository.load_batch_dict(filtered_engrams_dict)
 
         merged_observation: Observation = ObservationSystem(
-            str(uuid.uuid4()), observation.input_id, new_meta, engram_list, time.time()
+            str(uuid.uuid4()), observation.source_id, new_meta, engram_list, time.time()
         )
 
         return merged_observation

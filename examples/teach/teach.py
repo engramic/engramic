@@ -13,6 +13,7 @@ from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.sense.sense_service import SenseService
 from engramic.application.storage.storage_service import StorageService
+from engramic.application.teach.teach_service import TeachService
 from engramic.core.document import Document
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
@@ -27,29 +28,35 @@ class TestService(Service):
     def start(self):
         super().start()
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
-        self.subscribe(Service.Topic.INPUT_COMPLETED, self.on_input_complete)
+        self.subscribe(Service.Topic.LESSON_CREATED, self.on_lesson_created)
+        self.subscribe(Service.Topic.LESSON_COMPLETED, self.on_lesson_completed)
 
         sense_service = self.host.get_service(SenseService)
-        document = Document(
-            Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
-        )
         # document = Document(
         #    Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
         # )
+        document = Document(
+            Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+        )
         self.document_id = document.id
         sense_service.submit_document(document)
 
     def on_main_prompt_complete(self, message_in: dict[str, Any]) -> None:
         response = Response(**message_in)
-        logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
+        if not response.prompt['is_lesson']:
+            logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
+        else:
+            logging.info('Lesson Response. %s', response.prompt['prompt_str'])
 
-    def on_input_complete(self, message_in: dict[str, Any]) -> None:
-        source_id = message_in['source_id']
-        if self.document_id == source_id:
+    def on_lesson_created(self, message_in: dict[str, Any]) -> None:
+        self.lesson_id = message_in['lesson_id']
+
+    def on_lesson_completed(self, message_in: dict[str, Any]) -> None:
+        lesson_id = message_in['lesson_id']
+        if self.lesson_id == lesson_id:
             retrieve_service = self.host.get_service(RetrieveService)
-            # prompt = Prompt('Please tell me about IntroductiontoQuantumNetworking.pdf')
-            prompt = Prompt('Tell me about the company in GH SC Official Job Descriptions.pdf.')
-            retrieve_service.submit(prompt)
+            # retrieve_service.submit(Prompt('Please tell me about QuantumNetworking'))
+            retrieve_service.submit(Prompt('Tell me about the company GH star collector.'))
 
 
 def main() -> None:
@@ -63,6 +70,7 @@ def main() -> None:
             StorageService,
             ConsolidateService,
             CodifyService,
+            TeachService,
             ProgressService,
             TestService,
         ],

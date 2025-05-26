@@ -4,7 +4,7 @@
 
 
 import os
-from typing import Any
+from typing import Any, cast
 
 from google import genai
 from google.genai import types
@@ -26,6 +26,16 @@ class Gemini(Embedding):
             model='text-embedding-004', contents=strings, config=types.EmbedContentConfig(task_type='RETRIEVAL_QUERY')
         )
 
-        float_ret_array = [float_array.values for float_array in result.embeddings]
+        if not result.embeddings:
+            error = 'Embeddings returned None result'
+            raise RuntimeError(error)
+
+        for float_array in result.embeddings:
+            if float_array.values is None:
+                error = 'Found None in embedding values'
+                raise RuntimeError(error)
+
+        # cast to satisfy type checker
+        float_ret_array = [cast(list[float], float_array.values) for float_array in result.embeddings]
 
         return {'embeddings_list': float_ret_array}
