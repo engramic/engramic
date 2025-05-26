@@ -48,7 +48,7 @@ class TestService(Service):
         if self.document_id == source_id:
             retrieve_service = self.host.get_service(RetrieveService)
             # prompt = Prompt('Please tell me about IntroductiontoQuantumNetworking.pdf')
-            prompt = Prompt('Make a numbered list of all the roles in GH SC Official Job Descriptions.pdf.')
+            prompt = Prompt('Tell me about the company in GH SC Official Job Descriptions.pdf.')
             retrieve_service.submit(prompt)
 
 

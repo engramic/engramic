@@ -56,7 +56,7 @@ class TestService(Service):
         if self.lesson_id == lesson_id:
             retrieve_service = self.host.get_service(RetrieveService)
             # retrieve_service.submit(Prompt('Please tell me about QuantumNetworking'))
-            retrieve_service.submit(Prompt('Please write a numbered list of all of the roles at GH star collector.'))
+            retrieve_service.submit(Prompt('Tell me about the company GH star collector.'))
 
 
 def main() -> None:

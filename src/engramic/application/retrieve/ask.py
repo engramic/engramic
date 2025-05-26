@@ -230,7 +230,6 @@ class Ask(Retrieval):
 
     async def _vector_fetch_direction_meta(self, embedding: list[float]) -> list[str]:
         plugin = self.prompt_vector_db_plugin
-        plugin['args'].update({'threshold': 0.6, 'n_results': 5})
 
         ret = await asyncio.to_thread(
             plugin['func'].query,

@@ -18,7 +18,7 @@ Engramic_working_memory incudes the state changes that occured from the current_
 
 Next, form your upcoming response using a mix of the following:
 % if analysis['response_length']=="short":
-1. Provide a short an simple answer. One sentence or less.
+1. Provide a short an simple answer. One sentence or less. Use sources or answer without them.
 % else:
 1. You use your phd level knowledge and intuition to provide a response.
 % endif
@@ -51,7 +51,7 @@ Deliver results related to the user_intent and resist explaining the work you ar
         </engramic_working_memory>
     % endif
     % if len(engram_list) == 0:
-        There were no sources found. User can try again with more detail if they are being vague.
+        There were no sources found, use your pre-training knowledge.
     % endif
     % for engram in engram_list:
     % if engram["is_native_source"]:
