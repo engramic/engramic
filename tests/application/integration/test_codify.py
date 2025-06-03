@@ -20,12 +20,11 @@ class MiniService(Service):
         self.run_task(self.send_messages())
 
     async def send_messages(self) -> None:
-        main_prompt_response = self.host.mock_data_collector['ResponseService--0-output']
-        self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
+        main_prompt_response = self.host.mock_data_collector['ResponseService--output']
         self.send_message_async(Service.Topic.MAIN_PROMPT_COMPLETE, main_prompt_response)
 
     def on_observation_complete(self, generated_response) -> None:
-        expected_results = self.host.mock_data_collector['CodifyService--0-output']
+        expected_results = self.host.mock_data_collector['CodifyService--output']
 
         for d in [generated_response, expected_results]:
             d.pop('id', None)

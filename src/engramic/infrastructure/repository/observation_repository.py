@@ -32,17 +32,21 @@ class ObservationRepository:
     def load_dict(self, dict_data: dict[str, Any]) -> Observation:
         engram_list = self.engram_repository.load_batch_dict(dict_data['engram_list'])
         meta = self.meta_repository.load(dict_data['meta'])
-        source_id = dict_data['source_id']
 
-        observation: Observation = ObservationSystem(str(uuid.uuid4()), source_id, meta, engram_list, time.time())
+        observation: Observation = ObservationSystem(
+            dict_data['id'], meta, engram_list, time.time(), dict_data['parent_id'], dict_data['tracking_id']
+        )
         return observation
 
     def load_toml_dict(self, toml_data: dict[str, Any]) -> ObservationSystem:
         engram_list = self.engram_repository.load_batch_dict(toml_data['engram'])
         meta = self.meta_repository.load(toml_data['meta'])
-        source_id = toml_data['source_id']
+        parent_id = toml_data['parent_id']
+        tracking_id = toml_data['tracking_id']
 
-        observation = ObservationSystem(str(uuid.uuid4()), source_id, meta, engram_list)
+        observation = ObservationSystem(
+            str(uuid.uuid4()), meta, engram_list, parent_id=parent_id, tracking_id=tracking_id
+        )
         return observation
 
     def validate_toml_dict(self, toml_data: dict[str, Any]) -> bool:
@@ -74,15 +78,17 @@ class ObservationRepository:
         for engram_dict in toml_data['engram']:
             self._normalize_engram(engram_dict, meta_id, response)
 
-        toml_data['source_id'] = response.source_id
+        toml_data['parent_id'] = response.prompt.prompt_id
+        toml_data['tracking_id'] = response.prompt.tracking_id
         return toml_data
 
     def _normalize_meta(self, meta: dict[str, Any], response: Response) -> Any:
         meta_id = str(uuid.uuid4())
         meta.setdefault('type', Meta.SourceType.RESPONSE.value)
         meta.setdefault('id', meta_id)
-        meta.setdefault('source_ids', [response.hash])
-        meta.setdefault('locations', [f'llm://{response.model}'])
+        meta.setdefault('source_ids', [response.source_id])
+        meta.setdefault('locations', [f'llm://{response.source_id}'])
+        meta.setdefault('repo_ids', response.prompt.repo_ids_filters)
 
         # Normalize summary_full into Index
         text = meta.get('summary_full', {}).get('text', '')
@@ -93,7 +99,7 @@ class ObservationRepository:
     def _normalize_engram(self, engram: dict[str, Any], meta_id: str, response: Response) -> None:
         engram.setdefault('id', str(uuid.uuid4()))
         engram.setdefault('created_date', int(time.time()))
-        engram.setdefault('source_ids', [response.hash])
+        engram.setdefault('source_ids', [response.id])
         engram.setdefault('locations', [f'llm://{response.model}'])
         engram.setdefault('meta_ids', [meta_id])
         engram.setdefault('is_native_source', False)

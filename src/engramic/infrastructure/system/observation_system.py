@@ -17,6 +17,9 @@ class ObservationSystem(Observation):
     def merge_observation(
         self, observation: Observation, accuracy_filter: int, relevancy_filter: int, engram_repository: EngramRepository
     ) -> Observation:
+        error = 'Needs to be tested, likley not working.'
+        raise NotImplementedError(error)
+
         observation_cast = cast(ObservationSystem, observation)
         observation_dict = asdict(observation_cast)
 
@@ -37,6 +40,7 @@ class ObservationSystem(Observation):
         new_meta = Meta(
             str(uuid.uuid4()),
             observation_dict['meta']['type'],
+            observation_dict['meta']['repo_ids'],
             combined_locations,
             combined_source_ids,
             observation_dict['meta']['keywords'],
@@ -46,8 +50,6 @@ class ObservationSystem(Observation):
 
         engram_list = engram_repository.load_batch_dict(filtered_engrams_dict)
 
-        merged_observation: Observation = ObservationSystem(
-            str(uuid.uuid4()), observation.source_id, new_meta, engram_list, time.time()
-        )
+        merged_observation: Observation = ObservationSystem(str(uuid.uuid4()), new_meta, engram_list, time.time())
 
         return merged_observation

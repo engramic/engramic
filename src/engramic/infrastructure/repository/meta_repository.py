@@ -60,6 +60,7 @@ class MetaRepository:
                 meta_data['locations'],
                 meta_data['source_ids'],
                 meta_data['keywords'],
+                meta_data['repo_ids'],
                 meta_data['summary_initial'],
                 index,
             )

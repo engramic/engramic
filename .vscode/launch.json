@@ -30,6 +30,13 @@
       "console": "integratedTerminal"
     },
     {
+      "name": "Example - Repo",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/repo/repo.py",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Example - Teach",
       "type": "debugpy",
       "request": "launch",
@@ -42,10 +49,10 @@
       "request": "launch",
       "module": "pytest",
       //"args": ["${workspaceFolder}/tests/application/integration/test_retrieve.py"],
-      "args": ["${workspaceFolder}/tests/application/integration/test_response.py"],
+      //"args": ["${workspaceFolder}/tests/application/integration/test_response.py"],
       //"args": ["${workspaceFolder}/tests/application/integration/test_codify.py"],
-      //"args": ["${workspaceFolder}/tests/application/integration/test_consolidate.py"],
-      //"args": ["${workspaceFolder}/tests/application/integration/test_sense.py"],
+      //"args": ["${workspaceFolder}/tests/application/integration/test_consolidate.py","-s"],
+      "args": ["${workspaceFolder}/tests/application/integration/test_sense.py"],
       "console": "integratedTerminal"
     },
     {

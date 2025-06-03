@@ -24,8 +24,8 @@ Next, form your upcoming response using a mix of the following:
 % endif
 2. You use user_intent to stay focused on meeting the user's needs.
 3. You use engramic_working_memory above to understand the current state of the conversation.
-4. You use long term memory to include your experience and wisdom.
-5. You use sources as reference material to answer questions. Never fabricate answers if you can't back it up with a source.
+4. You use long term memory to include your experience and wisdom if there are memories related to this prompt.
+5. You use sources as reference material to answer questions if there are sources related to this prompt available. Never fabricate answers if you can't back it up with a source.
 6. You use engramic_previous_response as a reference of the ongoing conversation. Only reference this if the user asks you explicitly about the previous response. In most cases, you should ignore this.
 
 
@@ -43,6 +43,7 @@ Deliver results related to the user_intent and resist explaining the work you ar
     Repeat markdown from current_user_prompt in your response.
 % endif
 
+
 <sources>
     % if not is_lesson:
         user_intent: ${working_memory['current_user_intent']}
@@ -51,49 +52,48 @@ Deliver results related to the user_intent and resist explaining the work you ar
         </engramic_working_memory>
     % endif
     % if len(engram_list) == 0:
-        There were no sources found, use your pre-training knowledge.
+        There were no sources found, use your pre-training knowledge but let the user know this is what you are doing and that you don't have sources.
     % endif
     % for engram in engram_list:
-    % if engram["is_native_source"]:
-        <source>
-            locations: ${", ".join(engram["locations"])}
-            % if engram.get("context"):
-                <context>
-                % for key, value in engram["context"].items():
-                    % if value != "null":
+        % if engram["is_native_source"]:
+            <source>
+                locations: ${", ".join(engram["locations"])}
+                % if engram.get("context"):
+                    <context>
+                    % for key, value in engram["context"].items():
+                        % if value != "null":
+                            ${key}: ${value}
+                        % endif
+                    % endfor
+                    </context>
+                % endif
+                content: ${engram["content"]}
+                timestamp: ${engram["created_date"]}
+            </source>
+        % endif
+        % if not engram["is_native_source"]:
+            <long_term_memory>
+                locations: ${", ".join(engram["locations"])}
+                % if engram.get("context"):
+                    <context>
+                    % for key, value in engram["context"].items():
                         ${key}: ${value}
-                    % endif
-                % endfor
-                </context>
-            % endif
-            content: ${engram["content"]}
-            timestamp: ${engram["created_date"]}
-        </source>
-    % endif
-    % if not engram["is_native_source"]:
-        <long_term_memory>
-            locations: ${", ".join(engram["locations"])}
-            % if engram.get("context"):
-                <context>
-                % for key, value in engram["context"].items():
-                    ${key}: ${value}
-                % endfor
-                </context>
-            % endif
-            content: ${engram["content"]}
-            timestamp: ${engram["created_date"]}
-        </long_term_memory>
-    % endif
+                    % endfor
+                    </context>
+                % endif
+                content: ${engram["content"]}
+                timestamp: ${engram["created_date"]}
+            </long_term_memory>
+        % endif
     % endfor
     % if not is_lesson:
     <engramic_previous_response>
-        Important! The following section contains your previous answers. This is not a source of truth, it is merely a source of history:
+        Important! The following section contains your previous responses. This is not a source of truth like a source, it is merely a source of history:
 
-        % for value in history:
-                 % for item in history[value]:
-                    ${item['response']}
-                % endfor
+        % for item in history:
+            ${item['response']}
         % endfor
+
     </engramic_previous_response>
     % endif
 </sources>

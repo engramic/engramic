@@ -18,7 +18,7 @@ class PromptGenQuestions(Prompt):
     Document Summary:
     ${meta['summary_full']['text']}
 
-    We are going to peform an analysis on this document, to this this, I need to you generate 10 study actions to understand the document better.
+    We are going to peform an analysis on this document, to this this, I need to you generate 3 study actions to understand the document better.
 
     I need you to generate study actions that are the most apropriate for the entirety of the document, now is not the time to get overly specific, keep it high level. Consider the purpose of the document so that your study actions are the most relevant.
 

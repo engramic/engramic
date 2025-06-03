@@ -27,15 +27,15 @@ class TestService(Service):
     def start(self):
         super().start()
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
-        self.subscribe(Service.Topic.INPUT_COMPLETED, self.on_input_complete)
+        self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
 
         sense_service = self.host.get_service(SenseService)
-        document = Document(
-            Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
-        )
         # document = Document(
-        #    Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+        #    Document.Root.RESOURCE.value, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
         # )
+        document = Document(
+            Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+        )
         self.document_id = document.id
         sense_service.submit_document(document)
 
@@ -43,12 +43,12 @@ class TestService(Service):
         response = Response(**message_in)
         logging.info('\n\n================[Response]==============\n%s\n\n', response.response)
 
-    def on_input_complete(self, message_in: dict[str, Any]) -> None:
-        source_id = message_in['source_id']
-        if self.document_id == source_id:
+    def on_document_inserted(self, message_in: dict[str, Any]) -> None:
+        document_id = message_in['id']
+        if self.document_id == document_id:
             retrieve_service = self.host.get_service(RetrieveService)
-            # prompt = Prompt('Please tell me about IntroductiontoQuantumNetworking.pdf')
-            prompt = Prompt('Tell me about the company in GH SC Official Job Descriptions.pdf.')
+            prompt = Prompt('Please tell me about IntroductiontoQuantumNetworking.pdf')
+            # prompt = Prompt('Tell me about the company in GH SC Official Job Descriptions.pdf.')
             retrieve_service.submit(prompt)
 
 

@@ -15,13 +15,17 @@ class Mock(VectorDB):
         self.mock_data = mock_data
 
     @vector_db_impl
-    def query(self, collection_name: str, embeddings: list[float], args: dict[str, Any]) -> dict[str, Any]:
-        del collection_name, embeddings
+    def query(
+        self, collection_name: str, embeddings: list[float], filters: list[str], args: dict[str, Any]
+    ) -> dict[str, Any]:
+        del collection_name, embeddings, filters
 
         response_str = self.mock_data[args['mock_lookup']]
         return response_str
 
     @vector_db_impl
-    def insert(self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any]) -> None:
-        del obj_id, args
+    def insert(
+        self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any], filters: list[str]
+    ) -> None:
+        del obj_id, args, filters
         logging.info('Add %s %s.', len(index_list), collection_name)

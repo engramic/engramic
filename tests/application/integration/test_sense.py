@@ -21,11 +21,11 @@ class MiniService(Service):
         self.run_task(self.send_message())
 
     async def send_message(self) -> None:
-        sense_service_input = self.host.mock_data_collector['SenseService-0-input']
+        sense_service_input = self.host.mock_data_collector['SenseService--input']
         self.send_message_async(Service.Topic.SUBMIT_DOCUMENT, sense_service_input)
 
     def on_observation_completed(self, generated_observation: dict[Any, Any]) -> None:
-        expected_results = self.host.mock_data_collector['SenseService--0-output']
+        expected_results = self.host.mock_data_collector['SenseService--output']
 
         expected_meta = expected_results['meta']
         generated_meta = generated_observation['meta']

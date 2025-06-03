@@ -92,7 +92,6 @@ class CodifyService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
-        self.subscribe(Service.Topic.SET_TRAINING_MODE, self.on_set_training_mode)
         super().start()
 
     async def stop(self) -> None:
@@ -227,6 +226,10 @@ class CodifyService(Service):
 
         return_observation = self.observation_repository.load_toml_dict(
             self.observation_repository.normalize_toml_dict(toml_data, response)
+        )
+
+        self.send_message_async(
+            Service.Topic.OBSERVATION_CREATED, {'id': return_observation.id, 'parent_id': return_observation.parent_id}
         )
 
         # if this observation is from multiple sources, it must be merged the sources into it's meta.

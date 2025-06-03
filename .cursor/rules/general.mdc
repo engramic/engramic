@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Please follow rules for typechecking using pytest strict rules.
+

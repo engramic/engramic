@@ -18,7 +18,7 @@ Context is particularly important. It should contain clues that grounds the info
 
 The types of working memory include keyword phrases, integers, floats, or arrays, but never sentences or long strings over 10 words.
 
-% if history_array['history']:
+% if history:
 The results of the previous exchange are provided below. Use those results to update user intent and synthisize working memory into variables.
 % endif
 
@@ -43,7 +43,7 @@ Steps
         ${prompt_str}
     </current_user_input>
     <previous_exchange>
-    % for ctr, item in enumerate(history_array['history']):
+    % for ctr, item in enumerate(history):
         <timestamp time="${item['response_time']}">
             <user_previous_prompt>
                 ${item['prompt']['prompt_str']}

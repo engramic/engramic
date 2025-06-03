@@ -17,6 +17,7 @@ class DB(ABC):
         META = 'meta'
         OBSERVATION = 'observation'
         HISTORY = 'history'
+        DOCUMENT = 'document'
 
     @abstractmethod
     def connect(self, args: dict[str, Any]) -> None:

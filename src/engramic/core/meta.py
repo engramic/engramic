@@ -23,8 +23,10 @@ class Meta:
     locations: list[str]
     source_ids: list[str]
     keywords: list[str]
+    repo_ids: list[str] | None = None
     summary_initial: str | None = None
     summary_full: Index | None = None
+    parent_id: str | None = None
 
     def render(self) -> str:
         def toml_escape(value: str) -> str:

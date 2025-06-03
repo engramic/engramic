@@ -22,18 +22,18 @@ class TeachService(Service):
 
     def start(self) -> None:
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
-        self.subscribe(Service.Topic.INPUT_COMPLETED, self.on_input_complete)
+        self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
         super().start()
 
     def on_meta_complete(self, msg: dict[Any, Any]) -> None:
         meta = Meta(**msg)
-        if meta.type == meta.SourceType.DOCUMENT.value:
-            self.meta_cache[meta.source_ids[0]] = meta
+        if meta.type == meta.SourceType.DOCUMENT.value and meta.parent_id is not None:
+            self.meta_cache[meta.parent_id] = meta
 
-    def on_input_complete(self, msg: dict[Any, Any]) -> None:
-        source_id = msg['source_id']
-        if source_id in self.meta_cache:
-            meta = self.meta_cache[source_id]
-            lesson = Lesson(self, meta.source_ids[0], str(uuid.uuid4()))
+    def on_document_inserted(self, msg: dict[Any, Any]) -> None:
+        document_id = msg['id']
+        if document_id in self.meta_cache:
+            meta = self.meta_cache[document_id]
+            lesson = Lesson(self, str(uuid.uuid4()), str(uuid.uuid4()), document_id)
             lesson.run_lesson(meta)
-            del self.meta_cache[meta.source_ids[0]]
+            del self.meta_cache[document_id]

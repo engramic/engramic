@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for more details.
 import os
 import uuid
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any, cast
 
 import chromadb
@@ -38,7 +38,9 @@ class ChromaDB(VectorDB):
         self.collection['meta'] = self.client.get_or_create_collection(name='meta', metadata=metadata)
 
     @vector_db_impl
-    def query(self, collection_name: str, embeddings: list[float], args: dict[str, Any]) -> dict[str, Any]:
+    def query(
+        self, collection_name: str, embeddings: list[float], filters: list[str], args: dict[str, Any]
+    ) -> dict[str, Any]:
         embeddings_typed: Sequence[float] = embeddings
         n_results = self.DEFAULT_N_RESULTS
         threshold: float = self.DEFAULT_THRESHOLD
@@ -50,38 +52,64 @@ class ChromaDB(VectorDB):
             n_results = args['n_results']
 
         # all_items = self.collection[collection_name].get()
+        where: dict[str, Any] | None = None
+        ret_ids: list[str] = []
 
-        results = self.collection[collection_name].query(query_embeddings=embeddings_typed, n_results=n_results)
+        if filters:
+            metadatas: list[dict[str, Any]] = [{repo_filter: {'$eq': True}} for repo_filter in filters]
 
-        ret_ids = []
+            if len(filters) == 1:
+                where = {filters[0]: True}
+            elif len(filters) > 1:
+                where = {'$or': metadatas}
 
-        distances_groups = results.get('distances') or []
-        documents_groups = results.get('documents') or []
+            results = self.collection[collection_name].query(
+                query_embeddings=embeddings_typed, n_results=n_results, where=where
+            )
 
-        for i in range(len(distances_groups)):
-            distances = distances_groups[i]
-            documents = documents_groups[i]
+            distances_groups = results.get('distances') or []
+            documents_groups = results.get('documents') or []
 
-            for j, distance in enumerate(distances):
-                if distance < threshold:
-                    ret_ids.append(documents[j])
+            for i in range(len(distances_groups)):
+                distances = distances_groups[i]
+                documents = documents_groups[i]
+
+                for j, distance in enumerate(distances):
+                    if distance < threshold:
+                        ret_ids.append(documents[j])
 
         return {'query_set': set(ret_ids)}
 
     @vector_db_impl
-    def insert(self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any]) -> None:
+    def insert(
+        self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any], filters: list[str]
+    ) -> None:
         # start = time.perf_counter()
         del args
         documents = []
         embeddings = []
         ids = []
+        metadatas_container: list[dict[str, str | int | float | bool | None]] = []
 
         for embedding in index_list:
             documents.append(obj_id)
             embeddings.append(cast(Sequence[float], embedding.embedding))
             ids.append(str(uuid.uuid4()))
+            metadatas: dict[str, str | int | float | bool | None] = {}
+            if filters is not None:
+                for repo_filter in filters:
+                    metadatas.update({repo_filter: True})
+                metadatas_container.append(metadatas)
 
-        self.collection[collection_name].add(documents=documents, embeddings=embeddings, ids=ids)
+        if not filters:  # currently, a prompt can have a repo ID of None leading to an empty metadatas_container.
+            self.collection[collection_name].add(documents=documents, embeddings=embeddings, ids=ids)
+        else:
+            self.collection[collection_name].add(
+                documents=documents,
+                embeddings=embeddings,
+                ids=ids,
+                metadatas=cast(list[Mapping[str, str | int | float | bool | None]], metadatas_container),
+            )
 
         # end = time.perf_counter()
 

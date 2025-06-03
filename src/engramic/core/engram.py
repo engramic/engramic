@@ -45,7 +45,7 @@ class Engram:
     context: dict[str, str] | None = None
     indices: list[Index] | None = None
     meta_ids: list[str] | None = None
-    library_ids: list[str] | None = None
+    repo_ids: list[str] | None = None
     accuracy: int | None = 0
     relevancy: int | None = 0
     created_date: int | None = None
@@ -68,8 +68,8 @@ class Engram:
         if self.meta_ids:
             lines.append(f'meta_ids = {toml_list(self.meta_ids)}')
 
-        if self.library_ids:
-            lines.append(f'library_ids = {toml_list(self.library_ids)}')
+        if self.repo_ids:
+            lines.append(f'repo_ids = {toml_list(self.repo_ids)}')
 
         if self.context:
             # Assuming context has a render_toml() method or can be represented as a dict

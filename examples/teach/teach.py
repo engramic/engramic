@@ -9,6 +9,7 @@ from engramic.application.codify.codify_service import CodifyService
 from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
 from engramic.application.progress.progress_service import ProgressService
+from engramic.application.repo.repo_service import RepoService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.sense.sense_service import SenseService
@@ -29,15 +30,15 @@ class TestService(Service):
         super().start()
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
         self.subscribe(Service.Topic.LESSON_CREATED, self.on_lesson_created)
-        self.subscribe(Service.Topic.LESSON_COMPLETED, self.on_lesson_completed)
+        self.subscribe(Service.Topic.LESSON_INSERTED, self.on_lesson_inserted)
 
         sense_service = self.host.get_service(SenseService)
-        # document = Document(
-        #    Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
-        # )
         document = Document(
-            Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+            Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
         )
+        # document = Document(
+        #    Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+        # )
         self.document_id = document.id
         sense_service.submit_document(document)
 
@@ -49,14 +50,14 @@ class TestService(Service):
             logging.info('Lesson Response. %s', response.prompt['prompt_str'])
 
     def on_lesson_created(self, message_in: dict[str, Any]) -> None:
-        self.lesson_id = message_in['lesson_id']
+        self.lesson_id = message_in['id']
 
-    def on_lesson_completed(self, message_in: dict[str, Any]) -> None:
-        lesson_id = message_in['lesson_id']
+    def on_lesson_inserted(self, message_in: dict[str, Any]) -> None:
+        lesson_id = message_in['id']
         if self.lesson_id == lesson_id:
             retrieve_service = self.host.get_service(RetrieveService)
-            # retrieve_service.submit(Prompt('Please tell me about QuantumNetworking'))
-            retrieve_service.submit(Prompt('Tell me about the company GH star collector.'))
+            retrieve_service.submit(Prompt('Please tell me about QuantumNetworking'))
+            # retrieve_service.submit(Prompt('Tell me about the company GH star collector.'))
 
 
 def main() -> None:
@@ -71,6 +72,7 @@ def main() -> None:
             ConsolidateService,
             CodifyService,
             TeachService,
+            RepoService,
             ProgressService,
             TestService,
         ],

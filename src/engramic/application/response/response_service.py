@@ -107,7 +107,7 @@ class ResponseService(Service):
             self._fetch_retrieval(
                 prompt=prompt, source_id=source_id, analysis=prompt_analysis, retrieve_result=retrieve_result
             ),
-            self._fetch_history(),
+            self._fetch_history(prompt),
         ])
         fetch_engrams_task.add_done_callback(self.on_fetch_data_complete)
 
@@ -117,10 +117,11 @@ class ResponseService(Service):
     Fetch engrams based on the IDs provided by the retrieve service.
     """
 
-    async def _fetch_history(self) -> dict[str, Any]:
+    async def _fetch_history(self, prompt: Prompt) -> dict[str, Any]:
         plugin = self.db_document_plugin
         args = plugin['args']
         args['history'] = 1
+        args['repo_ids_filters'] = prompt.repo_ids_filters
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)
         history: dict[str, Any] = ret_val[0]
@@ -186,9 +187,10 @@ class ResponseService(Service):
             prompt_str=prompt_in.prompt_str,
             is_lesson=prompt_in.is_lesson,
             training_mode=prompt_in.training_mode,
+            repo_ids_filters=prompt_in.repo_ids_filters,
             input_data={
                 'engram_list': engram_dict_list,
-                'history': history_array,
+                'history': history_array['history'],
                 'working_memory': retrieve_result.conversation_direction,
                 'analysis': retrieve_result.analysis,
             },

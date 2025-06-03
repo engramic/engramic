@@ -15,7 +15,8 @@ if TYPE_CHECKING:
 @dataclass()
 class Observation(ABC):
     id: str
-    source_id: str  # This is the id that originated the observation, could be a prompt or document.
     meta: Meta
     engram_list: list[Engram]
     created_date: float | None = None
+    parent_id: str | None = None
+    tracking_id: str | None = None
