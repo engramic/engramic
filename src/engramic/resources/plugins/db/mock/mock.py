@@ -39,7 +39,6 @@ class Mock(DB):
 
         return {}
 
-
     @db_impl
     def insert_documents(self, table: DB.DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:
         del args

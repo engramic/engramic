@@ -48,21 +48,28 @@ class TestService(Service):
     def _on_repo_files(self, message_in: dict[str, Any]) -> None:
         for file in message_in['files']:
             if file['is_scanned']:
-                logging.info(f"File {file['file_name']} previously scanned.")
-                
-            if message_in['repo'] == 'QuantumNetworking' and file['file_name'] == 'IntroductiontoQuantumNetworking.pdf' and file['is_scanned'] == False:
+                info = f"File {file['file_name']} previously scanned."
+                logging.info(info)
+
+            if (
+                message_in['repo'] == 'QuantumNetworking'
+                and file['file_name'] == 'IntroductiontoQuantumNetworking.pdf'
+                and file['is_scanned'] is False
+            ):
                 self.document_id1 = file['id']
                 self.repo_id1 = message_in['repo_id']
                 repo_service = self.host.get_service(RepoService)
                 repo_service.submit_ids([self.document_id1])
 
-                
-            if message_in['repo'] == 'ElysianFields' and file['file_name'] == 'Elysian_Fields.pdf' and file['is_scanned'] == False:
+            if (
+                message_in['repo'] == 'ElysianFields'
+                and file['file_name'] == 'Elysian_Fields.pdf'
+                and file['is_scanned'] is False
+            ):
                 self.document_id2 = file['id']
                 self.repo_id2 = message_in['repo_id']
                 repo_service = self.host.get_service(RepoService)
                 repo_service.submit_ids([self.document_id2])
-                
 
     def on_document_inserted(self, message_in: dict[str, Any]) -> None:
         document_id = message_in['id']

@@ -8,15 +8,17 @@ import os
 import uuid
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import tomli
 
 from engramic.core.document import Document
 from engramic.core.host import Host
-from engramic.infrastructure.system.service import Service
-from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.repository.document_repository import DocumentRepository
+from engramic.infrastructure.system.service import Service
+
+if TYPE_CHECKING:
+    from engramic.infrastructure.system.plugin_manager import PluginManager
 
 
 class RepoService(Service):
@@ -56,7 +58,7 @@ class RepoService(Service):
         if document_id in self.submitted_documents:
             self.submitted_documents.remove(document_id)
             document = Document(**msg)
-            document.is_scanned = True # Create a Document instance to validate the data
+            document.is_scanned = True  # Create a Document instance to validate the data
             self.document_repository.save(document)
 
     def _load_repository_id(self, folder_path: Path) -> str:
@@ -115,26 +117,25 @@ class RepoService(Service):
                     relative_path = file_path.relative_to(expanded_repo_root / folder)
                     relative_dir = str(relative_path.parent) if relative_path.parent != Path('.') else ''
                     doc = Document(
-                            root_directory=Document.Root.DATA.value,
-                            file_path=folder + relative_dir,
-                            file_name=file,
-                            repo_id=repo_id,
-                            tracking_id=str(uuid.uuid4()),
-                        )
+                        root_directory=Document.Root.DATA.value,
+                        file_path=folder + relative_dir,
+                        file_name=file,
+                        repo_id=repo_id,
+                        tracking_id=str(uuid.uuid4()),
+                    )
 
-                    fetched_doc = self.document_repository.load(doc.id)
-                    if len(fetched_doc['document'])==0:
-                        
+                    fetched_doc: dict[str, Any] = self.document_repository.load(doc.id)
+                    if len(fetched_doc['document']) == 0:
                         documents.append(doc)
                     else:
                         documents.append(Document(**fetched_doc['document'][0]))
 
                     self.file_index[doc.id] = doc
 
-
             async def send_message_files(folder: str, repo_id: str, documents: list[Document]) -> None:
                 self.send_message_async(
-                    Service.Topic.REPO_FILES, {'repo': folder, 'repo_id': repo_id, 'files': [asdict(doc) for doc in documents]}
+                    Service.Topic.REPO_FILES,
+                    {'repo': folder, 'repo_id': repo_id, 'files': [asdict(doc) for doc in documents]},
                 )
 
             self.run_task(send_message_files(folder, repo_id, copy.deepcopy(documents)))
