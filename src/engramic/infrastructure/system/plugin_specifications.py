@@ -78,7 +78,7 @@ class DBspec(DB):
     @db_spec
     def fetch(self, table: DB.DBTables, ids: list[str], args: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
         del table, ids, args
-        error_message = 'Subclasses must implement `execute`'
+        error_message = 'Subclasses must implement `fetch`'
         raise NotImplementedError(error_message)
 
     @db_spec

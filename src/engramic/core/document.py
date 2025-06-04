@@ -24,6 +24,7 @@ class Document:
     id: str = ''
     repo_id: str | None = None
     tracking_id: str | None = None
+    is_scanned: bool = False
 
     def get_source_id(self) -> str:
         full_path = self.file_path + '/' + self.file_name

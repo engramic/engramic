@@ -35,15 +35,13 @@ class Sqlite(DB):
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS engram (
                     id TEXT PRIMARY KEY,
-                    data TEXT,
-                    name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
+                    data TEXT
                 )
             """)
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS history (
                     id TEXT PRIMARY KEY,
-                    data TEXT,
-                    name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
+                    data TEXT
                 )
             """)
             self.cursor.execute(
@@ -52,15 +50,19 @@ class Sqlite(DB):
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS meta (
                     id TEXT PRIMARY KEY,
-                    data TEXT,
-                    name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
+                    data TEXT
                 )
             """)
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS observation (
                     id TEXT PRIMARY KEY,
-                    data TEXT,
-                    name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
+                    data TEXT
+                )
+            """)
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS document (
+                    id TEXT PRIMARY KEY,
+                    data TEXT
                 )
             """)
             self.db.commit()

@@ -33,6 +33,7 @@ class Service(ABC):
         PROMPT_CREATED = 'prompt_created'
         PROMPT_INSERTED = 'prompt_inserted'
         DOCUMENT_CREATED = 'document_created'
+        DOCUMENT_COMPLETE = 'document_complete'
         DOCUMENT_INSERTED = 'document_inserted'
         LESSON_CREATED = 'lesson_created'
         LESSON_INSERTED = 'lesson_inserted'

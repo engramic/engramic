@@ -368,3 +368,6 @@ class Scan(Media):
         self.service.host.update_mock_data_output(self.service, asdict(observation))
 
         self.service.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(observation))
+        self.service.send_message_async(Service.Topic.DOCUMENT_COMPLETE,asdict(self.document))
+
+

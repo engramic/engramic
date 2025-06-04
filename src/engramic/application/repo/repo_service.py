@@ -15,18 +15,23 @@ import tomli
 from engramic.core.document import Document
 from engramic.core.host import Host
 from engramic.infrastructure.system.service import Service
+from engramic.infrastructure.system.plugin_manager import PluginManager
+from engramic.infrastructure.repository.document_repository import DocumentRepository
 
 
 class RepoService(Service):
     def __init__(self, host: Host) -> None:
         super().__init__(host)
+        self.plugin_manager: PluginManager = host.plugin_manager
+        self.db_document_plugin = self.plugin_manager.get_plugin('db', 'document')
+        self.document_repository: DocumentRepository = DocumentRepository(self.db_document_plugin)
         self.repos: dict[str, str] = {}
         self.file_index: dict[str, Any] = {}
         self.submitted_documents: set[str] = set()
 
     def start(self) -> None:
         self.subscribe(Service.Topic.REPO_SUBMIT_IDS, self._on_submit_ids)
-        self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
+        self.subscribe(Service.Topic.DOCUMENT_COMPLETE, self.on_document_complete)
         super().start()
 
     def init_async(self) -> None:
@@ -39,28 +44,20 @@ class RepoService(Service):
 
     def submit_ids(self, id_array: list[str]) -> None:
         for sub_id in id_array:
-            file = self.file_index[sub_id]
-            document = Document(**file)
+            document = self.file_index[sub_id]
             self.send_message_async(
                 Service.Topic.SUBMIT_DOCUMENT,
                 asdict(document),
             )
             self.submitted_documents.add(document.id)
 
-    def on_observation_complete(self, msg: dict[str, Any]) -> None:
-        source_ids: set[str] = set()
-
-        for engram in msg['engram_list']:
-            source_ids.update(engram['source_ids'])
-
-        if len(list(source_ids)) > 1:
-            error = 'Document has multiple source ids.'
-            raise RuntimeError(error)
-
-        source_id = next(iter(source_ids))
-
-        if source_id in self.submitted_documents:
-            self.submitted_documents.remove(source_id)
+    def on_document_complete(self, msg: dict[str, Any]) -> None:
+        document_id = msg['id']
+        if document_id in self.submitted_documents:
+            self.submitted_documents.remove(document_id)
+            document = Document(**msg)
+            document.is_scanned = True # Create a Document instance to validate the data
+            self.document_repository.save(document)
 
     def _load_repository_id(self, folder_path: Path) -> str:
         repo_file = folder_path / '.repo'
@@ -117,22 +114,27 @@ class RepoService(Service):
                     file_path = Path(root) / file
                     relative_path = file_path.relative_to(expanded_repo_root / folder)
                     relative_dir = str(relative_path.parent) if relative_path.parent != Path('.') else ''
-
-                    doc = asdict(
-                        Document(
+                    doc = Document(
                             root_directory=Document.Root.DATA.value,
                             file_path=folder + relative_dir,
                             file_name=file,
                             repo_id=repo_id,
                             tracking_id=str(uuid.uuid4()),
                         )
-                    )
-                    self.file_index[doc['id']] = doc
-                    documents.append(doc)
 
-            async def send_message_files(folder: str, repo_id: str, documents: list[dict[str, Any]]) -> None:
+                    fetched_doc = self.document_repository.load(doc.id)
+                    if len(fetched_doc['document'])==0:
+                        
+                        documents.append(doc)
+                    else:
+                        documents.append(Document(**fetched_doc['document'][0]))
+
+                    self.file_index[doc.id] = doc
+
+
+            async def send_message_files(folder: str, repo_id: str, documents: list[Document]) -> None:
                 self.send_message_async(
-                    Service.Topic.REPO_FILES, {'repo': folder, 'repo_id': repo_id, 'files': documents}
+                    Service.Topic.REPO_FILES, {'repo': folder, 'repo_id': repo_id, 'files': [asdict(doc) for doc in documents]}
                 )
 
             self.run_task(send_message_files(folder, repo_id, copy.deepcopy(documents)))
