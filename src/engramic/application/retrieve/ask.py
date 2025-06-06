@@ -163,6 +163,10 @@ class Ask(Retrieval):
 
         input_data = response_array
         plugin = self.retrieve_gen_conversation_direction_plugin
+
+        if len(self.service.repo_folders.items()) > 0:
+            input_data.update({'all_repos': self.service.repo_folders})
+
         # add prompt engineering here and submit as the full prompt.
         prompt_gen = PromptGenConversation(
             prompt_str=self.prompt.prompt_str, input_data=input_data, repo_ids_filters=self.prompt.repo_ids_filters
@@ -318,7 +322,13 @@ class Ask(Retrieval):
     async def _generate_indices(self, meta_list: list[Meta]) -> dict[str, str]:
         plugin = self.prompt_retrieve_indices_plugin
         # add prompt engineering here and submit as the full prompt.
-        prompt = PromptGenIndices(prompt_str=self.prompt.prompt_str, input_data={'meta_list': meta_list})
+        input_data: dict[str, Any] = {'meta_list': meta_list}
+        if len(self.service.repo_folders.items()) > 0:
+            input_data.update({'all_repos': self.service.repo_folders})
+
+        prompt = PromptGenIndices(
+            prompt_str=self.prompt.prompt_str, input_data=input_data, repo_ids_filters=self.prompt.repo_ids_filters
+        )
         structured_output = {'indices': list[str]}
         ret = await asyncio.to_thread(
             plugin['func'].submit,

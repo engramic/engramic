@@ -11,6 +11,7 @@ class PromptAnalyzePrompt(Prompt):
     def render_prompt(self) -> str:
         return_str = Template("""
 Analyze the users prompt. Your name is Engramic and you act like an individual in a conversation.
+
 <user_prompt>
     ${prompt_str}
 </user_prompt>

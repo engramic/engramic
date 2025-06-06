@@ -152,7 +152,7 @@ class Gemini(LLM):
                     finish_reason = str(chunk.candidates[0].finish_reason)
                 error = f'Error in Gemini submit. Response.text is None. Finish Reason: {finish_reason}'
                 logging.warning(error)
-            if not args['skip_websocket'] and chunk.text:
+            if chunk.text:
                 websocket_manager.send_message(LLM.StreamPacket(chunk.text, False, ''))
 
             if chunk.text:

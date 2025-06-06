@@ -25,7 +25,6 @@ from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
-    from engramic.core.observation import Observation
     from engramic.infrastructure.system.plugin_manager import PluginManager
 
 
@@ -228,22 +227,24 @@ class CodifyService(Service):
             self.observation_repository.normalize_toml_dict(toml_data, response)
         )
 
-        self.send_message_async(
-            Service.Topic.OBSERVATION_CREATED, {'id': return_observation.id, 'parent_id': return_observation.parent_id}
-        )
-
-        # if this observation is from multiple sources, it must be merged the sources into it's meta.
+        # if this observation is from multiple sources, it must merge the sources into it's meta.
         if len(engram_array) > 0:
-            return_observation_merged: Observation = return_observation.merge_observation(
+            merged_data = return_observation.merge_observation(
                 return_observation,
                 CodifyService.ACCURACY_CONSTANT,
                 CodifyService.RELEVANCY_CONSTANT,
                 self.engram_repository,
             )
 
-            return {'return_observation': return_observation_merged}
+            # Cast merged_data to the same type as return_observation
+            return_observation_merged = type(return_observation)(**asdict(merged_data))
+
+            return_observation = return_observation_merged
 
         self.metrics_tracker.increment(CodifyMetric.ENGRAM_VALIDATED)
+        self.send_message_async(
+            Service.Topic.OBSERVATION_CREATED, {'id': return_observation.id, 'parent_id': return_observation.parent_id}
+        )
 
         return {'return_observation': return_observation}
 

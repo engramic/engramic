@@ -63,11 +63,13 @@ class Lesson:
                     'training_mode': True,
                     'is_lesson': True,
                     'tracking_id': self.tracking_id,
+                    'repo_ids_filters': self.meta.repo_ids,
                 },
             )
 
         for text_prompt in reversed(text_prompts):
-            self.service.run_task(send_prompt(text_prompt))
+            future = self.service.run_task(send_prompt(text_prompt))
+            future.add_done_callback(self._on_send_prompt_complete)
 
         async def send_lesson() -> None:
             self.service.send_message_async(
@@ -76,3 +78,6 @@ class Lesson:
             )
 
         self.service.run_task(send_lesson())
+
+    def _on_send_prompt_complete(self, ret: Future[Any]) -> None:
+        ret.result()

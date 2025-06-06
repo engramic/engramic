@@ -71,6 +71,7 @@ class RetrieveService(Service):
         self.db_plugin = host.plugin_manager.get_plugin('db', 'document')
         self.metrics_tracker: MetricsTracker[RetrieveMetric] = MetricsTracker[RetrieveMetric]()
         self.meta_repository: MetaRepository = MetaRepository(self.db_plugin)
+        self.repo_folders: dict[str, Any] = {}
 
     def init_async(self) -> None:
         self.db_plugin['func'].connect(args=None)
@@ -81,10 +82,14 @@ class RetrieveService(Service):
         self.subscribe(Service.Topic.SUBMIT_PROMPT, self.on_submit_prompt)
         self.subscribe(Service.Topic.INDICES_COMPLETE, self.on_indices_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
+        self.subscribe(Service.Topic.REPO_FOLDERS, self._on_repo_folders)
         super().start()
 
     async def stop(self) -> None:
         await super().stop()
+
+    def _on_repo_folders(self, msg: dict[str, Any]) -> None:
+        self.repo_folders = msg['repo_folders']
 
     # when called from monitor service
     def on_submit_prompt(self, msg: dict[Any, Any]) -> None:

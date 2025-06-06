@@ -1,7 +1,8 @@
 # Copyright (c) 2025 Preisz Consulting, LLC.
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
-import copy
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -13,11 +14,13 @@ from typing import TYPE_CHECKING, Any
 import tomli
 
 from engramic.core.document import Document
-from engramic.core.host import Host
 from engramic.infrastructure.repository.document_repository import DocumentRepository
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
+    from concurrent.futures import Future
+
+    from engramic.core.host import Host
     from engramic.infrastructure.system.plugin_manager import PluginManager
 
 
@@ -27,8 +30,9 @@ class RepoService(Service):
         self.plugin_manager: PluginManager = host.plugin_manager
         self.db_document_plugin = self.plugin_manager.get_plugin('db', 'document')
         self.document_repository: DocumentRepository = DocumentRepository(self.db_document_plugin)
-        self.repos: dict[str, str] = {}
-        self.file_index: dict[str, Any] = {}
+        self.repos: dict[str, str] = {}  # memory copy of all folders
+        self.file_index: dict[str, Any] = {}  # memory copy of all files
+        self.file_repos: dict[str, Any] = {}  # memory copy of all files in repos
         self.submitted_documents: set[str] = set()
 
     def start(self) -> None:
@@ -61,6 +65,12 @@ class RepoService(Service):
             document.is_scanned = True  # Create a Document instance to validate the data
             self.document_repository.save(document)
 
+        if document.repo_id is None:
+            error = 'Document ID None when not expected to be.'
+            raise RuntimeError(error)
+        # update the file server. For simplicity, this is just updating the entire set, not the delta.
+        self.run_task(self.update_repo_files(document.repo_id, [document_id]))
+
     def _load_repository_id(self, folder_path: Path) -> str:
         repo_file = folder_path / '.repo'
         if not repo_file.is_file():
@@ -89,6 +99,20 @@ class RepoService(Service):
                     info = f"Skipping '{name}': {e}"
                     logging.info(info)
 
+    async def update_repo_files(self, repo_id: str, update_ids: list[str] | None = None) -> None:
+        document_dicts = []
+
+        folder = self.repos[repo_id]
+
+        update_list = self.file_repos[repo_id] if update_ids is None else update_ids
+
+        document_dicts = [asdict(self.file_index[document_id]) for document_id in update_list]
+
+        self.send_message_async(
+            Service.Topic.REPO_FILES,
+            {'repo': folder, 'repo_id': repo_id, 'files': document_dicts},
+        )
+
     def scan_folders(self) -> None:
         repo_root = os.getenv('REPO_ROOT')
         if repo_root is None:
@@ -106,7 +130,7 @@ class RepoService(Service):
 
         for repo_id in self.repos:
             folder = self.repos[repo_id]
-            documents = []
+            document_ids = []
             # Recursively walk through all files in repo
             for root, dirs, files in os.walk(expanded_repo_root / folder):
                 del dirs
@@ -126,16 +150,16 @@ class RepoService(Service):
 
                     fetched_doc: dict[str, Any] = self.document_repository.load(doc.id)
                     if len(fetched_doc['document']) == 0:
-                        documents.append(doc)
+                        document_ids.append(doc.id)
                     else:
-                        documents.append(Document(**fetched_doc['document'][0]))
+                        doc = Document(**fetched_doc['document'][0])
+                        document_ids.append(doc.id)
 
                     self.file_index[doc.id] = doc
 
-            async def send_message_files(folder: str, repo_id: str, documents: list[Document]) -> None:
-                self.send_message_async(
-                    Service.Topic.REPO_FILES,
-                    {'repo': folder, 'repo_id': repo_id, 'files': [asdict(doc) for doc in documents]},
-                )
+            self.file_repos[repo_id] = document_ids
+            future = self.run_task(self.update_repo_files(repo_id))
+            future.add_done_callback(self._on_update_repo_files)
 
-            self.run_task(send_message_files(folder, repo_id, copy.deepcopy(documents)))
+    def _on_update_repo_files(self, ret: Future[Any]) -> None:
+        ret.result()

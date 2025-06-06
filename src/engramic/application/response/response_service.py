@@ -198,14 +198,18 @@ class ResponseService(Service):
 
         plugin = self.llm_main
         args = self.host.mock_update_args(plugin)
-        args.update({'skip_websocket': prompt_in.is_lesson})
 
-        response = await asyncio.to_thread(
-            plugin['func'].submit_streaming,
-            prompt=prompt,
-            websocket_manager=self.web_socket_manager,
-            args=args,
-        )
+        if prompt_in.is_lesson:
+            response = await asyncio.to_thread(
+                plugin['func'].submit, prompt=prompt, args=args, images=None, structured_schema=None
+            )
+        else:
+            response = await asyncio.to_thread(
+                plugin['func'].submit_streaming,
+                prompt=prompt,
+                websocket_manager=self.web_socket_manager,
+                args=args,
+            )
 
         if __debug__:
             main_prompt = prompt.render_prompt()
