@@ -56,7 +56,7 @@ class TestService(Service):
         lesson_id = message_in['id']
         if self.lesson_id == lesson_id:
             retrieve_service = self.host.get_service(RetrieveService)
-            retrieve_service.submit(Prompt('Please tell me about QuantumNetworking'))
+            retrieve_service.submit(Prompt('Please tell me about the file IntroductiontoQuantumNetworking.pdf'))
             # retrieve_service.submit(Prompt('Tell me about the company GH star collector.'))
 
 

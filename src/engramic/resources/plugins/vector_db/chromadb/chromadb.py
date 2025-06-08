@@ -62,21 +62,23 @@ class ChromaDB(VectorDB):
                 where = {filters[0]: True}
             elif len(filters) > 1:
                 where = {'$or': metadatas}
+        else:
+            where = {'null': True}
 
-            results = self.collection[collection_name].query(
-                query_embeddings=embeddings_typed, n_results=n_results, where=where
-            )
+        results = self.collection[collection_name].query(
+            query_embeddings=embeddings_typed, n_results=n_results, where=where
+        )
 
-            distances_groups = results.get('distances') or []
-            documents_groups = results.get('documents') or []
+        distances_groups = results.get('distances') or []
+        documents_groups = results.get('documents') or []
 
-            for i in range(len(distances_groups)):
-                distances = distances_groups[i]
-                documents = documents_groups[i]
+        for i in range(len(distances_groups)):
+            distances = distances_groups[i]
+            documents = documents_groups[i]
 
-                for j, distance in enumerate(distances):
-                    if distance < threshold:
-                        ret_ids.append(documents[j])
+            for j, distance in enumerate(distances):
+                if distance < threshold:
+                    ret_ids.append(documents[j])
 
         return {'query_set': set(ret_ids)}
 
@@ -100,16 +102,16 @@ class ChromaDB(VectorDB):
                 for repo_filter in filters:
                     metadatas.update({repo_filter: True})
                 metadatas_container.append(metadatas)
+            else:
+                metadatas.update({'null': True})
+                metadatas_container.append(metadatas)
 
-        if not filters:  # currently, a prompt can have a repo ID of None leading to an empty metadatas_container.
-            self.collection[collection_name].add(documents=documents, embeddings=embeddings, ids=ids)
-        else:
-            self.collection[collection_name].add(
-                documents=documents,
-                embeddings=embeddings,
-                ids=ids,
-                metadatas=cast(list[Mapping[str, str | int | float | bool | None]], metadatas_container),
-            )
+        self.collection[collection_name].add(
+            documents=documents,
+            embeddings=embeddings,
+            ids=ids,
+            metadatas=cast(list[Mapping[str, str | int | float | bool | None]], metadatas_container),
+        )
 
         # end = time.perf_counter()
 

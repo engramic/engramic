@@ -29,6 +29,7 @@ class TestService(Service):
     def __init__(self, host):
         super().__init__(host)
         self.count = 0
+        self.repos = {}
 
     def start(self):
         super().start()
@@ -38,38 +39,29 @@ class TestService(Service):
         self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
         repo_service = self.host.get_service(RepoService)
         repo_service.scan_folders()
+        self.run_task(self.submit_documents())
+
+    async def submit_documents(self) -> None:
+        repo_service = self.host.get_service(RepoService)
+        self.document_id1 = '97a1ae1b8461076cdc679d6e0a5f885e'  # 'IntroductiontoQuantumNetworking.pdf'
+        self.document_id2 = '9c9f0237620b77fa69e2ca63e40a9f27'  # 'Elysian_Fields.pdf'
+        repo_service.submit_ids([self.document_id1])
+        repo_service.submit_ids([self.document_id2])
 
     def _on_repo_folders(self, message_in: dict[str, Any]) -> None:
         if message_in['repo_folders'] is not None:
-            logging.info('Repos Found: %s', message_in['repo_folders'])
+            self.repos = message_in['repo_folders']
+            self.repo_id1 = next((key for key, value in self.repos.items() if value == 'QuantumNetworking'), None)
+            self.repo_id2 = next((key for key, value in self.repos.items() if value == 'ElysianFields'), None)
         else:
             logging.info('No repos found. You can add a repo by adding a folder to home/.local/share/engramic')
 
     def _on_repo_files(self, message_in: dict[str, Any]) -> None:
+        # Only logging information about the files
+        logging.info('Repo: %s, Files received: %d', message_in['repo'], len(message_in['files']))
         for file in message_in['files']:
-            if file['is_scanned']:
-                info = f"File {file['file_name']} previously scanned."
-                logging.info(info)
-
-            if (
-                message_in['repo'] == 'QuantumNetworking'
-                and file['file_name'] == 'IntroductiontoQuantumNetworking.pdf'
-                and file['is_scanned'] is False
-            ):
-                self.document_id1 = file['id']
-                self.repo_id1 = message_in['repo_id']
-                repo_service = self.host.get_service(RepoService)
-                repo_service.submit_ids([self.document_id1])
-
-            if (
-                message_in['repo'] == 'ElysianFields'
-                and file['file_name'] == 'Elysian_Fields.pdf'
-                and file['is_scanned'] is False
-            ):
-                self.document_id2 = file['id']
-                self.repo_id2 = message_in['repo_id']
-                repo_service = self.host.get_service(RepoService)
-                repo_service.submit_ids([self.document_id2])
+            status = 'previously scanned' if file['is_scanned'] else 'not scanned'
+            logging.info('File: %s - %s', file['file_name'], status)
 
     def on_document_inserted(self, message_in: dict[str, Any]) -> None:
         document_id = message_in['id']

@@ -59,17 +59,16 @@ class RepoService(Service):
 
     def on_document_complete(self, msg: dict[str, Any]) -> None:
         document_id = msg['id']
+        document = Document(**msg)
+
         if document_id in self.submitted_documents:
             self.submitted_documents.remove(document_id)
-            document = Document(**msg)
+
             document.is_scanned = True  # Create a Document instance to validate the data
             self.document_repository.save(document)
 
-        if document.repo_id is None:
-            error = 'Document ID None when not expected to be.'
-            raise RuntimeError(error)
-        # update the file server. For simplicity, this is just updating the entire set, not the delta.
-        self.run_task(self.update_repo_files(document.repo_id, [document_id]))
+        if document.repo_id:
+            self.run_task(self.update_repo_files(document.repo_id, [document_id]))
 
     def _load_repository_id(self, folder_path: Path) -> str:
         repo_file = folder_path / '.repo'
@@ -92,6 +91,10 @@ class RepoService(Service):
         for name in os.listdir(repo_root):
             folder_path = repo_root / name
             if folder_path.is_dir():
+                if name == 'null':
+                    error = "Folder name 'null' is reserved and cannot be used as a repository name."
+                    logging.error(error)
+                    raise ValueError(error)
                 try:
                     repo_id = self._load_repository_id(folder_path)
                     self.repos[repo_id] = name
@@ -159,7 +162,7 @@ class RepoService(Service):
 
             self.file_repos[repo_id] = document_ids
             future = self.run_task(self.update_repo_files(repo_id))
-            future.add_done_callback(self._on_update_repo_files)
+            future.add_done_callback(self._on_update_repo_files_complete)
 
-    def _on_update_repo_files(self, ret: Future[Any]) -> None:
+    def _on_update_repo_files_complete(self, ret: Future[Any]) -> None:
         ret.result()

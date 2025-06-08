@@ -37,12 +37,13 @@ class ObservationSystem(Observation):
         new_meta = Meta(
             str(uuid.uuid4()),
             observation_dict['meta']['type'],
-            observation_dict['meta']['repo_ids'],
             combined_locations,
             combined_source_ids,
             observation_dict['meta']['keywords'],
+            observation_dict['meta']['repo_ids'],
             observation_dict['meta']['summary_initial'],
             index,
+            observation_dict['meta']['parent_id'],
         )
 
         engram_list = engram_repository.load_batch_dict(filtered_engrams_dict)

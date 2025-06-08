@@ -54,6 +54,12 @@ class Lesson:
         res = future.result()
         text_prompts = res['study_actions']
 
+        if self.meta.type == self.meta.SourceType.DOCUMENT.value:
+            location = self.meta.locations[0]
+
+            # generate some static question for file discovery.
+            text_prompts.append(f'Tell me about the file {location}')
+
         async def send_prompt(question: str) -> None:
             self.service.send_message_async(
                 Service.Topic.SUBMIT_PROMPT,

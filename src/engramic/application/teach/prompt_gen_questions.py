@@ -18,12 +18,9 @@ class PromptGenQuestions(Prompt):
     Document Summary:
     ${meta['summary_full']['text']}
 
-    We are going to peform an analysis on this document, to this this, I need to you generate 10 study actions to understand the document better.
+    We are going to peform an analysis on this document, to this this, I need to you generate a set of study actions to understand the document's main topics better.
 
     I need you to generate study actions that are the most apropriate for the entirety of the document, now is not the time to get overly specific, keep it high level. Consider the purpose of the document so that your study actions are the most relevant.
-
-    The first question should be the following:
-    "Tell me about ${meta['locations'][0]}"
 
     Go for it, generate ten relevant study actions based on the entirety of the document.
     Popular study actions include:
