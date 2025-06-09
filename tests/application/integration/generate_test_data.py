@@ -25,33 +25,39 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class TestService(Service):
     def start(self):
         super().start()
-        self.subscribe(Service.Topic.INPUT_COMPLETED, self.on_input_complete)
-        self.run_task(self.send_message())
+        self.subscribe(Service.Topic.PROMPT_INSERTED, self.on_prompt_inserted)
+        self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
+        self.run_task(self.start_test())
 
     def init_async(self):
         super().init_async()
 
-    async def send_message(self) -> None:
+    async def start_test(self) -> None:
         retrive_service = self.host.get_service(RetrieveService)
         prompt = Prompt(
             'What is the most notable applications of quantum networking? Why is maintaining quantum engablement over long distances notoriously difficult?',
             training_mode=True,
+            tracking_id=1,
         )
         self.prompt_id = prompt.prompt_id
         retrive_service.submit(prompt)
 
-    def on_input_complete(self, message_in: dict[str, Any]) -> None:
-        source_id = message_in['source_id']
+    def on_prompt_inserted(self, message_in: dict[str, Any]) -> None:
+        prompt_id = message_in['id']
 
-        if source_id == self.prompt_id:
+        if prompt_id == self.prompt_id:
             sense_service = self.host.get_service(SenseService)
             document = Document(
-                Document.Root.RESOURCE, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+                Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
             )
             self.document_id = document.id
+            document.tracking_id = 2
             sense_service.submit_document(document)
 
-        if source_id == self.document_id:
+    def on_document_inserted(self, message_in: dict[str, Any]) -> None:
+        document_id = message_in['id']
+
+        if document_id == self.document_id:
             self.host.write_mock_data()
 
 

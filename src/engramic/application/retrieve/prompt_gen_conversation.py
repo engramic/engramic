@@ -13,12 +13,18 @@ class PromptGenConversation(Prompt):
 <instructions>
 Your name is Engramic and you are in a conversation with the user. When the user submits input and Engramic returns a response, this is known as an exchange. Review the input and provide user intent and a description of your working memory which is like system memory on a computer.
 
+% if selected_repos is not None and repo_ids_filters is not None:
+    Repos hold files that the user is interested in. The user has selected the following repos:
+    % for repo_id in repo_ids_filters:
+        ${all_repos[repo_id]}
+    % endfor
+% endif
 
 Context is particularly important. It should contain clues that grounds the information in it's setting. For example, a title or header, grounds a paragraph, adding vital context to the purpose of the paragraph.
 
 The types of working memory include keyword phrases, integers, floats, or arrays, but never sentences or long strings over 10 words.
 
-% if history_array['history']:
+% if history:
 The results of the previous exchange are provided below. Use those results to update user intent and synthisize working memory into variables.
 % endif
 
@@ -43,14 +49,18 @@ Steps
         ${prompt_str}
     </current_user_input>
     <previous_exchange>
-    % for ctr, item in enumerate(history_array['history']):
+    % for ctr, item in enumerate(history):
         <timestamp time="${item['response_time']}">
             <user_previous_prompt>
                 ${item['prompt']['prompt_str']}
             </user_previous_prompt>
             <engramic_previous_working_memory>
-                ${item['retrieve_result']['conversation_direction']['current_user_intent']}
-                ${item['retrieve_result']['conversation_direction']['working_memory']}
+                <previous_user_intent>
+                    ${item['retrieve_result']['conversation_direction']['current_user_intent']}
+                </previous_user_intent>
+                <previous_working_memory>
+                    ${item['retrieve_result']['conversation_direction']['working_memory']}
+                </previous_working_memory>
             </engramic_previous_working_memory>
             % if ctr <= 3:
                 <engramic_previous_response>

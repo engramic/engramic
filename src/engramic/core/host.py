@@ -254,10 +254,10 @@ class Host:
 
         return 'unknown_coroutine'
 
-    def update_mock_data_input(self, service: Service, value: dict[str, Any], index: int = 0) -> None:
+    def update_mock_data_input(self, service: Service, value: dict[str, Any], tracking_id: str = '') -> None:
         if self.generate_mock_data:
             service_name = service.__class__.__name__
-            concat = f'{service_name}-{index}-input'
+            concat = f'{service_name}-{tracking_id}-input'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'
@@ -265,12 +265,10 @@ class Host:
 
             self.mock_data_collector[concat] = value
 
-    def update_mock_data_output(
-        self, service: Service, value: dict[str, Any], index: int = 0, source_id: str = ''
-    ) -> None:
+    def update_mock_data_output(self, service: Service, value: dict[str, Any], tracking_id: str = '') -> None:
         if self.generate_mock_data:
             service_name = service.__class__.__name__
-            concat = f'{service_name}-{source_id}-{index}-output'
+            concat = f'{service_name}-{tracking_id}-output'
 
             if self.mock_data_collector.get(concat) is not None:
                 error = 'Mock data collection collision error. Missing an index?'

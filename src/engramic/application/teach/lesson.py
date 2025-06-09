@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import json
-import uuid
 from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
@@ -20,9 +19,10 @@ if TYPE_CHECKING:
 
 
 class Lesson:
-    def __init__(self, parent_service: TeachService, source_id: str, lesson_id: str) -> None:
+    def __init__(self, parent_service: TeachService, lesson_id: str, tracking_id: str, doc_id: str) -> None:
         self.id = lesson_id
-        self.source_id = source_id
+        self.doc_id = doc_id
+        self.tracking_id = tracking_id
         self.service = parent_service
 
     def run_lesson(self, meta_in: Meta) -> None:
@@ -52,25 +52,38 @@ class Lesson:
 
     def on_questions_generated(self, future: Future[Any]) -> None:
         res = future.result()
-        questions = res['study_actions']
+        text_prompts = res['study_actions']
 
-        async def send_prompt(question: str, source_id: str) -> None:
+        if self.meta.type == self.meta.SourceType.DOCUMENT.value:
+            location = self.meta.locations[0]
+
+            # generate some static question for file discovery.
+            text_prompts.append(f'Tell me about the file {location}')
+
+        async def send_prompt(question: str) -> None:
             self.service.send_message_async(
                 Service.Topic.SUBMIT_PROMPT,
-                {'prompt_str': question, 'source_id': source_id, 'training_mode': True, 'is_lesson': True},
+                {
+                    'prompt_str': question,
+                    'parent_id': self.id,
+                    'training_mode': True,
+                    'is_lesson': True,
+                    'tracking_id': self.tracking_id,
+                    'repo_ids_filters': self.meta.repo_ids,
+                },
             )
 
-        # print(questions)
-        source_array = []
-        for question in reversed(questions):
-            source_id = str(uuid.uuid4())
-            source_array.append(source_id)
-            self.service.run_task(send_prompt(question, source_id))
+        for text_prompt in reversed(text_prompts):
+            future = self.service.run_task(send_prompt(text_prompt))
+            future.add_done_callback(self._on_send_prompt_complete)
 
         async def send_lesson() -> None:
             self.service.send_message_async(
                 Service.Topic.LESSON_CREATED,
-                {'source_id': self.source_id, 'lesson_id': self.id, 'source_array': source_array},
+                {'id': self.id, 'tracking_id': self.tracking_id, 'doc_id': self.doc_id},
             )
 
         self.service.run_task(send_lesson())
+
+    def _on_send_prompt_complete(self, ret: Future[Any]) -> None:
+        ret.result()

@@ -35,15 +35,13 @@ class Sqlite(DB):
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS engram (
                     id TEXT PRIMARY KEY,
-                    data TEXT,
-                    name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
+                    data TEXT
                 )
             """)
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS history (
                     id TEXT PRIMARY KEY,
-                    data TEXT,
-                    name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
+                    data TEXT
                 )
             """)
             self.cursor.execute(
@@ -52,15 +50,19 @@ class Sqlite(DB):
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS meta (
                     id TEXT PRIMARY KEY,
-                    data TEXT,
-                    name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
+                    data TEXT
                 )
             """)
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS observation (
                     id TEXT PRIMARY KEY,
-                    data TEXT,
-                    name TEXT GENERATED ALWAYS AS (json_extract(data, '$.name')) STORED
+                    data TEXT
+                )
+            """)
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS document (
+                    id TEXT PRIMARY KEY,
+                    data TEXT
                 )
             """)
             self.db.commit()
@@ -68,6 +70,23 @@ class Sqlite(DB):
     @db_impl
     def close(self, args: dict[str, Any]) -> None:
         del args
+
+    def make_repo_filter_sql(self, repo_ids: list[str]) -> tuple[str, list[str | int]]:
+        """
+        Generates SQL and parameters for filtering history rows with exactly the provided repo_ids.
+
+        Args:
+            repo_ids: List of repo_id strings to filter for.
+
+        Returns:
+            Tuple of (SQL string, parameters list)
+        """
+        n = len(repo_ids)
+        placeholders = ', '.join('?' for _ in repo_ids)
+        sql = f"""json_array_length(json_extract(data, '$.prompt.repo_ids_filters')) = ? AND (SELECT COUNT(DISTINCT value) FROM json_each(json_extract(data, '$.prompt.repo_ids_filters')) WHERE value IN ({placeholders})) = ?"""
+        # Parameter order: length, *repo_ids, length again (for count comparison)
+        params: list[str | int] = [n, *repo_ids, n]
+        return sql, params
 
     @db_impl
     def fetch(self, table: DB.DBTables, ids: list[str], args: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
@@ -79,23 +98,36 @@ class Sqlite(DB):
             table_name: Final[str] = self._table_name_map[table]
 
             query_select = f'SELECT id, data FROM {table_name}'
-            query_id = ''
-            query_order = ''
-            query_limit = ''
+            where_clauses: list[str] = []
+            query_params: list[Any] = []
 
-            query_params = []
-
+            # Filter by ids
             if ids:
                 placeholders = ','.join('?' for _ in ids)
-                query_id = f'WHERE id IN ({placeholders})'
+                where_clauses.append(f'id IN ({placeholders})')
                 query_params.extend(ids)
 
-            if args and 'history' in args:
-                query_order = "ORDER BY json_extract(data, '$.created_date') DESC"
-                query_limit = f"LIMIT {args['history']}"
+            # Filter by repo_ids_filters (assumes self.make_repo_filter_sql returns ("SQL", params))
+            if args and 'repo_ids_filters' in args and args['repo_ids_filters'] is not None:
+                repo_ids = args['repo_ids_filters']
+                sql_str, params = self.make_repo_filter_sql(repo_ids)
+                where_clauses.append(sql_str)
+                query_params.extend(params)
 
-            # Compose final query
-            assembled_query = f'{query_select} {query_id} {query_order} {query_limit}'
+            # Build WHERE
+            where = ''
+            if where_clauses:
+                where = 'WHERE ' + ' AND '.join(where_clauses)
+
+            # Ordering and limits
+            query_order = ''
+            query_limit = ''
+            if args and 'history_limit' in args:
+                query_order = "ORDER BY json_extract(data, '$.created_date') DESC"
+                query_limit = f"LIMIT {args['history_limit']}"
+
+            # Assemble final query
+            assembled_query = f'{query_select} {where} {query_order} {query_limit}'
 
             if query_params:
                 self.cursor.execute(assembled_query, query_params)
@@ -104,7 +136,8 @@ class Sqlite(DB):
 
             rows = self.cursor.fetchall()
 
-        return {table_name: [json.loads(data[1]) for data in rows]}
+        ret = {table_name: [json.loads(data[1]) for data in rows]}
+        return ret
 
     @db_impl
     def insert_documents(self, table: DB.DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:

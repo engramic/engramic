@@ -56,7 +56,7 @@ def main() -> None:
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.', training_mode=True))
+    retrieve_service.submit(Prompt('Tell me about Chamath Palihapitiya.', training_mode=True))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

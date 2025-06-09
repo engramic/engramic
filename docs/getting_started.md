@@ -2,9 +2,11 @@
 
 Please contact us at info@engramic.org if you have any issues with these instructions.
 
+*Note: At this time, we are only testing on Linux (Ubuntu).*
+
 
 ??? note "1. Pre-Requisites - OS & IDE"
-    We are currently testing Engramic on **WSL on Windows** using **Visual Studio Code** With Ubuntu 24.0.1 LTS. It *may* run on other configurations—we'll begin cross-platform testing soon. If you'd like to help us, please reach out at [info@engramic.org](mailto:info@engramic.org).
+    We are currently developing Engramic on **WSL on Windows** using **Visual Studio Code** With Ubuntu 24.0.1 LTS. It *may* run on other configurations—we'll begin cross-platform testing soon. If you'd like to help us, please reach out at [info@engramic.org](mailto:info@engramic.org).
 
     Engramic is availible via pip, however, working from source is recommended for this release.
 
@@ -22,10 +24,12 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     - MS Python Debugger
     - Google Gemini API key (optional)
 
+    We will direct you to installation instructions in the steps below.
+
 
 ??? note "2. Clone or Fork From [GitHub](https://github.com/engramic/engramic)"
 
-    Clone or fork the latest version from the `main` branch of the Engramic GitHub repository:
+    In Linux, clone or fork the latest version from the `main` branch of the Engramic GitHub repository:
 
     📎 [https://github.com/engramic/engramic](https://github.com/engramic/engramic)
 
@@ -34,6 +38,8 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 ??? note "3. Install [Hatch](https://hatch.pypa.io/1.12/install/#command-line-installer_1)"
 
     We use **[Hatch](https://hatch.pypa.io)** as our Python project manager. It handles all dependencies, Python versioning, testing, versioning, scripts, and virtual environments.
+
+    Visit this page to install Hatch on your Linux instance:
 
     🔗 [Hatch Installation](https://hatch.pypa.io/1.12/install/#command-line-installer_1)
 
@@ -66,7 +72,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
         code .
         ```
 
-    4. In Windows, in VS Code, install the Python Debugger extension from Microsoft.
+    4. In VS Code, install the Python Debugger extension from Microsoft.
     
 
 ??? note "5. Configure the Python Interpreter"
@@ -161,20 +167,13 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
     ### Looking at The Code ###
 
-    This time, we've added another call to our TestService. Services support sync and async threads. Some features that services perform run on the main thread, such as subscribing, while others such as sending messages or running tasks must run on the async thread. The Codify service is listening for the SET_TRAINING_MODE call sent by TestService.
+    This time, we've added another call to our TestService. Services support sync and async threads. Some features that services perform run on the main thread, such as subscribing, while others such as sending messages or running tasks must run on the async thread. The Codify service is listening for MAIN_PROMPT_COMPLETE and OBSERVATION_COMPLETE calls.
 
     ```
         class TestService(Service):
             def start(self):
                 self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
                 self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
-
-                async def send_message() -> None:
-                    self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
-
-                self.run_task(send_message())
-
-                super().start()
     ```
 
     Let's look at the Observation, the output of the Codify service. Two types of data structures are output on the screen, the first is a set of Engrams, these are the memories extracted from the response of the training. The next is the Meta Summary. Meta data are summary information about all Engrams that were generated. This data structure is created to help the retrieval stage with awareness of it's memory set.
@@ -186,6 +185,8 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     hatch shell dev
     hatch run delete_dbs
     ```
+
+    Congratulations. You have finished the getting started page. If you would like to continue learning, we suggestion you follow the [How To's](../howto/how_to_parse_documents/) section of the documentation.
 
 
     

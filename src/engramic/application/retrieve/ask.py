@@ -143,27 +143,34 @@ class Ask(Retrieval):
     async def _fetch_history(self) -> list[dict[str, Any]]:
         plugin = self.prompt_db_document_plugin
         args = plugin['args']
-        args['history'] = 10
+        args['history_limit'] = 10
+        args['repo_ids_filters'] = self.prompt.repo_ids_filters
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)
         history_dict: list[dict[str, Any]] = ret_val[0]
         return history_dict
 
     def on_fetch_history_complete(self, fut: Future[Any]) -> None:
-        response_array: list[dict[str, Any]] = fut.result()
+        response_array: dict[str, Any] = fut.result()
         retrieve_gen_conversation_direction_step = self.service.run_task(
             self._retrieve_gen_conversation_direction(response_array)
         )
         retrieve_gen_conversation_direction_step.add_done_callback(self.on_direction_ret_complete)
 
-    async def _retrieve_gen_conversation_direction(self, response_array: list[dict[str, Any]]) -> dict[str, str]:
+    async def _retrieve_gen_conversation_direction(self, response_array: dict[str, Any]) -> dict[str, str]:
         if __debug__:
             self.service.send_message_async(self.service.Topic.DEBUG_ASK_CREATED, {'ask_id': self.id})
 
-        input_data = {'history_array': response_array}
+        input_data = response_array
         plugin = self.retrieve_gen_conversation_direction_plugin
+
+        if len(self.service.repo_folders.items()) > 0:
+            input_data.update({'all_repos': self.service.repo_folders})
+
         # add prompt engineering here and submit as the full prompt.
-        prompt_gen = PromptGenConversation(prompt_str=self.prompt.prompt_str, input_data=input_data)
+        prompt_gen = PromptGenConversation(
+            prompt_str=self.prompt.prompt_str, input_data=input_data, repo_ids_filters=self.prompt.repo_ids_filters
+        )
 
         structured_schema = {
             'current_user_intent': str,
@@ -235,6 +242,7 @@ class Ask(Retrieval):
             plugin['func'].query,
             collection_name='meta',
             embeddings=embedding,
+            filters=self.prompt.repo_ids_filters,
             args=self.service.host.mock_update_args(plugin),
         )
 
@@ -314,7 +322,13 @@ class Ask(Retrieval):
     async def _generate_indices(self, meta_list: list[Meta]) -> dict[str, str]:
         plugin = self.prompt_retrieve_indices_plugin
         # add prompt engineering here and submit as the full prompt.
-        prompt = PromptGenIndices(prompt_str=self.prompt.prompt_str, input_data={'meta_list': meta_list})
+        input_data: dict[str, Any] = {'meta_list': meta_list}
+        if len(self.service.repo_folders.items()) > 0:
+            input_data.update({'all_repos': self.service.repo_folders})
+
+        prompt = PromptGenIndices(
+            prompt_str=self.prompt.prompt_str, input_data=input_data, repo_ids_filters=self.prompt.repo_ids_filters
+        )
         structured_output = {'indices': list[str]}
         ret = await asyncio.to_thread(
             plugin['func'].submit,
@@ -377,6 +391,7 @@ class Ask(Retrieval):
             plugin['func'].query,
             collection_name='main',
             embeddings=embeddings,
+            filters=self.prompt.repo_ids_filters,
             args=self.service.host.mock_update_args(plugin),
         )
 

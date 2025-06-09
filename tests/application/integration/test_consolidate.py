@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Preisz Consulting, LLC.
+# This file is part of Engramic, licensed under the Engramic Community License.
+# See the LICENSE file in the project root for more details.
+
 import logging
 import sys
 from typing import Any
@@ -6,7 +10,6 @@ import pytest
 
 from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
-from engramic.application.progress.progress_service import ProgressService
 from engramic.core.host import Host
 from engramic.infrastructure.system.service import Service
 
@@ -26,24 +29,24 @@ class MiniService(Service):
 
     def start(self) -> None:
         super().start()
-        self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engram_complete)
-        self.subscribe(Service.Topic.ENGRAM_CREATED, self.on_engram_created)
-        self.subscribe(Service.Topic.INDEX_COMPLETE, self.on_index_complete)
-        self.subscribe(Service.Topic.INDEX_CREATED, self.on_index_created)
+        self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engrams_complete)
+        self.subscribe(Service.Topic.ENGRAMS_CREATED, self.on_engrams_created)
+        self.subscribe(Service.Topic.INDICES_COMPLETE, self.on_indices_complete)
+        self.subscribe(Service.Topic.INDICES_CREATED, self.on_indices_created)
 
         self.run_task(self.send_messages())
 
     async def send_messages(self) -> None:
-        observation = self.host.mock_data_collector['CodifyService--0-output']
-        self.source_id = observation['source_id']
-        self.send_message_async(Service.Topic.SET_TRAINING_MODE, {'training_mode': True})
+        observation = self.host.mock_data_collector['CodifyService--output']
         self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, observation)
 
-    def on_engram_created(self, message_in: dict[str, Any]) -> None:
+    def on_engrams_created(self, message_in: dict[str, Any]) -> None:
         self.engram_create_count += len(message_in['engram_id_array'])
 
-    def on_engram_complete(self, generated_response_in) -> None:
-        expected_results = self.host.mock_data_collector[f'ConsolidateService-{self.source_id}-0-output'][
+        self.tracking_id = message_in['tracking_id']
+
+    def on_engrams_complete(self, generated_response_in) -> None:
+        expected_results = self.host.mock_data_collector[f'ConsolidateService-{self.tracking_id}-output'][
             'engram_array'
         ]
         generated_response = generated_response_in['engram_array']
@@ -68,7 +71,7 @@ class MiniService(Service):
 
         assert gen_str == exp_str
 
-        if generated_response_in['source_id'] == self.source_id:
+        if generated_response_in['tracking_id'] == self.tracking_id:
             self.engram_complete_count += len(generated_response)
 
             if (
@@ -77,12 +80,11 @@ class MiniService(Service):
             ):
                 self.host.shutdown()
 
-    def on_index_created(self, message_in: dict[str, Any]) -> None:
+    def on_indices_created(self, message_in: dict[str, Any]) -> None:
         self.index_create_count += len(message_in['index_id_array'])
 
-    def on_index_complete(self, message_in: dict[str, Any]) -> None:
-        if message_in['source_id'] == self.source_id:
-            self.index_complete_count += len(message_in['index'])
+    def on_indices_complete(self, message_in: dict[str, Any]) -> None:
+        self.index_complete_count += len(message_in['index'])
 
         if (
             self.engram_create_count == self.engram_complete_count
@@ -93,6 +95,6 @@ class MiniService(Service):
 
 @pytest.mark.timeout(100)  # seconds
 def test_consolidate_service_submission() -> None:
-    host = Host('mock', [MessageService, ConsolidateService, ProgressService, MiniService])
+    host = Host('mock', [MessageService, ConsolidateService, MiniService])
 
     host.wait_for_shutdown()

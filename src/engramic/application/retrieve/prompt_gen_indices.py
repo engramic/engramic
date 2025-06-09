@@ -11,9 +11,17 @@ class PromptGenIndices(Prompt):
     def render_prompt(self) -> str:
         rendered_template = Template("""
 
+    % if selected_repos is not None and repo_ids_filters is not None:
+    Repos hold files that the user is interested in. The user has selected the following repos:
+    % for repo_id in repo_ids_filters:
+        ${all_repos[repo_id]}
+    % endfor
+    % endif
+
     Write a set of indices, phrases of 5 to 8 words, that will be used by a vector database to search for data that will satisfy the user_prompt.
 
-    When building indices for a list, pay carful attention to the names of the items in the list to ensure that you don't combine similar names.
+    When building indices for a list, pay careful attention to the names of the items in the list to ensure that you don't combine similar names.
+
 
     % if len(meta_list)>0:
     The domain_knowledge gives you insight into knowledge stored in your long term memory. It's here because it's the most closely related information you have stored about the user_prompt.

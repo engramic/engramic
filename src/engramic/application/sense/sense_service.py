@@ -1,14 +1,19 @@
 # Copyright (c) 2025 Preisz Consulting, LLC.
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
+from __future__ import annotations
 
-import uuid
-from typing import Any
+from dataclasses import asdict
+from typing import TYPE_CHECKING, Any
 
 from engramic.application.sense.scan import Scan
 from engramic.core.document import Document
-from engramic.core.host import Host
 from engramic.infrastructure.system.service import Service
+
+if TYPE_CHECKING:
+    from concurrent.futures import Future
+
+    from engramic.core.host import Host
 
 
 class SenseService(Service):
@@ -44,26 +49,34 @@ class SenseService(Service):
         super().start()
 
     def on_document_submit(self, msg: dict[Any, Any]) -> None:
-        file_path = msg['file_path']
-        file_name = msg['file_name']
-        path_type = msg['root_directory']
-        self.submit_document(Document(Document.Root(path_type), file_path, file_name))
+        document = Document(**msg['document'])
+        overwrite = False
+        if 'overwrite' in msg:
+            overwrite = msg['overwrite']
 
-    def submit_document(self, document: Document) -> None:
-        if __debug__:
-            self.host.update_mock_data_input(
-                self,
-                {
-                    'file_path': document.file_path,
-                    'file_name': document.file_name,
-                    'root_directory': document.root_directory.value,
-                },
+        self.submit_document(document, overwrite=overwrite)
+
+    def submit_document(self, document: Document, *, overwrite: bool = False) -> Document | None:
+        if document.is_scanned is True and overwrite is False:
+            return None
+
+        self.host.update_mock_data_input(
+            self,
+            asdict(document),
+        )
+
+        async def send_message() -> Document:
+            self.send_message_async(
+                Service.Topic.DOCUMENT_CREATED,
+                {'id': document.id, 'type': 'document', 'tracking_id': document.tracking_id},
             )
+            return document
 
-        scan = Scan(self, str(uuid.uuid4()))
+        future = self.run_task(send_message())
+        future.add_done_callback(self.on_document_created_sent)
+        return document
+
+    def on_document_created_sent(self, ret: Future[Any]) -> None:
+        document = ret.result()
+        scan = Scan(self, document.repo_id, document.tracking_id)
         scan.parse_media_resource(document)
-
-        async def send_message() -> None:
-            self.send_message_async(Service.Topic.INPUT_CREATED, {'source_id': document.id, 'type': 'document'})
-
-        self.run_task(send_message())

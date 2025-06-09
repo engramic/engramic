@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Preisz Consulting, LLC.
+# This file is part of Engramic, licensed under the Engramic Community License.
+# See the LICENSE file in the project root for more details.
+
 import logging
 import sys
 
@@ -20,11 +24,11 @@ class MiniService(Service):
         self.run_task(self.send_message())
 
     async def send_message(self) -> None:
-        rs_input = self.host.mock_data_collector['RetrieveService-0-input']
+        rs_input = self.host.mock_data_collector['RetrieveService--input']
         self.send_message_async(Service.Topic.SUBMIT_PROMPT, rs_input)
 
     def on_retrieve_complete(self, generated_results) -> None:
-        expected_results = self.host.mock_data_collector['RetrieveService--0-output']
+        expected_results = self.host.mock_data_collector['RetrieveService--output']
 
         assert str(generated_results['analysis']) == str(expected_results['analysis'])
         assert str(generated_results['prompt']['prompt_str']) == str(expected_results['prompt']['prompt_str'])

@@ -89,18 +89,33 @@ class Scan(Media):
     H1 = 1
     H3 = 2
 
-    def __init__(self, parent_service: SenseService, scan_id: str):
-        self.id = scan_id
+    def __init__(self, parent_service: SenseService, repo_id: str, tracking_id: str):
+        self.scan_id = str(uuid.uuid4())
+        self.observation_id = str(uuid.uuid4())
+        self.repo_id: str = repo_id
+        if repo_id:
+            self.repo_ids: list[str] | None = [repo_id]
+        else:
+            self.repo_ids = None
         self.service = parent_service
+        self.document: Document | None = None
+        self.tracking_id = tracking_id
         self.page_images: list[str] = []
         self.sense_initial_summary = self.service.sense_initial_summary
 
     def parse_media_resource(self, document: Document) -> None:
+        async def send_message(observation_id: str, document_id: str) -> None:
+            self.service.send_message_async(
+                Service.Topic.OBSERVATION_CREATED, {'id': observation_id, 'parent_id': document_id}
+            )
+
+        self.service.run_task(send_message(self.observation_id, document.id))
+
         logging.info('Parsing document: %s', document.file_name)
         file_path: Traversable | Path
-        if document.root_directory == Document.Root.RESOURCE:
+        if document.root_directory == Document.Root.RESOURCE.value:
             file_path = files(document.file_path).joinpath(document.file_name)
-        elif document.root_directory == Document.Root.DATA:
+        elif document.root_directory == Document.Root.DATA.value:
             repo_root = os.getenv('REPO_ROOT')
             if repo_root is None:
                 error = "Environment variable 'REPO_ROOT' is not set."
@@ -109,7 +124,7 @@ class Scan(Media):
             file_path = expanded_path / document.file_name
 
         self.document = document
-        self.source_id = document.id
+        self.source_ids = [document.id]
 
         try:
             with file_path.open('rb') as file_ptr:
@@ -162,6 +177,10 @@ class Scan(Media):
     async def _generate_short_summary(self) -> Any:
         plugin = self.sense_initial_summary
         summary_images = self.page_images[: Scan.SHORT_SUMMARY_PAGE_COUNT]
+
+        if self.document is None:
+            error = 'Document must be set before generating prompt.'
+            raise ValueError(error)
 
         prompt = PromptGenMeta(input_data={'file_path': self.document.file_path, 'file_name': self.document.file_name})
 
@@ -277,6 +296,10 @@ class Scan(Media):
                 self._process_engrams(part, context_copy, depth)
 
         else:
+            if self.document is None:
+                error = 'Document id is None but a value is expected.'
+                raise RuntimeError(error)
+
             engram = Engram(
                 str(uuid.uuid4()),
                 [self.inital_scan['file_path']],
@@ -286,7 +309,7 @@ class Scan(Media):
                 context,
                 None,
                 [self.meta_id],
-                None,  # library
+                self.repo_ids,
                 None,  # accuracy
                 None,  # relevancy
                 int(datetime.now(timezone.utc).timestamp()),
@@ -317,20 +340,32 @@ class Scan(Media):
     def _on_generate_full_summary(self, future: Future[Any]) -> None:
         results = json.loads(future.result())
 
+        if self.document is None:
+            error = 'Document is None but expected not to be.'
+            raise RuntimeError(error)
+
         meta = Meta(
             self.meta_id,
             Meta.SourceType.DOCUMENT.value,
             [self.inital_scan['file_path'] + self.inital_scan['file_name']],
-            [self.source_id],
+            self.source_ids,
             results['keywords'].split(','),
+            self.repo_ids,
             self.inital_scan['summary_initial'],
             Index(results['summary_full']),
+            self.document.id,
         )
 
         observation = Observation(
-            str(uuid.uuid4()), self.document.id, meta, self.engrams, datetime.now(timezone.utc).timestamp()
+            self.observation_id,
+            meta,
+            self.engrams,
+            int(datetime.now(timezone.utc).timestamp()),
+            self.document.id,
+            self.tracking_id,
         )
 
         self.service.host.update_mock_data_output(self.service, asdict(observation))
 
         self.service.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(observation))
+        self.service.send_message_async(Service.Topic.DOCUMENT_COMPLETE, asdict(self.document))

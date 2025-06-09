@@ -71,6 +71,7 @@ class RetrieveService(Service):
         self.db_plugin = host.plugin_manager.get_plugin('db', 'document')
         self.metrics_tracker: MetricsTracker[RetrieveMetric] = MetricsTracker[RetrieveMetric]()
         self.meta_repository: MetaRepository = MetaRepository(self.db_plugin)
+        self.repo_folders: dict[str, Any] = {}
 
     def init_async(self) -> None:
         self.db_plugin['func'].connect(args=None)
@@ -79,32 +80,20 @@ class RetrieveService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.SUBMIT_PROMPT, self.on_submit_prompt)
-        self.subscribe(Service.Topic.INDEX_COMPLETE, self.on_index_complete)
+        self.subscribe(Service.Topic.INDICES_COMPLETE, self.on_indices_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
+        self.subscribe(Service.Topic.REPO_FOLDERS, self._on_repo_folders)
         super().start()
 
     async def stop(self) -> None:
         await super().stop()
 
+    def _on_repo_folders(self, msg: dict[str, Any]) -> None:
+        self.repo_folders = msg['repo_folders']
+
     # when called from monitor service
     def on_submit_prompt(self, msg: dict[Any, Any]) -> None:
-        prompt_str = msg['prompt_str']
-
-        source_id = ''
-        if 'source_id' in msg:
-            source_id = msg['source_id']
-
-        training_mode = False
-        if 'training_mode' in msg:
-            training_mode = msg['training_mode']
-
-        is_lesson = False
-        if 'is_lesson' in msg:
-            is_lesson = msg['is_lesson']
-
-        self.submit(
-            Prompt(prompt_str=prompt_str, prompt_id=source_id, training_mode=training_mode, is_lesson=is_lesson)
-        )
+        self.submit(Prompt(**msg))
 
     # when used from main
     def submit(self, prompt: Prompt) -> None:
@@ -116,28 +105,32 @@ class RetrieveService(Service):
         retrieval.get_sources()
 
         async def send_message() -> None:
-            self.send_message_async(Service.Topic.INPUT_CREATED, {'source_id': prompt.prompt_id, 'type': 'prompt'})
+            msg = {'id': prompt.prompt_id, 'parent_id': prompt.parent_id, 'tracking_id': prompt.tracking_id}
+            self.send_message_async(Service.Topic.PROMPT_CREATED, msg)
 
         self.run_task(send_message())
 
-    def on_index_complete(self, index_message: dict[str, Any]) -> None:
+    def on_indices_complete(self, index_message: dict[str, Any]) -> None:
         raw_index: list[dict[str, Any]] = index_message['index']
         engram_id: str = index_message['engram_id']
-        source_id: str = index_message['source_id']
+        tracking_id: str = index_message['tracking_id']
+        repo_ids: str = index_message['repo_ids']
         index_list: list[Index] = [Index(**item) for item in raw_index]
-        self.run_task(self._insert_engram_vector(index_list, engram_id, source_id))
+        self.run_task(self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id))
 
-    async def _insert_engram_vector(self, index_list: list[Index], engram_id: str, source_id: str) -> None:
+    async def _insert_engram_vector(
+        self, index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str
+    ) -> None:
         plugin = self.vector_db_plugin
         self.vector_db_plugin['func'].insert(
-            collection_name='main', index_list=index_list, obj_id=engram_id, args=plugin['args']
+            collection_name='main', index_list=index_list, obj_id=engram_id, args=plugin['args'], filters=repo_ids
         )
 
         index_id_array = [index.id for index in index_list]
 
         self.send_message_async(
-            Service.Topic.INDEX_INSERTED,
-            {'source_id': source_id, 'engram_id': engram_id, 'index_id_array': index_id_array},
+            Service.Topic.INDICES_INSERTED,
+            {'parent_id': engram_id, 'index_id_array': index_id_array, 'tracking_id': tracking_id},
         )
 
         self.metrics_tracker.increment(RetrieveMetric.EMBEDDINGS_ADDED_TO_VECTOR)
@@ -154,6 +147,7 @@ class RetrieveService(Service):
             collection_name='meta',
             index_list=[meta.summary_full],
             obj_id=meta.id,
+            filters=meta.repo_ids,
             args=plugin['args'],
         )
 

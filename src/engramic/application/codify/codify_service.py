@@ -25,7 +25,6 @@ from engramic.infrastructure.system.plugin_manager import PluginManager
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
-    from engramic.core.observation import Observation
     from engramic.infrastructure.system.plugin_manager import PluginManager
 
 
@@ -62,7 +61,6 @@ class CodifyService(Service):
         start(): Subscribes the service to key topics.
         stop(): Stops the service.
         init_async(): Initializes async components, including DB connections.
-        on_set_training_mode(message_in): Sets training mode flag based on incoming message.
         on_main_prompt_complete(response_dict): Main entry point triggered after a model completes a prompt.
         fetch_engrams(response): Asynchronously fetches engrams associated with a response.
         on_fetch_engram_complete(fut): Callback that processes fetched engrams and triggers metadata retrieval.
@@ -92,7 +90,6 @@ class CodifyService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
-        self.subscribe(Service.Topic.SET_TRAINING_MODE, self.on_set_training_mode)
         super().start()
 
     async def stop(self) -> None:
@@ -101,9 +98,6 @@ class CodifyService(Service):
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
-
-    def on_set_training_mode(self, message_in: dict[str, Any]) -> None:
-        self.training_mode = message_in['training_mode']
 
     def on_main_prompt_complete(self, response_dict: dict[str, Any]) -> None:
         if __debug__:
@@ -229,18 +223,24 @@ class CodifyService(Service):
             self.observation_repository.normalize_toml_dict(toml_data, response)
         )
 
-        # if this observation is from multiple sources, it must be merged the sources into it's meta.
+        # if this observation is from multiple sources, it must merge the sources into it's meta.
         if len(engram_array) > 0:
-            return_observation_merged: Observation = return_observation.merge_observation(
+            merged_data = return_observation.merge_observation(
                 return_observation,
                 CodifyService.ACCURACY_CONSTANT,
                 CodifyService.RELEVANCY_CONSTANT,
                 self.engram_repository,
             )
 
-            return {'return_observation': return_observation_merged}
+            # Cast merged_data to the same type as return_observation
+            return_observation_merged = type(return_observation)(**asdict(merged_data))
+
+            return_observation = return_observation_merged
 
         self.metrics_tracker.increment(CodifyMetric.ENGRAM_VALIDATED)
+        self.send_message_async(
+            Service.Topic.OBSERVATION_CREATED, {'id': return_observation.id, 'parent_id': return_observation.parent_id}
+        )
 
         return {'return_observation': return_observation}
 
