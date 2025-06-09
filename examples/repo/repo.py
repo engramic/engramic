@@ -45,7 +45,7 @@ class TestService(Service):
         repo_service = self.host.get_service(RepoService)
         self.document_id1 = '97a1ae1b8461076cdc679d6e0a5f885e'  # 'IntroductiontoQuantumNetworking.pdf'
         self.document_id2 = '9c9f0237620b77fa69e2ca63e40a9f27'  # 'Elysian_Fields.pdf'
-        repo_service.submit_ids([self.document_id1])
+        repo_service.submit_ids([self.document_id1], overwrite=True)
         repo_service.submit_ids([self.document_id2])
 
     def _on_repo_folders(self, message_in: dict[str, Any]) -> None:
@@ -60,7 +60,7 @@ class TestService(Service):
         # Only logging information about the files
         logging.info('Repo: %s, Files received: %d', message_in['repo'], len(message_in['files']))
         for file in message_in['files']:
-            status = 'previously scanned' if file['is_scanned'] else 'not scanned'
+            status = 'previously scanned' if file['is_scanned'] else 'unscanned'
             logging.info('File: %s - %s', file['file_name'], status)
 
     def on_document_inserted(self, message_in: dict[str, Any]) -> None:
@@ -82,7 +82,7 @@ class TestService(Service):
                 prompt3 = Prompt(
                     'This is prompt 3. Briefly tell me about IntroductiontoQuantumNetworking.pdf and Elysian_Fields.pdf.  Start with prompt number.',
                     repo_ids_filters=None,
-                )  # means that repos are not being used.
+                )  # means that repos are not being used. All files not loaded as part of a repo are in a default repo known as the 'null' repo.
                 retrieve_service.submit(prompt3)
 
                 # The following would throw an exception. Null set is an invalid input.

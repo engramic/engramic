@@ -8,13 +8,13 @@ Engramic is an inference engine. It's special because it natively supports long-
 
 ---
 
-Engramic is pre-alpha. It's a great time to start working with these core systems for some developers, but we have yet to complete many important features and even the core systems may not be fully tested. In other words, use of this code base will require some development experience and the ability to work in maturing environments. The flip side, is that a new community is forming and as a pioneer, you have an opportunity to get in early so that you can someday tell your friends, *I used Engramic before it was cool*.
+Engramic is pre-alpha. It's a great time to start working with these core systems for some developers, but we have yet to complete many important features. In other words, use of this code base will require some development experience and the ability to work in maturing environments. The flip side, is that a new community is forming and as a pioneer, you have an opportunity to get in early so that you can someday tell your friends, *I used Engramic before it was cool*.
 
 There is currently no support for the following:
 
 - There is no support for individual users.
-- There is no HTTP(s) interface at this time. 
-- This is no support for documents such as PDFs.
+- There is no HTTP(s) interface at this time.
+- There are no fallbacks if API calls fail.
 - Windows and MacOS is not being tested as part of our release process.
 
 These features, along with others, will be available in the near future.
@@ -33,14 +33,14 @@ flowchart LR
     retrieve --> respond
     respond --> stream 
     codify --> consolidate
-    respond --> codify 
+    respond --> codify
 ```
 
 *Engramic's core services. Engramic uses a learning loop, building memories from responses and responses from memories*.
 
 ### Why Engramic?
 
-Engramic is designed to learn from your unstructured, proprietary data using any large language model (LLM). When we study, we often begin by reading a document from start to finish. But true understanding comes from synthesizing the information, asking questions, identifying what’s meaningful, and connecting it to prior knowledge and related context. Learning is an iterative process—not a linear one. That’s why we believe a large context window alone doesn’t solve the challenge of truly understanding a dataset. This belief, shaped by two years of research, is what inspired Engramic’s design.
+Engramic is designed to learn from your unstructured, proprietary data using any large language model (LLM). Understanding comes from synthesizing the information, asking questions, identifying what’s meaningful, and connecting it to prior knowledge and related context. Learning is an iterative process—not a linear one. That’s why we believe a large context window alone doesn’t solve the challenge of truly understanding a dataset. This belief, shaped by two years of research, is what inspired Engramic’s design.
 
 ---
 
@@ -80,5 +80,4 @@ Engramic is designed to learn from your unstructured, proprietary data using any
 - **Unified Memory**  
   All engrams are stored within a unified system, enabling both full and selective access to memory content.
 
-### Engramic Services
 

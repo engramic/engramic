@@ -40,7 +40,7 @@ class TestService(Service):
         #    Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
         # )
         self.document_id = document.id
-        sense_service.submit_document(document)
+        sense_service.submit_document(document, overwrite=True)
 
     def on_main_prompt_complete(self, message_in: dict[str, Any]) -> None:
         response = Response(**message_in)

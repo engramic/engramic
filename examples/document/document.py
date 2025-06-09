@@ -30,9 +30,6 @@ class TestService(Service):
         self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
 
         sense_service = self.host.get_service(SenseService)
-        # document = Document(
-        #    Document.Root.RESOURCE.value, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
-        # )
         document = Document(
             Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
         )
@@ -47,8 +44,8 @@ class TestService(Service):
         document_id = message_in['id']
         if self.document_id == document_id:
             retrieve_service = self.host.get_service(RetrieveService)
-            prompt = Prompt('Please tell me about your sources on quantum networking')
-            # prompt = Prompt('Tell me about the company in GH SC Official Job Descriptions.pdf.')
+            prompt = Prompt('Do you have any files about quantum networking? What is it about?')
+
             retrieve_service.submit(prompt)
 
 

@@ -360,7 +360,7 @@ class Scan(Media):
             self.observation_id,
             meta,
             self.engrams,
-            datetime.now(timezone.utc).timestamp(),
+            int(datetime.now(timezone.utc).timestamp()),
             self.document.id,
             self.tracking_id,
         )

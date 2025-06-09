@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Preisz Consulting, LLC.
+# This file is part of Engramic, licensed under the Engramic Community License.
+# See the LICENSE file in the project root for more details.
+
 import logging
 import sys
 from typing import Any
@@ -22,7 +26,7 @@ class MiniService(Service):
 
     async def send_message(self) -> None:
         sense_service_input = self.host.mock_data_collector['SenseService--input']
-        self.send_message_async(Service.Topic.SUBMIT_DOCUMENT, sense_service_input)
+        self.send_message_async(Service.Topic.SUBMIT_DOCUMENT, {'document': sense_service_input})
 
     def on_observation_completed(self, generated_observation: dict[Any, Any]) -> None:
         expected_results = self.host.mock_data_collector['SenseService--output']

@@ -46,14 +46,16 @@ class RepoService(Service):
     def _on_submit_ids(self, msg: str) -> None:
         json_msg = json.loads(msg)
         id_array = json_msg['submit_ids']
-        self.submit_ids(id_array)
+        overwrite = False
+        if 'overwrite' in json_msg:
+            overwrite = json_msg['overwrite']
+        self.submit_ids(id_array, overwrite=overwrite)
 
-    def submit_ids(self, id_array: list[str]) -> None:
+    def submit_ids(self, id_array: list[str], *, overwrite: bool = False) -> None:
         for sub_id in id_array:
             document = self.file_index[sub_id]
             self.send_message_async(
-                Service.Topic.SUBMIT_DOCUMENT,
-                asdict(document),
+                Service.Topic.SUBMIT_DOCUMENT, {'document': asdict(document), 'overwrite': overwrite}
             )
             self.submitted_documents.add(document.id)
 
@@ -66,6 +68,8 @@ class RepoService(Service):
 
             document.is_scanned = True  # Create a Document instance to validate the data
             self.document_repository.save(document)
+
+            self.file_index[document_id] = document
 
         if document.repo_id:
             self.run_task(self.update_repo_files(document.repo_id, [document_id]))
@@ -151,13 +155,14 @@ class RepoService(Service):
                         tracking_id=str(uuid.uuid4()),
                     )
 
+                    # Check to see if the document has been loaded before.
                     fetched_doc: dict[str, Any] = self.document_repository.load(doc.id)
-                    if len(fetched_doc['document']) == 0:
-                        document_ids.append(doc.id)
-                    else:
-                        doc = Document(**fetched_doc['document'][0])
-                        document_ids.append(doc.id)
 
+                    # If it has been loaded, add that one to the file_index.
+                    if len(fetched_doc['document']) != 0:
+                        doc = Document(**fetched_doc['document'][0])
+
+                    document_ids.append(doc.id)
                     self.file_index[doc.id] = doc
 
             self.file_repos[repo_id] = document_ids

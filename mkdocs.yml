@@ -25,8 +25,11 @@ nav:
   - Getting Started: getting_started.md
   - Host & Services: host_and_services.md
   - Profiles: profiles.md
-  - How To's:
-    - PDF Parse: howto/how_to_parse_documents.md
+  - How To's: 
+    - Introduction: howto/howto.md
+    - Load a Document: howto/how_to_parse_documents.md
+    - Run a Lesson: howto/how_to_run_a_lesson.md
+    - Load & Query a Repo: howto/how_to_load_a_repo.md
   - API Reference:
     - Engram: reference/emgram.md
     - Retrieve Service: 

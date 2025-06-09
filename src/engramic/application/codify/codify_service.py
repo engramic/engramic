@@ -61,7 +61,6 @@ class CodifyService(Service):
         start(): Subscribes the service to key topics.
         stop(): Stops the service.
         init_async(): Initializes async components, including DB connections.
-        on_set_training_mode(message_in): Sets training mode flag based on incoming message.
         on_main_prompt_complete(response_dict): Main entry point triggered after a model completes a prompt.
         fetch_engrams(response): Asynchronously fetches engrams associated with a response.
         on_fetch_engram_complete(fut): Callback that processes fetched engrams and triggers metadata retrieval.
@@ -99,9 +98,6 @@ class CodifyService(Service):
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
-
-    def on_set_training_mode(self, message_in: dict[str, Any]) -> None:
-        self.training_mode = message_in['training_mode']
 
     def on_main_prompt_complete(self, response_dict: dict[str, Any]) -> None:
         if __debug__:

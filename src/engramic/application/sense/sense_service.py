@@ -49,10 +49,17 @@ class SenseService(Service):
         super().start()
 
     def on_document_submit(self, msg: dict[Any, Any]) -> None:
-        document = Document(**msg)
-        self.submit_document(document)
+        document = Document(**msg['document'])
+        overwrite = False
+        if 'overwrite' in msg:
+            overwrite = msg['overwrite']
 
-    def submit_document(self, document: Document) -> None:
+        self.submit_document(document, overwrite=overwrite)
+
+    def submit_document(self, document: Document, *, overwrite: bool = False) -> Document | None:
+        if document.is_scanned is True and overwrite is False:
+            return None
+
         self.host.update_mock_data_input(
             self,
             asdict(document),
@@ -67,6 +74,7 @@ class SenseService(Service):
 
         future = self.run_task(send_message())
         future.add_done_callback(self.on_document_created_sent)
+        return document
 
     def on_document_created_sent(self, ret: Future[Any]) -> None:
         document = ret.result()
