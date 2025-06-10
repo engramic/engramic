@@ -2,6 +2,14 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+"""
+Tracks and manages progress of various components through the Engramic system.
+
+This module provides tracking capabilities for lessons, prompts, documents, observations,
+engrams, and indices as they move through the processing pipeline, and reports completion
+percentages to interested components.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -14,8 +22,39 @@ if TYPE_CHECKING:
 
 
 class ProgressService(Service):
+    """
+    Monitors and reports progress of various components through the system pipeline.
+
+    Tracks the creation and completion status of multiple object types (lessons, prompts,
+    documents, observations, engrams, indices) in parent-child hierarchies, calculates
+    completion percentages, and notifies the system when objects are fully processed.
+
+    Attributes:
+        progress_array (dict[str, ProgressArray]): Maps object IDs to their progress tracking data.
+        lookup_array (dict[str, str]): Quick reverse lookup from child-id to parent-id.
+        tracking_array (dict[str, BubbleReturn]): Stores progress aggregation data by tracking ID.
+
+    Methods:
+        on_lesson_created(msg): Handles lesson creation events.
+        on_prompt_created(msg): Handles prompt creation events.
+        on_document_created(msg): Handles document creation events.
+        on_observation_created(msg): Handles observation creation events.
+        on_engrams_created(msg): Handles engrams creation events.
+        on_indices_created(msg): Handles indices creation events.
+    """
+
     @dataclass(slots=True)
     class ProgressArray:
+        """
+        Stores progress tracking data for a single object in the system.
+
+        Attributes:
+            item_type (str): Type of the object being tracked (lesson, prompt, document, etc).
+            tracking_id (str | None): Identifier used to track a processing chain.
+            children_is_complete_array (dict[str, bool]): Maps child IDs to completion status.
+            target_id (str | None): ID of the target object (usually a document).
+        """
+
         item_type: str
         tracking_id: str | None = None
         children_is_complete_array: dict[str, bool] = field(default_factory=dict)
@@ -23,6 +62,19 @@ class ProgressService(Service):
 
     @dataclass(slots=True)
     class BubbleReturn:
+        """
+        Stores aggregated progress data during bubble-up operations.
+
+        Used to track completion metrics as progress propagates up the object hierarchy.
+
+        Attributes:
+            total_indices (int): Total number of indices to be processed.
+            completed_indices (int): Number of indices already processed.
+            is_complete (bool): Whether the entire processing chain is complete.
+            root_node (str): ID of the root node in the processing hierarchy.
+            target_id (str | None): ID of the target object.
+        """
+
         total_indices: int = 0
         completed_indices: int = 0
         is_complete: bool = False
@@ -33,6 +85,12 @@ class ProgressService(Service):
     # life-cycle                                                            #
     # --------------------------------------------------------------------- #
     def __init__(self, host: Host) -> None:
+        """
+        Initializes the ProgressService.
+
+        Args:
+            host (Host): The host environment providing access to system resources.
+        """
         super().__init__(host)
         self.progress_array: dict[str, ProgressService.ProgressArray] = {}
         # quick reverse lookup: child-id → parent-id
@@ -40,6 +98,12 @@ class ProgressService(Service):
         self.tracking_array: dict[str, ProgressService.BubbleReturn] = {}
 
     def start(self) -> None:
+        """
+        Starts the progress service by subscribing to relevant system events.
+
+        Subscribes to creation events for lessons, prompts, documents, observations,
+        engrams, and indices to begin tracking their progress through the system.
+        """
         self.subscribe(Service.Topic.LESSON_CREATED, self.on_lesson_created)
         self.subscribe(Service.Topic.PROMPT_CREATED, self.on_prompt_created)
         self.subscribe(Service.Topic.DOCUMENT_CREATED, self.on_document_created)
@@ -54,6 +118,14 @@ class ProgressService(Service):
     # message handlers                                                      #
     # --------------------------------------------------------------------- #
     def on_lesson_created(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the creation of a new lesson in the system.
+
+        Sets up progress tracking for the lesson and connects it to its parent if one exists.
+
+        Args:
+            msg (dict[str, Any]): Message containing lesson creation details.
+        """
         lesson_id = msg['id']
         parent_id = msg.get('parent_id', '')
         tracking_id = msg['tracking_id']
@@ -85,6 +157,14 @@ class ProgressService(Service):
             )
 
     def on_prompt_created(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the creation of a new prompt in the system.
+
+        Sets up progress tracking for the prompt and connects it to its parent if one exists.
+
+        Args:
+            msg (dict[str, Any): Message containing prompt creation details.
+        """
         prompt_id = msg['id']
         parent_id = msg.get('parent_id', '')
         tracking_id = msg['tracking_id']
@@ -110,6 +190,14 @@ class ProgressService(Service):
             )
 
     def on_document_created(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the creation of a new document in the system.
+
+        Sets up progress tracking for the document and connects it to its parent if one exists.
+
+        Args:
+            msg (dict[str, Any]): Message containing document creation details.
+        """
         doc_id = msg['id']
         tracking_id = msg['tracking_id']
 
@@ -139,6 +227,14 @@ class ProgressService(Service):
             )
 
     def on_observation_created(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the creation of a new observation in the system.
+
+        Sets up progress tracking for the observation and connects it to its parent.
+
+        Args:
+            msg (dict[str, Any]): Message containing observation creation details.
+        """
         obs_id = msg['id']
         parent_id = msg['parent_id']
 
@@ -147,6 +243,14 @@ class ProgressService(Service):
         self.lookup_array[obs_id] = parent_id
 
     def on_engrams_created(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the creation of new engrams in the system.
+
+        Sets up progress tracking for multiple engrams and connects them to their parent.
+
+        Args:
+            msg (dict[str, Any]): Message containing engram creation details.
+        """
         parent_id = msg['parent_id']
         for engram_id in msg['engram_id_array']:
             self.progress_array.setdefault(engram_id, ProgressService.ProgressArray('engram'))
@@ -154,6 +258,15 @@ class ProgressService(Service):
             self.lookup_array[engram_id] = parent_id
 
     def on_indices_created(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the creation of new indices in the system.
+
+        Sets up progress tracking for multiple indices and connects them to their parent.
+        Updates tracking metrics for the processing chain.
+
+        Args:
+            msg (dict[str, Any]): Message containing index creation details.
+        """
         parent_id = msg['parent_id']
         tracking_id = msg['tracking_id']
 
@@ -172,6 +285,15 @@ class ProgressService(Service):
     # propagation logic                                                  #
     # ------------------------------------------------------------------ #
     def _on_indices_inserted(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the insertion of indices into the system.
+
+        Marks indices as complete and triggers the bubble-up process to update
+        progress metrics and potentially mark parent objects as complete.
+
+        Args:
+            msg (dict[str, Any]): Message containing index insertion details.
+        """
         parent_id = msg['parent_id']
         tracking_id = msg['tracking_id']
 
@@ -202,8 +324,14 @@ class ProgressService(Service):
 
     def _bubble_up_if_complete(self, node_id: str, bubble_return: ProgressService.BubbleReturn) -> None:
         """
-        Recursively mark `node_id` complete (in its own parent) if *all* of its
-        children have been completed.  Propagates until the chain ends.
+        Recursively marks nodes as complete and propagates completion status upward.
+
+        Checks if all children of a node are complete, and if so, marks the node as complete
+        in its parent. This process continues up the hierarchy until reaching the root node.
+
+        Args:
+            node_id (str): ID of the node to check for completion.
+            bubble_return (BubbleReturn): Object to track aggregated progress metrics.
         """
         progress = self.progress_array[node_id]
 
@@ -237,6 +365,13 @@ class ProgressService(Service):
         return
 
     def _get_root_node(self, node_id: str, bubble_return: ProgressService.BubbleReturn) -> None:
+        """
+        Recursively finds the root node of a processing hierarchy.
+
+        Args:
+            node_id (str): ID of the node to start the search from.
+            bubble_return (BubbleReturn): Object to store the root node ID once found.
+        """
         parent_id: str | None = self.lookup_array.get(node_id)
         if parent_id is None:
             bubble_return.root_node = node_id
@@ -244,6 +379,14 @@ class ProgressService(Service):
             self._get_root_node(parent_id, bubble_return)
 
     def _cleanup_subtree(self, root_node_id: str) -> None:
+        """
+        Recursively removes completed nodes and their children from tracking structures.
+
+        Cleans up memory by removing objects that have completed processing.
+
+        Args:
+            root_node_id (str): ID of the root node of the subtree to clean up.
+        """
         node = self.progress_array.get(root_node_id)
         if node is None:
             return

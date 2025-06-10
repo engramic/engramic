@@ -27,15 +27,19 @@ ptr = "standard-2025-04-01"
 [standard-2025-04-01]
 type = "profile"
 vector_db.db = {name="ChromaDB"}
-llm.retrieve_gen_conversation_direction = {name="Gemini", model="gemini-2.0-flash"}
-llm.retrieve_gen_index = {name="Gemini", model="gemini-2.0-flash"}
-llm.retrieve_prompt_analysis = {name="Gemini", model="gemini-2.0-flash"}
+llm.retrieve_gen_conversation_direction = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.retrieve_gen_index = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.retrieve_prompt_analysis = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
 db.document = {name="Sqlite"}
-llm.response_main = {name="Gemini", model="gemini-2.0-flash"}
-llm.validate = {name="Gemini", model="gemini-2.0-flash"}
-llm.summary = {name="Gemini", model="gemini-2.0-flash"}
-llm.gen_indices = {name="Gemini", model="gemini-2.0-flash"}
-embedding.gen_embed = {name="Gemini", model="text-embedding-004"}
+llm.response_main = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.validate = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.summary = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.gen_indices = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+embedding.gen_embed = {name="Gemini",model="text-embedding-004"}
+llm.sense_initial_summary = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.sense_scan = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.sense_full_summary = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
+llm.teach_generate_questions = {name="Gemini",model="gemini-2.5-flash-preview-04-17"}
 ```
 
 ## Loading a Profile with the Host
@@ -44,7 +48,7 @@ When creating a `Host`, you should load the initial profile like so:
 
 ```python
 host = Host(
-    'standard',
+    'standard', #<--this defines the profile.
     [
         MessageService,
         RetrieveService,

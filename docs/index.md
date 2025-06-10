@@ -19,6 +19,12 @@ There is currently no support for the following:
 
 These features, along with others, will be available in the near future.
 
+What Engramic is ready for:
+
+- Proof of concepts focused on folder directories with 10 or so PDFs with less than 100 pages.
+- Research related to long term memory.
+- Developers looking to support Engramic.
+
 ---
 
 For an evergreen overview of Engramic, visit our online [Knowledge Base](https://www.engramic.org/knowledge-base).
@@ -26,14 +32,37 @@ For an evergreen overview of Engramic, visit our online [Knowledge Base](https:/
 ## Introduction to Engramic
 
 ```mermaid
-flowchart LR
-    sense --> consolidate
+flowchart TD
+    %% Define node styles
+    classDef process fill:#f9f9f9,stroke:#333,stroke-width:1px,rounded:true
+    classDef io fill:#e8f4ff,stroke:#4a86e8,stroke-width:1px,rounded:true
+    classDef external fill:#f0fff0,stroke:#2d862d,stroke-width:1px,rounded:true
+    
+    %% Input and external processes
+    prompt([User Prompt]):::io
+    stream([User Stream]):::io
+    sense[Sense]:::external
+    
+    respond --> stream
+
+    %% Core processes in learning loop
+    subgraph "Engramic Learning Loop"
+      direction RL
+      consolidate[Consolidate]:::process
+      retrieve[Retrieve]:::process
+      respond[Respond]:::process
+      codify[Codify]:::process
+      
+      consolidate --> retrieve
+      retrieve --> respond
+      respond --> codify
+      codify --> consolidate
+    end
+    
+    %% External connections
     prompt --> retrieve
-    consolidate --> retrieve
-    retrieve --> respond
-    respond --> stream 
-    codify --> consolidate
-    respond --> codify
+    sense --> consolidate
+    
 ```
 
 *Engramic's core services. Engramic uses a learning loop, building memories from responses and responses from memories*.

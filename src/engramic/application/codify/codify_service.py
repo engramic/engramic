@@ -36,20 +36,14 @@ class CodifyMetric(Enum):
 
 class CodifyService(Service):
     """
-    CodifyService is a system-level service responsible for validating and extracting engrams (memories) from AI model responses using a TOML-based validation pipeline.
+    A service responsible for validating and extracting engrams from AI model responses using a TOML-based validation pipeline.
 
     This service listens for prompts that have completed processing, and if the system is in training mode, it fetches related engrams and metadata, applies an LLM-based validation process, and stores structured observations. It tracks metrics related to its activity and supports training workflows.
 
-    Key Responsibilities:
-    - Subscribes to relevant service events like `MAIN_PROMPT_COMPLETE` and `ACKNOWLEDGE`.
-    - Fetches engrams and their associated metadata based on a completed model response.
-    - Uses a validation plugin to process model responses and extract structured observation data.
-    - Validates and loads TOML-encoded responses into structured Observation objects.
-    - Merges observations when applicable and sends results asynchronously to downstream systems.
-    - Tracks system-level metrics for observability and debugging.
-
     Attributes:
         plugin_manager (PluginManager): Manages access to system plugins such as the LLM and document DB.
+        llm_validate (dict): Plugin for LLM-based validation.
+        db_document_plugin (dict): Plugin for document database access.
         engram_repository (EngramRepository): Repository for accessing and managing engram data.
         meta_repository (MetaRepository): Repository for associated metadata retrieval.
         observation_repository (ObservationRepository): Handles validation and normalization of observation data.
@@ -58,17 +52,28 @@ class CodifyService(Service):
         training_mode (bool): Flag indicating whether the system is in training mode.
 
     Methods:
-        start(): Subscribes the service to key topics.
-        stop(): Stops the service.
-        init_async(): Initializes async components, including DB connections.
-        on_main_prompt_complete(response_dict): Main entry point triggered after a model completes a prompt.
-        fetch_engrams(response): Asynchronously fetches engrams associated with a response.
-        on_fetch_engram_complete(fut): Callback that processes fetched engrams and triggers metadata retrieval.
-        fetch_meta(engram_array, meta_id_array, response): Asynchronously fetches metadata for given engrams.
-        on_fetch_meta_complete(fut): Callback that begins the validation process after fetching metadata.
-        validate(engram_array, meta_array, response): Runs the validation plugin on the response and returns an observation.
-        on_validate_complete(fut): Final step that emits the completed observation to other systems.
-        on_acknowledge(message_in): Responds to ACK messages by reporting and resetting metrics.
+        start() -> None:
+            Subscribes the service to key topics.
+        stop() -> None:
+            Stops the service.
+        init_async() -> None:
+            Initializes async components, including DB connections.
+        on_main_prompt_complete(response_dict: dict[str, Any]) -> None:
+            Main entry point triggered after a model completes a prompt.
+        _fetch_engrams(response: Response) -> dict[str, Any]:
+            Asynchronously fetches engrams associated with a response.
+        on_fetch_engram_complete(fut: Future[Any]) -> None:
+            Callback that processes fetched engrams and triggers metadata retrieval.
+        _fetch_meta(engram_array: list[Engram], meta_id_array: list[str], response: Response) -> dict[str, Any]:
+            Asynchronously fetches metadata for given engrams.
+        on_fetch_meta_complete(fut: Future[Any]) -> None:
+            Callback that begins the validation process after fetching metadata.
+        _validate(engram_array: list[Engram], meta_array: list[Meta], response: Response) -> dict[str, Any]:
+            Runs the validation plugin on the response and returns an observation.
+        on_validate_complete(fut: Future[Any]) -> None:
+            Final step that emits the completed observation to other systems.
+        on_acknowledge(message_in: str) -> None:
+            Responds to ACK messages by reporting and resetting metrics.
     """
 
     ACCURACY_CONSTANT = 3

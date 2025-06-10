@@ -34,20 +34,18 @@ class ConsolidateMetric(Enum):
 
 class ConsolidateService(Service):
     """
-    The ConsolidateService orchestrates the post-processing pipeline for completed observations,
-    coordinating summarization, engram generation, index generation, and embedding creation.
+    Orchestrates the post-processing pipeline for completed observations.
 
-    This service is triggered when an observation is marked complete and is responsible for the following:
+    This service is triggered when an observation is marked complete and coordinates summarization,
+    engram generation, index generation, and embedding creation through the following pipeline stages:
 
     1. **Summarization** - Generates a natural language summary from the observation using an LLM plugin.
     2. **Embedding Summaries** - Uses an embedding plugin to create vector embeddings of the summary text.
     3. **Engram Generation** - Extracts or constructs engrams from the observation's content.
     4. **Index Generation** - Applies an LLM to generate meaningful textual indices for each engram.
     5. **Embedding Indices** - Uses an embedding plugin to convert each index into a vector representation.
-    6. **Publishing Results** - Emits messages like `ENGRAM_COMPLETE`, `META_COMPLETE`, and `INDEX_COMPLETE` at various stages to notify downstream systems.
-
-    Metrics are tracked throughout the pipeline using a `MetricsTracker` and returned on demand via the
-    `on_acknowledge` method.
+    6. **Publishing Results** - Emits messages like `ENGRAM_COMPLETE`, `META_COMPLETE`, and `INDEX_COMPLETE`
+       at various stages to notify downstream systems.
 
     Attributes:
         plugin_manager (PluginManager): Manages access to all system plugins.
@@ -57,21 +55,25 @@ class ConsolidateService(Service):
         db_document (dict): Plugin for document-level database access.
         observation_repository (ObservationRepository): Handles deserialization of incoming observations.
         engram_builder (dict[str, Engram]): In-memory store of engrams awaiting completion.
-        index_builder (dict[str, Index]): In-memory store of indices being constructed.
         metrics_tracker (MetricsTracker): Tracks metrics across each processing stage.
 
     Methods:
-        start(): Subscribes the service to message topics.
-        stop(): Stops the service and clears subscriptions.
-        on_observation_complete(observation_dict): Handles post-processing when an observation completes.
-        _ generate_summary(observation): Creates a summary of the observation content. (not implemented yet)
-        on_summary(summary_fut): Callback after summary generation completes.
-        generate_summary_embeddings(meta): Generates and attaches embeddings for a summary.
-        generate_engrams(observation): Constructs engrams from observation data.
-        on_engrams(engram_list_fut): Callback after engram generation; handles index and embedding creation.
-        gen_indices(index, id_in, engram): Uses an LLM to create indices from an engram.
-        gen_embeddings(id_and_index_dict, process_index): Creates embeddings for generated indices.
-        on_acknowledge(message_in): Sends a metrics snapshot for observability/debugging.
+        start() -> None:
+            Subscribes the service to message topics.
+        stop() -> None:
+            Stops the service and clears subscriptions.
+        on_observation_complete(observation_dict) -> None:
+            Handles post-processing when an observation completes.
+        _generate_summary_embeddings(observation) -> Meta:
+            Creates and attaches embeddings for a summary.
+        process_engrams(observation) -> None:
+            Orchestrates the generation of indices and embeddings for engrams.
+        _gen_indices(index, engram, repo_ids, tracking_id) -> dict:
+            Uses an LLM to create indices from an engram.
+        _gen_embeddings(id_and_index_dict, process_index) -> dict:
+            Creates embeddings for generated indices.
+        on_acknowledge(message_in) -> None:
+            Sends a metrics snapshot for observability/debugging.
     """
 
     def __init__(self, host: Host) -> None:

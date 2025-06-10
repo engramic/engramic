@@ -49,17 +49,28 @@ class StorageService(Service):
         metrics_tracker (MetricsTracker): Tracks counts of saved items for metric reporting.
 
     Methods:
-        start(): Registers the service to relevant message topics and begins operation.
-        init_async(): Connects to the database plugin asynchronously before full service startup.
-        on_engram_complete(engram_dict): Callback for storing completed engram batches.
-        on_observation_complete(response): Callback for storing completed observations.
-        on_prompt_complete(response_dict): Callback for storing completed prompt/response history.
-        on_meta_complete(meta_dict): Callback for storing finalized meta configuration.
-        save_observation(response): Coroutine to persist observations and update metrics.
-        save_history(response): Coroutine to persist prompt/response history and update metrics.
-        save_engram(engram): Coroutine to persist engram data and update metrics.
-        save_meta(meta): Coroutine to persist metadata and update metrics.
-        on_acknowledge(message_in): Collects current metrics and publishes service status.
+        start() -> None:
+            Registers the service to relevant message topics and begins operation.
+        init_async() -> None:
+            Connects to the database plugin asynchronously before full service startup.
+        on_engram_complete(engram_dict) -> None:
+            Callback for storing completed engram batches.
+        on_observation_complete(response) -> None:
+            Callback for storing completed observations.
+        on_prompt_complete(response_dict) -> None:
+            Callback for storing completed prompt/response history.
+        on_meta_complete(meta_dict) -> None:
+            Callback for storing finalized meta configuration.
+        save_observation(response) -> None:
+            Coroutine to persist observations and update metrics.
+        save_history(response) -> None:
+            Coroutine to persist prompt/response history and update metrics.
+        save_engram(engram) -> None:
+            Coroutine to persist engram data and update metrics.
+        save_meta(meta) -> None:
+            Coroutine to persist metadata and update metrics.
+        on_acknowledge(message_in) -> None:
+            Collects current metrics and publishes service status.
     """
 
     def __init__(self, host: Host) -> None:
@@ -104,6 +115,15 @@ class StorageService(Service):
         self.run_task(self.save_meta(meta))
 
     async def save_observation(self, response: Observation) -> None:
+        """
+        Persists an observation to the database and updates the observation metrics.
+
+        Args:
+            response (Observation): The observation object to be saved.
+
+        Returns:
+            None
+        """
         self.observation_repository.save(response)
         self.metrics_tracker.increment(StorageMetric.OBSERVATION_SAVED)
         logging.debug('Storage service saving observation.')

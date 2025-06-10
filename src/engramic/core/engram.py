@@ -26,7 +26,7 @@ class Engram:
         context (dict[str, str] | None): Optional contextual metadata in key-value format to enhance retrieval or classification.
         indices (list[Index] | None): Optional semantic indices, typically for vector-based retrieval.
         meta_ids (list[str] | None): Optional list of metadata tags or identifiers relevant to the engram.
-        library_ids (list[str] | None): Optional identifiers linking this engram to document groups or libraries.
+        repo_ids (list[str] | None): Optional identifiers linking this engram to repositories or code bases.
         accuracy (int | None): Optional accuracy score assigned during validation (e.g., via Codify Service).
         relevancy (int | None): Optional relevancy score assigned during validation (e.g., via Codify Service).
         created_date (int | None): Optional Unix timestamp representing the creation time of the engram.

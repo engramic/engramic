@@ -29,77 +29,43 @@ if TYPE_CHECKING:
 
 class Ask(Retrieval):
     """
-    Ask is a specifc type of retrieval focused on traditional Q&A. It is a single instanc of an ask.
+    Handles Q&A retrieval by transforming prompts into contextual embeddings and returning relevant engram IDs.
 
-    This class handles the end-to-end workflow of transforming a raw prompt into
-    contextual embeddings, querying the vector database, and returning retrieved engram ids.
-    It also supports various conversation analysis and prompt index generation.
+    This class implements the retrieval workflow from raw prompts to vector database queries,
+    supporting conversation analysis and dynamic index generation.
 
     Attributes:
-        id (str): A unique identifier for this retrieval session.
+        id (str): Unique identifier for this retrieval session.
         prompt (Prompt): The original prompt provided by the user.
-        plugin_manager (PluginManager): Plugin manager used to access LLM, vector DB, and embedding components.
+        plugin_manager (PluginManager): Access to LLM, vector DB, and embedding components.
         metrics_tracker (MetricsTracker): Tracks operational metrics for observability.
-        db_plugin (dict): Plugin used to interact with the document database.
-        service (RetrieveService): Reference to the parent service coordinating this request.
-        library (str | None): Optional name of the target library to search within.
-        conversation_direction (dict[str, str]): Stores current user intent and working memory.
-        prompt_analysis (PromptAnalysis | None): Stores structured analysis of the prompt after processing.
+        db_plugin (dict): Plugin for document database interactions.
+        service (RetrieveService): Parent service coordinating this request.
+        library (str | None): Optional target library to search within.
+        conversation_direction (dict[str, str]): Stores user intent and working memory.
+        prompt_analysis (PromptAnalysis | None): Structured analysis of the prompt.
 
     Methods:
-        get_sources():
+        get_sources() -> None:
             Initiates the async pipeline for directional memory retrieval.
-
-        _fetch_history():
-            Asynchronously retrieves prior user history from the document DB.
-
-        _retrieve_gen_conversation_direction():
-            Uses LLM plugin to extract user intent and conversational memory.
-
-        _embed_gen_direction():
-            Converts extracted intent into embeddings. General direction determines intent and manages short term memory.
-
-        _vector_fetch_direction_meta():
-            Queries the metadata collection in the vector DB using intent embeddings.
-
-        _fetch_direction_meta():
-            Loads Meta objects from the metadata store based on query results.
-
-        _analyze_prompt():
-            Uses LLM plugin to analyze the user prompt in the context of metadata.
-
-        _generate_indices():
-            Generates semantic indices from the prompt and metadata for retrieval.
-
-        _generate_indicies_embeddings():
-            Converts generated index phrases into embeddings.
-
-        _query_index_db():
-            Searches the main vector DB with embeddings to identify related engrams.
-
-        on_fetch_history_complete(fut):
-            Callback when prompt history fetch is complete; begins direction generation.
-
-        on_direction_ret_complete(fut):
-            Callback when conversation direction is generated; begins embedding.
-
-        on_embed_direction_complete(fut):
-            Callback when direction embedding is ready; begins vector DB search for metadata.
-
-        on_vector_fetch_direction_meta_complete(fut):
-            Callback when metadata vector search is complete; begins metadata fetch.
-
-        on_fetch_direction_meta_complete(fut):
-            Callback when metadata objects are fetched; begins analysis and index generation.
-
-        on_analyze_complete(fut):
-            Callback when prompt analysis and index generation are complete; begins embedding generation.
-
-        on_indices_embeddings_generated(fut):
-            Callback when index embeddings are ready; triggers main index DB query.
-
-        on_query_index_db(fut):
-            Final callback when engram retrieval is complete; assembles and emits the result.
+        _fetch_history() -> list[dict[str, Any]]:
+            Retrieves prior user history from the document DB.
+        _retrieve_gen_conversation_direction(response_array) -> dict[str, str]:
+            Extracts user intent and conversational memory.
+        _embed_gen_direction(main_prompt) -> list[float]:
+            Converts extracted intent into embeddings.
+        _vector_fetch_direction_meta(embedding) -> list[str]:
+            Queries metadata collection using intent embeddings.
+        _fetch_direction_meta(meta_id) -> list[Meta]:
+            Loads Meta objects from metadata store.
+        _analyze_prompt(meta_list) -> dict[str, str]:
+            Analyzes user prompt in context of metadata.
+        _generate_indices(meta_list) -> dict[str, str]:
+            Generates semantic indices for retrieval.
+        _generate_indicies_embeddings(indices) -> list[list[float]]:
+            Converts index phrases into embeddings.
+        _query_index_db(embeddings) -> set[str]:
+            Searches vector DB to identify related engrams.
     """
 
     def __init__(

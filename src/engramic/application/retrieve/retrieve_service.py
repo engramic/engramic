@@ -45,6 +45,7 @@ class RetrieveService(Service):
         db_plugin (dict): Plugin for interacting with the document database.
         metrics_tracker (MetricsTracker): Collects and resets retrieval-related metrics for monitoring.
         meta_repository (MetaRepository): Handles Meta object persistence and transformation.
+        repo_folders (dict[str, Any]): Dictionary containing repository folder information.
 
     Methods:
         init_async(): Initializes database connections and plugin setup asynchronously.
@@ -52,10 +53,12 @@ class RetrieveService(Service):
         stop(): Cleans up the service and halts processing.
 
         submit(prompt: Prompt): Begins the retrieval process and logs submission metrics.
-        on_submit_prompt(data: str): Converts raw prompt string to a Prompt object and submits for processing.
+        on_submit_prompt(msg: dict[Any, Any]): Processes a prompt message and submits for processing.
+        _on_repo_folders(msg: dict[str, Any]): Updates repository folder information.
 
-        on_index_complete(index_message: dict): Converts index payload into Index objects and queues for insertion.
-        _insert_engram_vector(index_list: list[Index], engram_id: str): Asynchronously inserts semantic indices into vector DB.
+        on_indices_complete(index_message: dict): Converts index payload into Index objects and queues for insertion.
+        _insert_engram_vector(index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str):
+            Asynchronously inserts semantic indices into vector DB with repository filters.
 
         on_meta_complete(meta_dict: dict): Loads and inserts metadata summary into the vector DB.
         insert_meta_vector(meta: Meta): Runs metadata vector insertion in a background thread.

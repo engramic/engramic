@@ -1,6 +1,13 @@
 # Copyright (c) 2025 Preisz Consulting, LLC.
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
+"""
+Provides repository management services for the Engramic system.
+
+This module handles repository discovery, document tracking, and file indexing
+for projects managed by Engramic.
+"""
+
 from __future__ import annotations
 
 import json
@@ -25,7 +32,37 @@ if TYPE_CHECKING:
 
 
 class RepoService(Service):
+    """
+    Service for managing repositories and their document contents.
+
+    Handles repository discovery, file indexing, and document submission for processing.
+    Maintains in-memory indices of repositories and their files.
+
+    Attributes:
+        plugin_manager (PluginManager): Manager for system plugins.
+        db_document_plugin (Any): Plugin for document database operations.
+        document_repository (DocumentRepository): Repository for document storage and retrieval.
+        repos (dict[str, str]): Mapping of repository IDs to folder names.
+        file_index (dict[str, Any]): Index of all files by document ID.
+        file_repos (dict[str, Any]): Mapping of repository IDs to lists of document IDs.
+        submitted_documents (set[str]): Set of document IDs that have been submitted for processing.
+
+    Methods:
+        start() -> None:
+            Starts the service and subscribes to relevant topics.
+        submit_ids(id_array, overwrite) -> None:
+            Submits documents for processing by their IDs.
+        scan_folders() -> None:
+            Discovers repositories and indexes their files.
+    """
+
     def __init__(self, host: Host) -> None:
+        """
+        Initializes the repository service.
+
+        Args:
+            host (Host): The host system that this service is attached to.
+        """
         super().__init__(host)
         self.plugin_manager: PluginManager = host.plugin_manager
         self.db_document_plugin = self.plugin_manager.get_plugin('db', 'document')
@@ -36,14 +73,26 @@ class RepoService(Service):
         self.submitted_documents: set[str] = set()
 
     def start(self) -> None:
+        """
+        Starts the repository service and subscribes to relevant topics.
+        """
         self.subscribe(Service.Topic.REPO_SUBMIT_IDS, self._on_submit_ids)
         self.subscribe(Service.Topic.DOCUMENT_COMPLETE, self.on_document_complete)
         super().start()
 
     def init_async(self) -> None:
+        """
+        Initializes asynchronous components of the service.
+        """
         return super().init_async()
 
     def _on_submit_ids(self, msg: str) -> None:
+        """
+        Handles the REPO_SUBMIT_IDS message.
+
+        Args:
+            msg (str): JSON message containing document IDs to submit.
+        """
         json_msg = json.loads(msg)
         id_array = json_msg['submit_ids']
         overwrite = False
@@ -52,6 +101,13 @@ class RepoService(Service):
         self.submit_ids(id_array, overwrite=overwrite)
 
     def submit_ids(self, id_array: list[str], *, overwrite: bool = False) -> None:
+        """
+        Submits documents for processing by their IDs.
+
+        Args:
+            id_array (list[str]): List of document IDs to submit.
+            overwrite (bool): Whether to overwrite existing documents. Defaults to False.
+        """
         for sub_id in id_array:
             document = self.file_index[sub_id]
             self.send_message_async(
@@ -60,6 +116,14 @@ class RepoService(Service):
             self.submitted_documents.add(document.id)
 
     def on_document_complete(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the DOCUMENT_COMPLETE message.
+
+        Updates the document index and repository files when a document has been processed.
+
+        Args:
+            msg (dict[str, Any]): Message containing the completed document.
+        """
         document_id = msg['id']
         document = Document(**msg)
 
@@ -75,6 +139,19 @@ class RepoService(Service):
             self.run_task(self.update_repo_files(document.repo_id, [document_id]))
 
     def _load_repository_id(self, folder_path: Path) -> str:
+        """
+        Loads the repository ID from a .repo file.
+
+        Args:
+            folder_path (Path): Path to the repository folder.
+
+        Returns:
+            str: The repository ID.
+
+        Raises:
+            RuntimeError: If the .repo file is missing or invalid.
+            TypeError: If the repository ID is not a string.
+        """
         repo_file = folder_path / '.repo'
         if not repo_file.is_file():
             error = f"Repository config file '.repo' not found in folder '{folder_path}'."
@@ -92,6 +169,15 @@ class RepoService(Service):
         return repository_id
 
     def _discover_repos(self, repo_root: Path) -> None:
+        """
+        Discovers repositories in the specified root directory.
+
+        Args:
+            repo_root (Path): Root directory containing repositories.
+
+        Raises:
+            ValueError: If a repository is named 'null'.
+        """
         for name in os.listdir(repo_root):
             folder_path = repo_root / name
             if folder_path.is_dir():
@@ -107,6 +193,13 @@ class RepoService(Service):
                     logging.info(info)
 
     async def update_repo_files(self, repo_id: str, update_ids: list[str] | None = None) -> None:
+        """
+        Updates the list of files for a repository.
+
+        Args:
+            repo_id (str): ID of the repository to update.
+            update_ids (list[str] | None): List of document IDs to update. If None, updates all files.
+        """
         document_dicts = []
 
         folder = self.repos[repo_id]
@@ -121,6 +214,14 @@ class RepoService(Service):
         )
 
     def scan_folders(self) -> None:
+        """
+        Scans repository folders and indexes their files.
+
+        Discovers repositories, indexes their files, and sends messages with the repository information.
+
+        Raises:
+            RuntimeError: If the REPO_ROOT environment variable is not set.
+        """
         repo_root = os.getenv('REPO_ROOT')
         if repo_root is None:
             error = "Environment variable 'REPO_ROOT' is not set."
@@ -170,4 +271,10 @@ class RepoService(Service):
             future.add_done_callback(self._on_update_repo_files_complete)
 
     def _on_update_repo_files_complete(self, ret: Future[Any]) -> None:
+        """
+        Callback when the update_repo_files task completes.
+
+        Args:
+            ret (Future[Any]): Future object representing the completed task.
+        """
         ret.result()
