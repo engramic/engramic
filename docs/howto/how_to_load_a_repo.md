@@ -189,6 +189,16 @@ prompt3 = Prompt(
 )
 ```
 
+*Note: If you have previously run the document example, you may have IntroductiontoQuantumNetworking.pdf in the 'null' repo. To remove it you can delete the database (you can simply delete the sql lite file or run the following hatch command).*
+
+```
+hatch shell dev
+```
+
+```
+hatch run delete_dbs
+```
+
 ### Empty List (invalid)
 ❌  **Invalid** - Empty list repo filters are not allowed and will throw an error.
 
