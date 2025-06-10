@@ -1,0 +1,832 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="../how_to_run_a_lesson/" rel="prev"/>
+<link href="../../reference/emgram/" rel="next"/>
+<link href="../../assets/logo_100.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.6.14" name="generator"/>
+<title>Load &amp; Query a Repo - Engramic Reference</title>
+<link href="../../assets/stylesheets/main.342714a4.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.06af60db.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Raleway";--md-code-font:"Roboto Mono"}</style>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../stylesheets/extra.css" rel="stylesheet"/>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#load-and-query-a-repo">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-color-scheme="default" data-md-component="outdated" hidden="">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="Engramic Reference" class="md-header__button md-logo" data-md-component="logo" href="../.." title="Engramic Reference">
+<img alt="logo" src="../../assets/logo_100.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Engramic Reference
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Load &amp; Query a Repo
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Engramic Reference" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="Engramic Reference">
+<img alt="logo" src="../../assets/logo_100.png"/>
+</a>
+    Engramic Reference
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    Home
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting_started/">
+<span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../host_and_services/">
+<span class="md-ellipsis">
+    Host &amp; Services
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../profiles/">
+<span class="md-ellipsis">
+    Profiles
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    How To's
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            How To's
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../howto/">
+<span class="md-ellipsis">
+    Introduction
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../how_to_parse_documents/">
+<span class="md-ellipsis">
+    Load a Document
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../how_to_run_a_lesson/">
+<span class="md-ellipsis">
+    Run a Lesson
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    Load &amp; Query a Repo
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    Load &amp; Query a Repo
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example-code-walkthrough">
+<span class="md-ellipsis">
+      Example Code Walkthrough
+    </span>
+</a>
+<nav aria-label="Example Code Walkthrough" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-setting-up-the-environment">
+<span class="md-ellipsis">
+      1. Setting Up the Environment
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-initializing-required-services">
+<span class="md-ellipsis">
+      2. Initializing Required Services
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-repository-discovery-process">
+<span class="md-ellipsis">
+      3. Repository Discovery Process
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-repository-event-handling">
+<span class="md-ellipsis">
+      4. Repository Event Handling
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-processing-repository-folders">
+<span class="md-ellipsis">
+      5. Processing Repository Folders
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-document-submission-process">
+<span class="md-ellipsis">
+      6. Document Submission Process
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-querying-with-repository-filters">
+<span class="md-ellipsis">
+      7. Querying with Repository Filters
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#repository-filtering-options">
+<span class="md-ellipsis">
+      Repository Filtering Options
+    </span>
+</a>
+<nav aria-label="Repository Filtering Options" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#access-multiple-repositories">
+<span class="md-ellipsis">
+      Access Multiple Repositories
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#filter-by-a-single-repository">
+<span class="md-ellipsis">
+      Filter by a Single Repository
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#the-null-repository">
+<span class="md-ellipsis">
+      The 'Null' Repository
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#empty-list-invalid">
+<span class="md-ellipsis">
+      Empty List (invalid)
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#important-considerations">
+<span class="md-ellipsis">
+      Important Considerations
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+<span class="md-ellipsis">
+    API Reference
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/emgram/">
+<span class="md-ellipsis">
+    Engram
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+<span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_2_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_6_2">
+<span class="md-nav__icon md-icon"></span>
+            Retrieve Service
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/retrieve_service/">
+<span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/ask/">
+<span class="md-ellipsis">
+    Ask
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/response_service/">
+<span class="md-ellipsis">
+    Response Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/codify_service/">
+<span class="md-ellipsis">
+    Codify Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/consolidate_service/">
+<span class="md-ellipsis">
+    Consolidate Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
+<span class="md-ellipsis">
+    Document Service
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_6_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_6_6">
+<span class="md-nav__icon md-icon"></span>
+            Document Service
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/sense_service/">
+<span class="md-ellipsis">
+    Sense Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/scan/">
+<span class="md-ellipsis">
+    Scan
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6_7" id="__nav_6_7_label" tabindex="0">
+<span class="md-ellipsis">
+    Teach Service
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_7_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_6_7">
+<span class="md-nav__icon md-icon"></span>
+            Teach Service
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/teach/">
+<span class="md-ellipsis">
+    Teach Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/lesson/">
+<span class="md-ellipsis">
+    lesson
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/repo_service/">
+<span class="md-ellipsis">
+    Repo Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/storage_service/">
+<span class="md-ellipsis">
+    Storage Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/message_service/">
+<span class="md-ellipsis">
+    Message Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../reference/progress_service/">
+<span class="md-ellipsis">
+    Progress Service
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example-code-walkthrough">
+<span class="md-ellipsis">
+      Example Code Walkthrough
+    </span>
+</a>
+<nav aria-label="Example Code Walkthrough" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-setting-up-the-environment">
+<span class="md-ellipsis">
+      1. Setting Up the Environment
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-initializing-required-services">
+<span class="md-ellipsis">
+      2. Initializing Required Services
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-repository-discovery-process">
+<span class="md-ellipsis">
+      3. Repository Discovery Process
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-repository-event-handling">
+<span class="md-ellipsis">
+      4. Repository Event Handling
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-processing-repository-folders">
+<span class="md-ellipsis">
+      5. Processing Repository Folders
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-document-submission-process">
+<span class="md-ellipsis">
+      6. Document Submission Process
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-querying-with-repository-filters">
+<span class="md-ellipsis">
+      7. Querying with Repository Filters
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#repository-filtering-options">
+<span class="md-ellipsis">
+      Repository Filtering Options
+    </span>
+</a>
+<nav aria-label="Repository Filtering Options" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#access-multiple-repositories">
+<span class="md-ellipsis">
+      Access Multiple Repositories
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#filter-by-a-single-repository">
+<span class="md-ellipsis">
+      Filter by a Single Repository
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#the-null-repository">
+<span class="md-ellipsis">
+      The 'Null' Repository
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#empty-list-invalid">
+<span class="md-ellipsis">
+      Empty List (invalid)
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#important-considerations">
+<span class="md-ellipsis">
+      Important Considerations
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="load-and-query-a-repo">Load And Query a Repo</h1>
+<pre class="mermaid"><code>flowchart LR
+    sense --&gt; repo
+    repo --&gt; sense
+
+    classDef green fill:#b2f2bb;
+    class sense green
+</code></pre>
+<p>A repo is collection of files located at a root folder. The RepoService provides the following abilities:</p>
+<ul>
+<li>Returns the set of all root folders.</li>
+<li>Returns all files within each root folder.</li>
+<li>Enables prompting filtering by repo.</li>
+</ul>
+<h2 id="example-code-walkthrough">Example Code Walkthrough</h2>
+<p>The full code is available in the source code at <code>/engramic/examples/repo/repo.py</code>. 
+You can download the files for this exercise at https://www.engramic.org/assets-page</p>
+<p>Let's walk through how this example works step-by-step:</p>
+<h3 id="1-setting-up-the-environment">1. Setting Up the Environment</h3>
+<p>The example code creates a <code>TestService</code> class that demonstrates how to:</p>
+<ul>
+<li>Scan and discover repository folders</li>
+<li>Submit documents for processing</li>
+<li>Listen for repository and document events</li>
+<li>Query the system with repository filtering</li>
+</ul>
+<h3 id="2-initializing-required-services">2. Initializing Required Services</h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">Host</span><span class="p">(</span>
+        <span class="s1">'standard'</span><span class="p">,</span>
+        <span class="p">[</span>
+            <span class="n">MessageService</span><span class="p">,</span>
+            <span class="n">SenseService</span><span class="p">,</span>
+            <span class="n">RetrieveService</span><span class="p">,</span>
+            <span class="n">ResponseService</span><span class="p">,</span>
+            <span class="n">StorageService</span><span class="p">,</span>
+            <span class="n">ConsolidateService</span><span class="p">,</span>
+            <span class="n">CodifyService</span><span class="p">,</span>
+            <span class="n">RepoService</span><span class="p">,</span>  <span class="c1">#&lt;-- This is the key service for repository functionality</span>
+            <span class="n">ProgressService</span><span class="p">,</span>
+            <span class="n">TestService</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+</code></pre></div>
+<p>This code sets up all necessary services, with <code>RepoService</code> being essential for the repository functionality.</p>
+<h3 id="3-repository-discovery-process">3. Repository Discovery Process</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># In TestService.start():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">MAIN_PROMPT_COMPLETE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_main_prompt_complete</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">REPO_FOLDERS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_repo_folders</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">REPO_FILES</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_repo_files</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">DOCUMENT_INSERTED</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_document_inserted</span><span class="p">)</span>
+    <span class="n">repo_service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">get_service</span><span class="p">(</span><span class="n">RepoService</span><span class="p">)</span>
+    <span class="n">repo_service</span><span class="o">.</span><span class="n">scan_folders</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submit_documents</span><span class="p">())</span>
+</code></pre></div>
+<p>This code:</p>
+<ol>
+<li>Subscribes to repository-related events</li>
+<li>Gets a reference to the RepoService</li>
+<li>Initiates a scan of repository folders</li>
+<li>Launches a task to submit documents for processing</li>
+</ol>
+<h3 id="4-repository-event-handling">4. Repository Event Handling</h3>
+<p>The TestService subscribes to key events related to repositories:</p>
+<ul>
+<li><code>REPO_FOLDERS</code>: Triggered when repository folders are discovered</li>
+<li><code>REPO_FILES</code>: Triggered after folders are discovered, providing file information</li>
+<li><code>DOCUMENT_INSERTED</code>: Triggered when a document has been processed</li>
+<li><code>MAIN_PROMPT_COMPLETE</code>: Triggered when a response to a prompt is ready</li>
+</ul>
+<h3 id="5-processing-repository-folders">5. Processing Repository Folders</h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_on_repo_folders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">message_in</span><span class="p">[</span><span class="s1">'repo_folders'</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repos</span> <span class="o">=</span> <span class="n">message_in</span><span class="p">[</span><span class="s1">'repo_folders'</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repo_id1</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">repos</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">'QuantumNetworking'</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repo_id2</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">repos</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">'ElysianFields'</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">'No repos found. You can add a repo by adding a folder to home/.local/share/engramic'</span><span class="p">)</span>
+</code></pre></div>
+<p>This code:</p>
+<ol>
+<li>Stores the discovered repository folders</li>
+<li>Looks up specific repository IDs by their folder names</li>
+<li>Provides feedback if no repositories are found</li>
+</ol>
+<h3 id="6-document-submission-process">6. Document Submission Process</h3>
+<div class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">submit_documents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">repo_service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">get_service</span><span class="p">(</span><span class="n">RepoService</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">document_id1</span> <span class="o">=</span> <span class="s1">'97a1ae1b8461076cdc679d6e0a5f885e'</span>  <span class="c1"># 'IntroductiontoQuantumNetworking.pdf'</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">document_id2</span> <span class="o">=</span> <span class="s1">'9c9f0237620b77fa69e2ca63e40a9f27'</span>  <span class="c1"># 'Elysian_Fields.pdf'</span>
+    <span class="n">repo_service</span><span class="o">.</span><span class="n">submit_ids</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">document_id1</span><span class="p">],</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">repo_service</span><span class="o">.</span><span class="n">submit_ids</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">document_id2</span><span class="p">])</span>
+</code></pre></div>
+<p>This code:</p>
+<ol>
+<li>Defines document IDs to be processed</li>
+<li>Submits the first document with overwrite=True to force reprocessing</li>
+<li>Submits the second document without overwrite, using cached version if available</li>
+</ol>
+<h3 id="7-querying-with-repository-filters">7. Querying with Repository Filters</h3>
+<p>When documents are fully processed (<code>DOCUMENT_INSERTED</code> events), the code sends queries with different repository filters:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_document_inserted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">document_id</span> <span class="o">=</span> <span class="n">message_in</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">document_id</span> <span class="ow">in</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">document_id1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">document_id2</span><span class="p">}:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="n">TestService</span><span class="o">.</span><span class="n">DOCUMENT_COUNT</span><span class="p">:</span>
+            <span class="n">retrieve_service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">get_service</span><span class="p">(</span><span class="n">RetrieveService</span><span class="p">)</span>
+            <span class="n">prompt1</span> <span class="o">=</span> <span class="n">Prompt</span><span class="p">(</span>
+                <span class="s1">'This is prompt 1. Briefly tell me about IntroductiontoQuantumNetworking.pdf and Elysian_Fields.pdf. Start with prompt number.'</span><span class="p">,</span>
+                <span class="n">repo_ids_filters</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_id1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_id2</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">retrieve_service</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">prompt1</span><span class="p">)</span>
+            <span class="n">prompt2</span> <span class="o">=</span> <span class="n">Prompt</span><span class="p">(</span>
+                <span class="s1">'This is prompt 2. Briefly tell me about IntroductiontoQuantumNetworking.pdf and Elysian_Fields.pdf. Start with prompt number.'</span><span class="p">,</span>
+                <span class="n">repo_ids_filters</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_id1</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">retrieve_service</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">prompt2</span><span class="p">)</span>
+            <span class="n">prompt3</span> <span class="o">=</span> <span class="n">Prompt</span><span class="p">(</span>
+                <span class="s1">'This is prompt 3. Briefly tell me about IntroductiontoQuantumNetworking.pdf and Elysian_Fields.pdf.  Start with prompt number.'</span><span class="p">,</span>
+                <span class="n">repo_ids_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">retrieve_service</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">prompt3</span><span class="p">)</span>
+</code></pre></div>
+<p>This code:</p>
+<ol>
+<li>Tracks when all documents are processed</li>
+<li>Creates three different prompts with varying repository filters:</li>
+<li>Prompt 1: Filters by both repositories</li>
+<li>Prompt 2: Filters by only the first repository</li>
+<li>Prompt 3: Uses no repository filtering (null repo)</li>
+<li>Submits the prompts to the RetrieveService</li>
+</ol>
+<h2 id="repository-filtering-options">Repository Filtering Options</h2>
+<h3 id="access-multiple-repositories">Access Multiple Repositories</h3>
+<p>This prompt will access files from both repo_id1 and repo_id2.</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt1</span> <span class="o">=</span> <span class="n">Prompt</span><span class="p">(</span>
+    <span class="s1">'This is prompt 1. Tell me about document content.'</span><span class="p">,</span>
+    <span class="n">repo_ids_filters</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_id1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_id2</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="filter-by-a-single-repository">Filter by a Single Repository</h3>
+<p>This prompt will only access files from repo_id1.</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt2</span> <span class="o">=</span> <span class="n">Prompt</span><span class="p">(</span>
+    <span class="s1">'This is prompt 2. Tell me about document content.'</span><span class="p">,</span>
+    <span class="n">repo_ids_filters</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_id1</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="the-null-repository">The 'Null' Repository</h3>
+<p>Documents are usable without using the repo system. In this case, the file is associated with a default repo known as the 'null' repo.</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt3</span> <span class="o">=</span> <span class="n">Prompt</span><span class="p">(</span>
+    <span class="s1">'This is prompt 3. Tell me about document content.'</span><span class="p">,</span>
+    <span class="n">repo_ids_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><em>Note: If you have previously run the document example, you may have IntroductiontoQuantumNetworking.pdf in the 'null' repo. To remove it you can delete the database (you can simply delete the sql lite file or run the following hatch command).</em></p>
+<div class="highlight"><pre><span></span><code>hatch shell dev
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>hatch run delete_dbs
+</code></pre></div>
+<h3 id="empty-list-invalid">Empty List (invalid)</h3>
+<p>❌  <strong>Invalid</strong> - Empty list repo filters are not allowed and will throw an error.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># The following would throw an exception</span>
+<span class="c1"># Prompt('This is prompt 4. Tell me about document content.', repo_ids_filters=[])</span>
+</code></pre></div>
+<h2 id="important-considerations">Important Considerations</h2>
+<ul>
+<li>In order to run the code, you must add the REPO_ROOT environment variable. For example, you can set repo root to a path like the following: <code>REPO_ROOT = "~/.local/share/engramic/"</code>.</li>
+<li>For security purposes, there is no ability to access all repos without explicitly providing each repo id as a filter.</li>
+<li>If you load a document under a repo, it is forever in that repo. For example, if you first scan a document under the 'null' repo and then scan that document as part of a repo it will be detected and not scanned. Because of this, when you query the repo, it will not display results as part of the repo because it is part of the 'null' repo.</li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": 0.0, "provider": "mike"}}</script>
+<script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+<script type="module">import mermaid from "https://unpkg.com/mermaid@10.4.0/dist/mermaid.esm.min.mjs";
+window.mermaidConfig = {default: {
+    startOnLoad: false
+}};</script></body>
+</html>

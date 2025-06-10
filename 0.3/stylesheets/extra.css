@@ -1,0 +1,9 @@
+:root  > * {
+    --md-primary-fg-color:         #bd7d3e; /* header */
+    --md-primary-fg-color--light: #b8a885;
+    --md-primary-fg-color--dark:  #beaf8a;
+  }
+
+  [data-md-color-scheme="slate"] {
+    --md-hue: 45; 
+  }
