@@ -18,21 +18,28 @@ if TYPE_CHECKING:
 
 class SenseService(Service):
     """
-    Sense currently support documents as it's only input system. Other formats that are not document based will be available in the future.
+    Processes and analyzes documents to extract semantic content for the Engramic system.
 
     This service listens for document submission events, initializes a scan process that parses the media
-    resource, and notifies the system of newly created inputs.
+    resource, and notifies the system of newly created inputs. Currently only supports document-based
+    inputs, with other formats planned for future releases.
 
     Attributes:
-        sense_initial_summary (Plugin): Plugin for generating an inital summary of the document.
+        sense_initial_summary (Plugin): Plugin for generating an initial summary of the document.
         sense_scan_page (Plugin): Plugin for scanning and interpreting document content.
         sense_full_summary (Plugin): Plugin for producing full document summaries.
 
     Methods:
-        init_async(): Initializes the service asynchronously and sets up any required connections or state.
-        start(): Subscribes to the system topic for document submissions.
-        on_document_submit(msg: dict): Extracts file information from a message and submits the document.
-        submit_document(document: Document): Triggers scanning of the submitted document and sends async notification.
+        init_async() -> None:
+            Initializes the service asynchronously and sets up any required connections or state.
+        start() -> None:
+            Subscribes to the system topic for document submissions.
+        on_document_submit(msg: dict[Any, Any]) -> None:
+            Extracts file information from a message and submits the document.
+        submit_document(document: Document, *, overwrite: bool = False) -> Document | None:
+            Triggers scanning of the submitted document and sends async notification.
+        on_document_created_sent(ret: Future[Any]) -> None:
+            Callback function that initiates document scanning after creation notification.
     """
 
     def __init__(self, host: Host) -> None:

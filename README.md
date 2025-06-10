@@ -15,6 +15,21 @@ Engramic is an advanced system designed to enhance AI applications with sophisti
 ## Development Status
 We are in early stages of development and platform testing is limited. Core concepts are in place, but the system is still evolving. We encourage developers and researchers to follow our progress and contribute to shaping the future of Engramic.
 
+There is currently no support for the following:
+
+- There is no support for individual users.
+- There is no HTTP(s) interface at this time.
+- There are no fallbacks if API calls fail.
+- Windows and MacOS is not being tested as part of our release process.
+
+These features, along with others, will be available in the near future.
+
+What Engramic is ready for:
+
+- Proof of concepts focused on folder directories with 10 or so PDFs with less than 100 pages.
+- Research related to long term memory.
+- Developers looking to support Engramic.
+
 [Engramic Docs](https://engramic.github.io/engramic/)
 
 [Engramic Knowledge Base](https://www.engramic.org/knowledge-base)
@@ -28,7 +43,6 @@ pip install engramic
 ```
 
 **!!!Important**. Engramic must be run from within a virtual environment (e.g. venv).
-
 
 During these early phases of development, we recommend working from source code. Setting up your environment is designed to be straightforward. See the "Getting Started" section in our documentation. The complete code is available in examples/mock_profile/mock_profile.py.
 
@@ -95,6 +109,8 @@ This example uses plugins that emulate API calls (i.e. mocks) to LLMs, databases
 - Tomli
 - Cachetools
 - Websockets
+- Pymupdf
+- PyJWT
 
 **Pure Python & C++**
 - Pyzmq

@@ -40,7 +40,11 @@ nav:
     - Consolidate Service: reference/consolidate_service.md
     - Document Service:
       - Sense Service: reference/sense_service.md
-      - Scan Service: reference/scan.md
+      - Scan: reference/scan.md
+    - Teach Service:
+      - Teach Service: reference/teach.md
+      - lesson: reference/lesson.md
+    - Repo Service: reference/repo_service.md
     - Storage Service: reference/storage_service.md
     - Message Service: reference/message_service.md
     - Progress Service: reference/progress_service.md

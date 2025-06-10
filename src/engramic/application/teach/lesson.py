@@ -2,6 +2,10 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+"""
+Implements the Lesson class for generating educational content from documents.
+"""
+
 from __future__ import annotations
 
 import json
@@ -19,18 +23,67 @@ if TYPE_CHECKING:
 
 
 class Lesson:
+    """
+    Represents an educational lesson generated from a document.
+
+    Handles the generation of questions and educational prompts based on
+    document content and metadata.
+
+    Attributes:
+        id (str): Unique identifier for the lesson.
+        doc_id (str): Identifier of the source document.
+        tracking_id (str): ID for tracking the lesson's progress.
+        service (TeachService): Parent service managing this lesson.
+        meta (Meta): Metadata about the source document.
+
+    Methods:
+        run_lesson(meta_in) -> None:
+            Initiates the lesson generation process.
+        generate_questions() -> Any:
+            Generates educational questions based on document content.
+        on_questions_generated(future) -> None:
+            Processes generated questions and creates prompts.
+        _on_send_prompt_complete(ret) -> None:
+            Handles completion of prompt submission.
+    """
+
     def __init__(self, parent_service: TeachService, lesson_id: str, tracking_id: str, doc_id: str) -> None:
+        """
+        Initializes a new Lesson instance.
+
+        Args:
+            parent_service (TeachService): The service managing this lesson.
+            lesson_id (str): Unique identifier for the lesson.
+            tracking_id (str): ID for tracking the lesson's progress.
+            doc_id (str): Identifier of the source document.
+        """
         self.id = lesson_id
         self.doc_id = doc_id
         self.tracking_id = tracking_id
         self.service = parent_service
 
     def run_lesson(self, meta_in: Meta) -> None:
+        """
+        Initiates the lesson generation process.
+
+        Stores the document metadata and starts the question generation task.
+
+        Args:
+            meta_in (Meta): Metadata about the source document.
+        """
         self.meta = meta_in
         future = self.service.run_task(self.generate_questions())
         future.add_done_callback(self.on_questions_generated)
 
     async def generate_questions(self) -> Any:
+        """
+        Generates educational questions based on document content.
+
+        Uses an LLM plugin to generate study questions from the document metadata.
+
+        Returns:
+            dict: The generated questions and study actions.
+        """
         plugin = self.service.teach_generate_questions
 
         prompt = PromptGenQuestions(input_data={'meta': asdict(self.meta)})
@@ -51,6 +104,15 @@ class Lesson:
         return initial_scan
 
     def on_questions_generated(self, future: Future[Any]) -> None:
+        """
+        Processes generated questions and creates learning prompts.
+
+        Takes the questions from the generator and submits them as learning prompts.
+        Also adds document-specific questions and notifies about lesson creation.
+
+        Args:
+            future (Future[Any]): Future containing the generated questions.
+        """
         res = future.result()
         text_prompts = res['study_actions']
 
@@ -86,4 +148,10 @@ class Lesson:
         self.service.run_task(send_lesson())
 
     def _on_send_prompt_complete(self, ret: Future[Any]) -> None:
+        """
+        Handles completion of prompt submission.
+
+        Args:
+            ret (Future[Any]): Future representing the completed prompt submission.
+        """
         ret.result()

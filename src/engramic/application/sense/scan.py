@@ -56,6 +56,10 @@ class Scan(Media):
         service (SenseService): Reference to the parent service orchestrating the scan.
         page_images (list[str]): Base64-encoded representations of PDF pages.
         sense_initial_summary (Plugin): Plugin used to generate an initial summary from early pages.
+        repo_id (str): Repository identifier for the document being scanned.
+        repo_ids (list[str] | None): List of repository IDs or None if no repository is specified.
+        document (Document | None): The document being processed.
+        tracking_id (str): ID for tracking the scan process.
 
     Constants:
         DPI (int): Resolution used for image extraction.
@@ -63,6 +67,7 @@ class Scan(Media):
         TEST_PAGE_LIMIT (int): Max number of pages scanned during test runs.
         MAX_CHUNK_SIZE (int): Max text length before recursive engram chunking.
         SHORT_SUMMARY_PAGE_COUNT (int): Number of pages used to generate initial summary.
+        MAX_DEPTH (int): Maximum recursion depth for engram processing.
         SECTION, H1, H3 (int): Enum-like values to manage tag-based engram splitting depth.
 
     Methods:

@@ -26,23 +26,24 @@ class MessageService(BaseMessageService):
     messages for metrics tracking. It operates by subscribing to control topics and exposing
     runtime observability features.
 
-    Responsibilities:
-    - Handles `START_PROFILER` and `END_PROFILER` messages to control a CPU profiler.
-    - Responds to `ACKNOWLEDGE` messages by emitting a status update with performance metrics.
-    - Uses the `metrics_tracker` inherited from BaseMessageService to report accumulated metrics.
-
     Attributes:
         profiler (cProfile.Profile | None): An optional CPU profiler used to capture runtime performance data.
             The profiler is started and stopped in response to specific control messages and saves output
             to a file named 'profile_output.prof'.
 
     Methods:
-        init_async(): Resets the profiler during asynchronous initialization.
-        start(): Subscribes to relevant system topics for profiler control and metric acknowledgment.
-        stop(): Gracefully shuts down the message service.
-        start_profiler(data): Initializes and starts the CPU profiler.
-        end_profiler(data): Stops the profiler and dumps results to a profile file.
-        on_acknowledge(message_in): Sends a metric snapshot and service status in response to ACKNOWLEDGE messages.
+        init_async() -> None:
+            Resets the profiler during asynchronous initialization.
+        start() -> None:
+            Subscribes to relevant system topics for profiler control and metric acknowledgment.
+        stop() -> None:
+            Gracefully shuts down the message service.
+        start_profiler(data: dict[Any, Any]) -> None:
+            Initializes and starts the CPU profiler.
+        end_profiler(data: dict[Any, Any]) -> None:
+            Stops the profiler and dumps results to a profile file.
+        on_acknowledge(message_in: str) -> None:
+            Sends a metric snapshot and service status in response to ACKNOWLEDGE messages.
     """
 
     def __init__(self, host: Host) -> None:

@@ -15,6 +15,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     ```
 
     To set up your dev environment, you will need the following:
+    
     - Python 3.10+
     - Visual Studio Code
     - Git
@@ -186,7 +187,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
     hatch run delete_dbs
     ```
 
-    Congratulations. You have finished the getting started page. If you would like to continue learning, we suggestion you follow the [How To's](../howto/how_to_parse_documents/) section of the documentation.
+    Congratulations. You have finished the getting started page. If you would like to continue learning, we suggestion you follow the [How To's](howto/how_to_parse_documents.md) section of the documentation.
 
 
     
