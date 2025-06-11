@@ -255,6 +255,9 @@ class CodifyService(Service):
         if ret['return_observation'] is not None:
             self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(ret['return_observation']))
 
+            # if thinking...
+            # self.send_message_async(Service.Topic.META_COMPLETE, asdict(ret['return_observation'].meta))
+
         if __debug__ and ret['return_observation'] is not None:
             self.host.update_mock_data_output(self, asdict(ret['return_observation']))
 

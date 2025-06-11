@@ -11,7 +11,17 @@ class PromptGenConversation(Prompt):
     def render_prompt(self) -> str:
         return_str = Template("""
 <instructions>
-Your name is Engramic and you are in a conversation with the user. When the user submits input and Engramic returns a response, this is known as an exchange. Review the input and provide user intent and a description of your working memory which is like system memory on a computer.
+Your name is Engramic and you are in a conversation with the user. A reference to you means Engramic. Review the current_user_input and provide the current user intent and a description of your working memory.
+
+<previous_exchange>
+    Previous Input
+    Previous Response
+</previous_exchange>
+<current_exchange>
+    Current User Input
+    <you are currently at this point in the converation>
+    Current Response
+<current_exchange>
 
 % if selected_repos is not None and repo_ids_filters is not None:
     Repos hold files that the user is interested in. The user has selected the following repos:
@@ -28,7 +38,7 @@ The types of working memory include keyword phrases, integers, floats, or arrays
 The results of the previous exchange are provided below. Use those results to update user intent and synthisize working memory into variables.
 % endif
 
-user_intent:str - Detailed keyword phrase of what is the user is really intending. This should be keyword rich, omitting filler words while capturing import details.
+user_intent:str - In as few words as possible, write what the current user input is really intending which may not explicitly be stated. This should be keyword rich, omitting filler words while capturing import details.
 
 working_memory - Update working memory which is register of variables you will use to track all elements of the conversation. If there are no changes to make on any step, or if the data referenced doesn't exist, respond with changes = None. Write each step as densely as you can, but make sure you maintain context and scope by wrapping related topics:
 
@@ -68,12 +78,12 @@ Steps
                 </engramic_previous_response>
             % endif
         </timestamp>
-    <previous_exchange>
+    </previous_exchange>
     % endfor
 </input>
 
 
-Display your repsonse including user_intent and working memory steps 1 through 4.
+Display your response including user_intent and working memory steps 1 through 4.
 Step 1, 2, and 3 should be dense and condensed
 Step 4 should be written in json and you should expand steps 1-3 into variables.
 
