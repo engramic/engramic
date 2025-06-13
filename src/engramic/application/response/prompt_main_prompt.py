@@ -17,6 +17,7 @@ A repo contains all of the files.
 Related files are retrieved and displayed as sources.
 Processed files are thought about and then displayed as long term memories.
 
+
 Engramic_working_memory includes the state changes that occurred from the current_user_prompt.
 
 Next, form your current response using a mix of the following:
@@ -49,7 +50,7 @@ Deliver results related to the user_intent and resist explaining the work you ar
 
 <sources>
     % if not is_lesson:
-        user_intent: ${working_memory['current_user_intent']}
+
         <engramic_working_memory>
             working_memory: ${working_memory['working_memory']}
         </engramic_working_memory>
@@ -103,7 +104,8 @@ Deliver results related to the user_intent and resist explaining the work you ar
     % endif
 </sources>
 <current_user_prompt>
-    ${prompt_str}
+    user_prompt: ${prompt_str}
+    user_intent: ${working_memory['current_user_intent']}
 </current_user_prompt>
 
 Follow these steps for your response. They were written after the working_memory was updated.

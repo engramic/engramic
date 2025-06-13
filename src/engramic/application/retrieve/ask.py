@@ -109,7 +109,7 @@ class Ask(Retrieval):
     async def _fetch_history(self) -> list[dict[str, Any]]:
         plugin = self.prompt_db_document_plugin
         args = plugin['args']
-        args['history_limit'] = 10
+        args['history_limit'] = 3
         args['repo_ids_filters'] = self.prompt.repo_ids_filters
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)

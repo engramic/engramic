@@ -35,6 +35,7 @@ class Service(ABC):
         DOCUMENT_CREATED = 'document_created'
         DOCUMENT_COMPLETE = 'document_complete'
         DOCUMENT_INSERTED = 'document_inserted'
+        CODIFY_RESPONSE = 'codify_response'
         LESSON_CREATED = 'lesson_created'
         LESSON_INSERTED = 'lesson_inserted'
         PROGRESS_UPDATED = 'progress_updated'

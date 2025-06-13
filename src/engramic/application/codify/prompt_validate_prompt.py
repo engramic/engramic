@@ -53,7 +53,7 @@ A multi-line text requires tripple double quotes.
 <TOML_file_description>
 [[engram]]
 content = "extract memorable facts from the article."
-context = a tripple quote wrapped valid json string (i.e. escape quotes correctly) that summarizes the context that supports a broader undersanding of the content. Pull the data from the context section of the citation but cherry pick the most relevant key-pair values. Use escaped double quotes in the string for properties.
+context = a tripple quote wrapped valid json string (i.e. escape quotes correctly) of key pair data that provides a contextual understandng of the content. Think of context as all of the relevant details you would need to give someone to fully understand the content such as a title, section, document name, subject, etc.
 % if engram_list:
 relevancy = value from 0 to 4
 accuracy = value from 0 to 4

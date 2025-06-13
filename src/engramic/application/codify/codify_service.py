@@ -15,6 +15,7 @@ import tomli
 from engramic.application.codify.prompt_validate_prompt import PromptValidatePrompt
 from engramic.core import Engram, Meta, Prompt, PromptAnalysis
 from engramic.core.host import Host
+from engramic.core.interface.db import DB
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.response import Response
 from engramic.core.retrieve_result import RetrieveResult
@@ -95,6 +96,7 @@ class CodifyService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
+        self.subscribe(Service.Topic.CODIFY_RESPONSE, self.on_codify_last_response)
         super().start()
 
     async def stop(self) -> None:
@@ -103,6 +105,35 @@ class CodifyService(Service):
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
+
+    def on_codify_last_response(self, msg:dict[str,Any]):
+        response_id = msg['response_id']
+        repo_ids_filters = msg['repo_ids_filters']
+        fut = self.run_task(self._fetch_history(response_id, repo_ids_filters))
+        fut.add_done_callback(self._on_fetch_history_codify)
+
+    async def _fetch_history(self, response_id: str, repo_ids_filters: list[str]) -> list[dict[str, Any]]:
+        plugin = self.db_document_plugin
+        args = plugin['args']
+        args['repo_ids_filters'] = repo_ids_filters
+        args['history_limit'] = 1
+
+        ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[response_id], args=args)
+        history_dict: list[dict[str, Any]] = ret_val[0]
+        return history_dict
+
+    def _on_fetch_history_codify(self, fut: Future[Any]) -> None:
+        ret = fut.result()
+        response = ret['history'][0]
+        prompt = response['prompt']
+        prompt['training_mode'] = True
+        prompt_id = prompt['prompt_id']
+        tracking_id = prompt['tracking_id']
+
+        self.send_message_async(
+            Service.Topic.PROMPT_CREATED, {'id': prompt_id, 'parent_id': None, 'tracking_id': tracking_id}
+        )
+        self.on_main_prompt_complete(ret['history'][0])
 
     def on_main_prompt_complete(self, response_dict: dict[str, Any]) -> None:
         if __debug__:
@@ -218,6 +249,7 @@ class CodifyService(Service):
             raise TypeError(error) from e
 
         if 'not_memorable' in toml_data:
+            # print("not memorable")
             return {'return_observation': None}
 
         if not self.observation_repository.validate_toml_dict(toml_data):
@@ -251,6 +283,8 @@ class CodifyService(Service):
 
     def on_validate_complete(self, fut: Future[Any]) -> None:
         ret = fut.result()
+
+        # print(asdict(ret['return_observation']))
 
         if ret['return_observation'] is not None:
             self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(ret['return_observation']))

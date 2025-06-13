@@ -3,6 +3,7 @@
 # See the LICENSE file in the project root for more details.
 
 import base64
+import json
 import logging
 import os
 import re
@@ -144,6 +145,13 @@ class Gemini(LLM):
             config=generate_content_config,
         )
 
+        response_id = args['response_id']
+        repo_ids_filters = args['repo_ids_filters']
+        packet = LLM.StreamPacket(
+            f'{{"response_id":"{response_id}","repo_ids_filters":{json.dumps(repo_ids_filters)}}}', False, ''
+        )
+        websocket_manager.send_message(packet)
+
         full_response = ''
         for chunk in response:
             if chunk.text is None:
@@ -157,5 +165,7 @@ class Gemini(LLM):
 
             if chunk.text:
                 full_response += chunk.text
+
+        websocket_manager.send_message(LLM.StreamPacket('{"response_end":"true"}', False, ''))
 
         return {'llm_response': self.extract_toml_block(full_response)}

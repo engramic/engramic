@@ -102,6 +102,7 @@ class ObservationRepository:
         engram.setdefault('source_ids', [response.id])
         engram.setdefault('locations', [f'llm://{response.model}'])
         engram.setdefault('meta_ids', [meta_id])
+        engram.setdefault('repo_ids', response.prompt.repo_ids_filters)
         engram.setdefault('is_native_source', False)
         if engram['context']:
             try:

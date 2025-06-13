@@ -1,9 +1,9 @@
 # Copyright (c) 2025 Preisz Consulting, LLC.
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
-
+import json
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any
 
 from engramic.core.prompt import Prompt
@@ -20,6 +20,11 @@ class LLM(ABC):
         packet: str
         finish: bool
         finish_reason: str
+
+        def to_json(self) -> str:
+            data: dict[str, Any] = asdict(self)
+            json_str: str = json.dumps(data)
+            return json_str
 
     @abstractmethod
     def submit(

@@ -121,7 +121,7 @@ class ResponseService(Service):
     async def _fetch_history(self, prompt: Prompt) -> dict[str, Any]:
         plugin = self.db_document_plugin
         args = plugin['args']
-        args['history'] = 1
+        args['history_limit'] = 0
         args['repo_ids_filters'] = prompt.repo_ids_filters
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)
@@ -200,11 +200,15 @@ class ResponseService(Service):
         plugin = self.llm_main
         args = self.host.mock_update_args(plugin)
 
+        response_id = str(uuid.uuid4())
+
         if prompt_in.is_lesson:
             response = await asyncio.to_thread(
                 plugin['func'].submit, prompt=prompt, args=args, images=None, structured_schema=None
             )
         else:
+            args.update({'response_id': response_id})
+            args.update({'repo_ids_filters': prompt_in.repo_ids_filters})
             response = await asyncio.to_thread(
                 plugin['func'].submit_streaming,
                 prompt=prompt,
@@ -226,7 +230,7 @@ class ResponseService(Service):
 
         response = response[0]['llm_response'].replace('$', 'USD ').replace('<context>', '').replace('</context>', '')
 
-        response_inst = Response(str(uuid.uuid4()), source_id, response, retrieve_result, prompt_in, analysis, model)
+        response_inst = Response(response_id, source_id, response, retrieve_result, prompt_in, analysis, model)
 
         return response_inst
 

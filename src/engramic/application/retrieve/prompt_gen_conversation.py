@@ -38,7 +38,9 @@ The types of working memory include keyword phrases, integers, floats, or arrays
 The results of the previous exchange are provided below. Use those results to update user intent and synthisize working memory into variables.
 % endif
 
-user_intent:str - In as few words as possible, write what the current user input is really intending which may not explicitly be stated. This should be keyword rich, omitting filler words while capturing import details.
+user_intent:str - In as few words as possible, write what the current user input is really intending which may not explicitly be stated and should be inferred from the current_user_input but within the context of the previous_exchange.
+
+This should be keyword rich, omitting filler words while capturing import details and stated as a first person instruction on what Engramic should do.
 
 working_memory - Update working memory which is register of variables you will use to track all elements of the conversation. If there are no changes to make on any step, or if the data referenced doesn't exist, respond with changes = None. Write each step as densely as you can, but make sure you maintain context and scope by wrapping related topics:
 
