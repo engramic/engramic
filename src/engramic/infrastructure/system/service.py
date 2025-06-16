@@ -36,6 +36,8 @@ class Service(ABC):
         DOCUMENT_COMPLETE = 'document_complete'
         DOCUMENT_INSERTED = 'document_inserted'
         CODIFY_RESPONSE = 'codify_response'
+        ENGRAM_REQUEST = 'engram_request'
+        ENGRAM_RESULT = 'engram_result'
         LESSON_CREATED = 'lesson_created'
         LESSON_INSERTED = 'lesson_inserted'
         PROGRESS_UPDATED = 'progress_updated'

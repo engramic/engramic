@@ -106,7 +106,7 @@ class CodifyService(Service):
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
 
-    def on_codify_last_response(self, msg:dict[str,Any]):
+    def on_codify_last_response(self, msg: dict[str, Any]) -> None:
         response_id = msg['response_id']
         repo_ids_filters = msg['repo_ids_filters']
         fut = self.run_task(self._fetch_history(response_id, repo_ids_filters))
@@ -127,6 +127,7 @@ class CodifyService(Service):
         response = ret['history'][0]
         prompt = response['prompt']
         prompt['training_mode'] = True
+        prompt['is_on_demand'] = True
         prompt_id = prompt['prompt_id']
         tracking_id = prompt['tracking_id']
 
@@ -217,6 +218,7 @@ class CodifyService(Service):
             response.prompt.prompt_str,
             input_data=input_data,
             is_lesson=response.prompt.is_lesson,
+            is_on_demand=response.prompt.is_on_demand,
             training_mode=response.prompt.training_mode,
         )
 

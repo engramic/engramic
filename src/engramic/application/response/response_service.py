@@ -121,7 +121,7 @@ class ResponseService(Service):
     async def _fetch_history(self, prompt: Prompt) -> dict[str, Any]:
         plugin = self.db_document_plugin
         args = plugin['args']
-        args['history_limit'] = 0
+        args['history_limit'] = 3
         args['repo_ids_filters'] = prompt.repo_ids_filters
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)

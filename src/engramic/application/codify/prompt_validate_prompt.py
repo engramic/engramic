@@ -45,6 +45,10 @@ An engram should be a unique, complete thought, with enough information to fill 
 This particular article is special and needs special treatment. You should try and generate one, maybe two engrams for this article. The information is designed to be cohesive and it's better to consolidate simlar topics agressively into as few engrams as possible.
 % endif
 
+% if is_on_demand:
+This particular article is special and needs special treatment. You should try and generate one engram for this article that extracts the main topic and captures it verbatim including formatting.
+% endif
+
 In the meta section, insert keywords and an outline summary based on the content and context of all engrams.
 
 Valid TOML file:

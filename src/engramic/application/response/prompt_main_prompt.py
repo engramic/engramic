@@ -44,7 +44,11 @@ Deliver results related to the user_intent and resist explaining the work you ar
 % if analysis['user_prompt_type']=="reference":
     This current_user_prompt is reference material and your response should heavily repeat the content you were given. Repeat all versions, titles, headers, page numbers, or other high-level information that is context and surround it in xml using the following tag: <context></context>.
 
+    Provide your response with a pleasing visual hierarchy, title and or subtitles and bullets as appropriate.
+
     Repeat markdown from current_user_prompt in your response.
+
+
 % endif
 
 
@@ -71,6 +75,7 @@ Deliver results related to the user_intent and resist explaining the work you ar
                     % endfor
                     </context>
                 % endif
+                id: ${engram["id"]}
                 content: ${engram["content"]}
                 timestamp: ${engram["created_date"]}
             </source>
@@ -85,6 +90,7 @@ Deliver results related to the user_intent and resist explaining the work you ar
                     % endfor
                     </context>
                 % endif
+                id: ${engram["id"]}
                 content: ${engram["content"]}
                 timestamp: ${engram["created_date"]}
             </long_term_memory>
@@ -112,9 +118,9 @@ Follow these steps for your response. They were written after the working_memory
 ${analysis['thinking_steps']}
 
 Only write in commonmark:
-Write your response and be creative in your language but never about your sources. Make sure it's easy for a user to read.
+Write your response and be creative in your language but never about your sources. Make sure it's easy for a user to read with a pleasing visual hierarchy.
 
-
+If you reference a source or memory in your response, please note it by creating a markdown link in the followng format at the end of the sentence or table [↗](/engram/<insert the uuid id for the source. Only UUIDs!>)
 
 """).render(**self.input_data)
         return str(render_string)
