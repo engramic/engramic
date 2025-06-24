@@ -24,8 +24,13 @@ class EngramRepository:
     def save_engram(self, engram: Engram) -> None:
         self.db_plugin['func'].insert_documents(table=DB.DBTables.ENGRAM, docs=[asdict(engram)], args=None)
 
-    def fetch_engram(self, engram_id: str) -> Engram:
+    def fetch_engram(self, engram_id: str) -> Engram | None:
         engram_ret = self.db_plugin['func'].fetch(table=DB.DBTables.ENGRAM, ids=[engram_id], args=None)
+
+        # Check if the result is empty
+        if not engram_ret or not engram_ret[0]['engram']:
+            return None
+
         engram = engram_ret[0]['engram'][0]
         return Engram(**engram)
 

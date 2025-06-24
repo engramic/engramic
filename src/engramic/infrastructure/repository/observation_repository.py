@@ -78,7 +78,7 @@ class ObservationRepository:
         for engram_dict in toml_data['engram']:
             self._normalize_engram(engram_dict, meta_id, response)
 
-        toml_data['parent_id'] = response.prompt.prompt_id
+        toml_data['parent_id'] = response.id
         toml_data['tracking_id'] = response.prompt.tracking_id
         return toml_data
 

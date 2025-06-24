@@ -32,6 +32,8 @@ class Service(ABC):
         SUBMIT_PROMPT = 'submit_prompt'
         PROMPT_CREATED = 'prompt_created'
         PROMPT_INSERTED = 'prompt_inserted'
+        CODIFY_CREATED = 'codify_created'
+        CODIFY_INSERTED = 'codify_inserted'
         DOCUMENT_CREATED = 'document_created'
         DOCUMENT_COMPLETE = 'document_complete'
         DOCUMENT_INSERTED = 'document_inserted'

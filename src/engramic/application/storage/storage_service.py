@@ -100,7 +100,10 @@ class StorageService(Service):
     def on_engram_request(self, msg: dict[str, Any]) -> None:
         engram = self.engram_repository.fetch_engram(msg['engram_id'])
 
-        self.send_message_async(Service.Topic.ENGRAM_RESULT, asdict(engram))
+        if engram:
+            self.send_message_async(Service.Topic.ENGRAM_RESULT, asdict(engram))
+        else:
+            self.send_message_async(Service.Topic.ENGRAM_RESULT, None)
 
     def on_engram_complete(self, engram_dict: dict[str, Any]) -> None:
         engram_batch = self.engram_repository.load_batch_dict(engram_dict['engram_array'])

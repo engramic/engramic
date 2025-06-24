@@ -5,6 +5,7 @@
 import asyncio
 import logging
 import time
+import uuid
 from concurrent.futures import Future
 from dataclasses import asdict
 from enum import Enum
@@ -96,7 +97,7 @@ class CodifyService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
-        self.subscribe(Service.Topic.CODIFY_RESPONSE, self.on_codify_last_response)
+        self.subscribe(Service.Topic.CODIFY_RESPONSE, self.on_codify_response)
         super().start()
 
     async def stop(self) -> None:
@@ -106,7 +107,10 @@ class CodifyService(Service):
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
 
-    def on_codify_last_response(self, msg: dict[str, Any]) -> None:
+    #################
+    # Start codify when the user is starting from a response id
+
+    def on_codify_response(self, msg: dict[str, Any]) -> None:
         response_id = msg['response_id']
         repo_ids_filters = msg['repo_ids_filters']
         fut = self.run_task(self._fetch_history(response_id, repo_ids_filters))
@@ -128,21 +132,25 @@ class CodifyService(Service):
         prompt = response['prompt']
         prompt['training_mode'] = True
         prompt['is_on_demand'] = True
-        prompt_id = prompt['prompt_id']
-        tracking_id = prompt['tracking_id']
 
-        self.send_message_async(
-            Service.Topic.PROMPT_CREATED, {'id': prompt_id, 'parent_id': None, 'tracking_id': tracking_id}
-        )
-        self.on_main_prompt_complete(ret['history'][0])
+        self.on_main_prompt_complete(ret['history'][0], is_on_demand=True)
 
-    def on_main_prompt_complete(self, response_dict: dict[str, Any]) -> None:
+    #################
+    # Start codify when continuing from main prompt completion.
+
+    def on_main_prompt_complete(self, response_dict: dict[str, Any], *, is_on_demand: bool = False) -> None:
         if __debug__:
             self.host.update_mock_data_input(self, response_dict)
 
         prompt = Prompt(**response_dict['prompt'])
         if not prompt.training_mode:
             return
+
+        parent_id:str|None = prompt.prompt_id
+        tracking_id = prompt.tracking_id
+        if is_on_demand:
+            parent_id = None
+            tracking_id = str(uuid.uuid4())
 
         model = response_dict['model']
         analysis = PromptAnalysis(**response_dict['analysis'])
@@ -156,6 +164,11 @@ class CodifyService(Service):
             analysis,
             model,
         )
+
+        self.send_message_async(
+            Service.Topic.CODIFY_CREATED, {'id': response.id, 'parent_id': parent_id, 'tracking_id': tracking_id}
+        )
+
         self.metrics_tracker.increment(CodifyMetric.RESPONSE_RECIEVED)
         fetch_engram_step = self.run_task(self._fetch_engrams(response))
         fetch_engram_step.add_done_callback(self.on_fetch_engram_complete)

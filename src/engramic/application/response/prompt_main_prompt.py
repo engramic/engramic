@@ -120,7 +120,11 @@ ${analysis['thinking_steps']}
 Only write in commonmark:
 Write your response and be creative in your language but never about your sources. Make sure it's easy for a user to read with a pleasing visual hierarchy.
 
-If you reference a source or memory in your response, please note it by creating a markdown link in the followng format at the end of the sentence or table [↗](/engram/<insert the uuid id for the source. Only UUIDs!>)
+If you reference a source or memory in your response, please note it by creating a markdown link in the followng format at the end of the sentence or table
+
+Example: if the id is a85a8a35-e520-40d7-a75f-e506b360d67a, then place this url at the end of the sentence.
+[↗](/engram/a85a8a35-e520-40d7-a75f-e506b360d67a)  The url must always be wrapped with a begin and end parenthesis.
+
 
 """).render(**self.input_data)
         return str(render_string)
