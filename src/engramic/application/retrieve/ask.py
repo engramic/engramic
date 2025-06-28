@@ -184,11 +184,11 @@ class Ask(Retrieval):
         embed_step = self.service.run_task(self._embed_gen_direction(intent_and_direction))
         embed_step.add_done_callback(self.on_embed_direction_complete)
 
-    async def _embed_gen_direction(self, main_prompt: str) -> list[float]:
+    async def _embed_gen_direction(self, current_user_intent: str) -> list[float]:
         plugin = self.embeddings_gen_embed
 
         ret = await asyncio.to_thread(
-            plugin['func'].gen_embed, strings=[main_prompt], args=self.service.host.mock_update_args(plugin)
+            plugin['func'].gen_embed, strings=[current_user_intent], args=self.service.host.mock_update_args(plugin)
         )
 
         self.service.host.update_mock_data(plugin, ret)
@@ -197,17 +197,19 @@ class Ask(Retrieval):
         return float_array
 
     def on_embed_direction_complete(self, fut: Future[Any]) -> None:
-        embedding = fut.result()
-        fetch_direction_step = self.service.run_task(self._vector_fetch_direction_meta(embedding))
+        user_intent_embedding = fut.result()
+        fetch_direction_step = self.service.run_task(self._vector_fetch_direction_meta(user_intent_embedding))
         fetch_direction_step.add_done_callback(self.on_vector_fetch_direction_meta_complete)
 
-    async def _vector_fetch_direction_meta(self, embedding: list[float]) -> list[str]:
+    async def _vector_fetch_direction_meta(self, user_intent_embedding: list[float]) -> list[str]:
         plugin = self.prompt_vector_db_plugin
+        plugin['args'].update({'threshold': 0.6})  # meta needs a broader threshold.
+        plugin['args'].update({'n_results': 10})  # meta needs a broader threshold.
 
         ret = await asyncio.to_thread(
             plugin['func'].query,
             collection_name='meta',
-            embeddings=embedding,
+            embeddings=user_intent_embedding,
             filters=self.prompt.repo_ids_filters,
             args=self.service.host.mock_update_args(plugin),
         )
@@ -253,7 +255,12 @@ class Ask(Retrieval):
             prompt_str=self.prompt.prompt_str,
             input_data={'meta_list': meta_list, 'working_memory': self.conversation_direction['working_memory']},
         )
-        structured_response = {'response_length': str, 'user_prompt_type': str, 'thinking_steps': str}
+        structured_response = {
+            'response_length': str,
+            'user_prompt_type': str,
+            'thinking_steps': str,
+            'remember_request': bool,
+        }
         ret = await asyncio.to_thread(
             plugin['func'].submit,
             prompt=prompt,
@@ -288,7 +295,10 @@ class Ask(Retrieval):
     async def _generate_indices(self, meta_list: list[Meta]) -> dict[str, str]:
         plugin = self.prompt_retrieve_indices_plugin
         # add prompt engineering here and submit as the full prompt.
-        input_data: dict[str, Any] = {'meta_list': meta_list}
+        input_data: dict[str, Any] = {
+            'meta_list': meta_list,
+            'current_user_intent': self.conversation_direction['current_user_intent'],
+        }
         if len(self.service.repo_folders.items()) > 0:
             input_data.update({'all_repos': self.service.repo_folders})
 
@@ -386,6 +396,9 @@ class Ask(Retrieval):
             conversation_direction=self.conversation_direction,
             analysis=asdict(self.prompt_analysis)['prompt_analysis'],
         )
+
+        if self.prompt_analysis.prompt_analysis['remember_request']:
+            self.prompt.training_mode = True
 
         if self.prompt_analysis is None:
             error = 'Prompt analysis None in on_query_index_db'

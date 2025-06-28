@@ -48,7 +48,7 @@ class ChromaDB(VectorDB):
         if args.get('threshold') is not None:
             threshold = args['threshold']
 
-        if args.get('threshold') is not None:
+        if args.get('n_results') is not None:
             n_results = args['n_results']
 
         # all_items = self.collection[collection_name].get()

@@ -15,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from engramic.core.prompt import Prompt
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
@@ -112,6 +113,7 @@ class ProgressService(Service):
         self.subscribe(Service.Topic.ENGRAMS_CREATED, self.on_engrams_created)
         self.subscribe(Service.Topic.INDICES_CREATED, self.on_indices_created)
         self.subscribe(Service.Topic.INDICES_INSERTED, self._on_indices_inserted)
+        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self._on_prompt_complete)
 
         super().start()
 
@@ -318,6 +320,23 @@ class ProgressService(Service):
     # ------------------------------------------------------------------ #
     # propagation logic                                                  #
     # ------------------------------------------------------------------ #
+    def _on_prompt_complete(self, msg: dict[str, Any]) -> None:
+        prompt_msg = msg['prompt']
+        prompt = Prompt(**prompt_msg)
+        if prompt.parent_id is None and not prompt.training_mode:
+            self.send_message_async(
+                Service.Topic.PROGRESS_UPDATED,
+                {
+                    'progress_type': 'lesson',
+                    'id': prompt.prompt_id,
+                    'target_id': None,
+                    'percent_complete': 1,
+                    'tracking_id': prompt.tracking_id,
+                },
+            )
+
+            self._cleanup_subtree(prompt.prompt_id)
+
     def _on_indices_inserted(self, msg: dict[str, Any]) -> None:
         """
         Handles the insertion of indices into the system.

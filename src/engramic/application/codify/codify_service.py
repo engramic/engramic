@@ -146,7 +146,7 @@ class CodifyService(Service):
         if not prompt.training_mode:
             return
 
-        parent_id:str|None = prompt.prompt_id
+        parent_id: str | None = prompt.prompt_id
         tracking_id = prompt.tracking_id
         if is_on_demand:
             parent_id = None

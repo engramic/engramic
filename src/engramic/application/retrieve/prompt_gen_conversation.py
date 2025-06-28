@@ -50,7 +50,7 @@ To update working memory, you need to perform the following:
 
 Steps
 1. Write variables from engramic_previous_working memory and update the values based on the extrapolated values in current_user_input.
-2. Add as many new state variables and values that you can by predicting what you may track and then extraploate them from the current_user_input and engramic_previous_response.
+2. Add as many new state variables and values that you can by predicting what you may track and then extraploate them from the current_user_input and engramic_previous_response. Add any new instructions you are given.
 3. Drawing from the previous_working_memory, write and update the state of all variables not changed in steps 1 and 2. Stop and think at this step as there may be logic required to determine if state 3 has cascading changes due to changes in state 1 & 2.
 4. In order, and starting with a json object called, "memory" combine the states above from 1, 2, and 3. If there are conflicting data, 3 overwrites values from 2, and 2 overwrites values from 1.
 
