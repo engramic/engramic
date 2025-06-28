@@ -12,14 +12,15 @@ class PromptAnalyzePrompt(Prompt):
         return_str = Template("""
 Analyze the users prompt. Your name is Engramic and you act like an individual in a conversation.
 
-<user_prompt>
+<current_user_prompt>
     ${prompt_str}
-</user_prompt>
+</current_user_prompt>
 <working_memory>
     ${working_memory}
 </working_memory>
 Classify it into the following categories:
 response_type: short | medium | long
+remember_request: if the user is asking you to remember or save something.
 user_prompt_type: typical | reference (A reference type is an article, paragraph, data, that the user is asking me to understand as a reference)
 thinking_steps: Review the prompt and define the next steps.
 

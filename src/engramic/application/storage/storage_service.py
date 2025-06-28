@@ -5,6 +5,7 @@
 import asyncio
 import logging
 import time
+from dataclasses import asdict
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
@@ -89,11 +90,20 @@ class StorageService(Service):
         self.subscribe(Service.Topic.OBSERVATION_COMPLETE, self.on_observation_complete)
         self.subscribe(Service.Topic.ENGRAM_COMPLETE, self.on_engram_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
+        self.subscribe(Service.Topic.ENGRAM_REQUEST, self.on_engram_request)
         super().start()
 
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
+
+    def on_engram_request(self, msg: dict[str, Any]) -> None:
+        engram = self.engram_repository.fetch_engram(msg['engram_id'])
+
+        if engram:
+            self.send_message_async(Service.Topic.ENGRAM_RESULT, asdict(engram))
+        else:
+            self.send_message_async(Service.Topic.ENGRAM_RESULT, None)
 
     def on_engram_complete(self, engram_dict: dict[str, Any]) -> None:
         engram_batch = self.engram_repository.load_batch_dict(engram_dict['engram_array'])

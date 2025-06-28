@@ -5,6 +5,7 @@
 import asyncio
 import logging
 import time
+import uuid
 from concurrent.futures import Future
 from dataclasses import asdict
 from enum import Enum
@@ -15,6 +16,7 @@ import tomli
 from engramic.application.codify.prompt_validate_prompt import PromptValidatePrompt
 from engramic.core import Engram, Meta, Prompt, PromptAnalysis
 from engramic.core.host import Host
+from engramic.core.interface.db import DB
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.response import Response
 from engramic.core.retrieve_result import RetrieveResult
@@ -95,6 +97,7 @@ class CodifyService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self.on_main_prompt_complete)
+        self.subscribe(Service.Topic.CODIFY_RESPONSE, self.on_codify_response)
         super().start()
 
     async def stop(self) -> None:
@@ -104,13 +107,50 @@ class CodifyService(Service):
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
 
-    def on_main_prompt_complete(self, response_dict: dict[str, Any]) -> None:
+    #################
+    # Start codify when the user is starting from a response id
+
+    def on_codify_response(self, msg: dict[str, Any]) -> None:
+        response_id = msg['response_id']
+        repo_ids_filters = msg['repo_ids_filters']
+        fut = self.run_task(self._fetch_history(response_id, repo_ids_filters))
+        fut.add_done_callback(self._on_fetch_history_codify)
+
+    async def _fetch_history(self, response_id: str, repo_ids_filters: list[str]) -> list[dict[str, Any]]:
+        plugin = self.db_document_plugin
+        args = plugin['args']
+        args['repo_ids_filters'] = repo_ids_filters
+        args['history_limit'] = 1
+
+        ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[response_id], args=args)
+        history_dict: list[dict[str, Any]] = ret_val[0]
+        return history_dict
+
+    def _on_fetch_history_codify(self, fut: Future[Any]) -> None:
+        ret = fut.result()
+        response = ret['history'][0]
+        prompt = response['prompt']
+        prompt['training_mode'] = True
+        prompt['is_on_demand'] = True
+
+        self.on_main_prompt_complete(ret['history'][0], is_on_demand=True)
+
+    #################
+    # Start codify when continuing from main prompt completion.
+
+    def on_main_prompt_complete(self, response_dict: dict[str, Any], *, is_on_demand: bool = False) -> None:
         if __debug__:
             self.host.update_mock_data_input(self, response_dict)
 
         prompt = Prompt(**response_dict['prompt'])
         if not prompt.training_mode:
             return
+
+        parent_id: str | None = prompt.prompt_id
+        tracking_id = prompt.tracking_id
+        if is_on_demand:
+            parent_id = None
+            tracking_id = str(uuid.uuid4())
 
         model = response_dict['model']
         analysis = PromptAnalysis(**response_dict['analysis'])
@@ -124,6 +164,11 @@ class CodifyService(Service):
             analysis,
             model,
         )
+
+        self.send_message_async(
+            Service.Topic.CODIFY_CREATED, {'id': response.id, 'parent_id': parent_id, 'tracking_id': tracking_id}
+        )
+
         self.metrics_tracker.increment(CodifyMetric.RESPONSE_RECIEVED)
         fetch_engram_step = self.run_task(self._fetch_engrams(response))
         fetch_engram_step.add_done_callback(self.on_fetch_engram_complete)
@@ -186,6 +231,7 @@ class CodifyService(Service):
             response.prompt.prompt_str,
             input_data=input_data,
             is_lesson=response.prompt.is_lesson,
+            is_on_demand=response.prompt.is_on_demand,
             training_mode=response.prompt.training_mode,
         )
 
@@ -218,6 +264,7 @@ class CodifyService(Service):
             raise TypeError(error) from e
 
         if 'not_memorable' in toml_data:
+            # print("not memorable")
             return {'return_observation': None}
 
         if not self.observation_repository.validate_toml_dict(toml_data):
@@ -252,8 +299,13 @@ class CodifyService(Service):
     def on_validate_complete(self, fut: Future[Any]) -> None:
         ret = fut.result()
 
+        # print(asdict(ret['return_observation']))
+
         if ret['return_observation'] is not None:
             self.send_message_async(Service.Topic.OBSERVATION_COMPLETE, asdict(ret['return_observation']))
+
+            # if thinking...
+            # self.send_message_async(Service.Topic.META_COMPLETE, asdict(ret['return_observation'].meta))
 
         if __debug__ and ret['return_observation'] is not None:
             self.host.update_mock_data_output(self, asdict(ret['return_observation']))

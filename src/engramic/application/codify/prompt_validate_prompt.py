@@ -42,7 +42,14 @@ If the article contains memorable data, you may choose to provide one, two, or t
 An engram should be a unique, complete thought, with enough information to fill an index card. Grab as much memorable information as you can, which may be as little as a single sentence or as big as a large table. You should avoid breaking up information that is semantically related. For exmaple, if there is a list, it would be better to have a single engram with the entire list than three engrams that split the contextually related information.
 
 % if is_lesson:
-This particular article is special and needs special treatment. You should try and generate one, maybe two engrams for this article. The information is designed to be cohesive and it's better to consolidate simlar topics agressively into as few engrams as possible.
+This particular article is special and needs special treatment. You should try and generate one, maybe two engrams for this article.
+The information is designed to be cohesive and it's better to consolidate simlar topics agressively into as few engrams as possible.
+
+If the article contains <instruction></instruction> tags, then set content to all of the text inside of the instruction tag including the instruction tags themselves. Context should include the name of the instructions and a type of "instructions".
+% endif
+
+% if is_on_demand:
+This particular article is special and needs special treatment. You should try and generate one engram for this article that extracts the main topic and captures it verbatim including formatting.
 % endif
 
 In the meta section, insert keywords and an outline summary based on the content and context of all engrams.
@@ -53,7 +60,7 @@ A multi-line text requires tripple double quotes.
 <TOML_file_description>
 [[engram]]
 content = "extract memorable facts from the article."
-context = a tripple quote wrapped valid json string (i.e. escape quotes correctly) that summarizes the context that supports a broader undersanding of the content. Pull the data from the context section of the citation but cherry pick the most relevant key-pair values. Use escaped double quotes in the string for properties.
+context = a tripple quote wrapped valid json string (you must escape quotes correctly) of key pair data that provides a contextual understandng of the content. Think of context as all of the relevant details you would need to give someone to fully understand the content such as a title, section, document name, subject, etc.
 % if engram_list:
 relevancy = value from 0 to 4
 accuracy = value from 0 to 4

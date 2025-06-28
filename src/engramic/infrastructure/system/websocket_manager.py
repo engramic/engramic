@@ -35,21 +35,21 @@ class WebsocketManager:
         # 1. Extract token from path (e.g., ?token=abc123)
 
         query = urlparse(websocket.path).query
-        token = parse_qs(query).get('token', [None])[0]
+        access_token = parse_qs(query).get('access_token', [None])[0]
 
-        if token is None:
+        if access_token is None:
             error = 'Websocket did not contain token.'
             raise RuntimeError(error)
 
-        token = token.strip()
+        access_token = access_token.strip()
 
-        if not token:
+        if not access_token:
             await websocket.close(code=4001, reason='Missing token')
             return
 
         # 2. Validate token
         try:
-            payload = jwt.decode(token, os.getenv('JWT_SECRET_KEY'), algorithms=['HS256'])
+            payload = jwt.decode(access_token, os.getenv('JWT_SECRET_KEY'), algorithms=['HS256'])
             del payload
         except jwt.InvalidTokenError:
             await websocket.close(code=4002, reason='Invalid token')

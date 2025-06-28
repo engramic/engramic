@@ -15,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from engramic.core.prompt import Prompt
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
@@ -106,11 +107,13 @@ class ProgressService(Service):
         """
         self.subscribe(Service.Topic.LESSON_CREATED, self.on_lesson_created)
         self.subscribe(Service.Topic.PROMPT_CREATED, self.on_prompt_created)
+        self.subscribe(Service.Topic.CODIFY_CREATED, self.on_codify_created)
         self.subscribe(Service.Topic.DOCUMENT_CREATED, self.on_document_created)
         self.subscribe(Service.Topic.OBSERVATION_CREATED, self.on_observation_created)
         self.subscribe(Service.Topic.ENGRAMS_CREATED, self.on_engrams_created)
         self.subscribe(Service.Topic.INDICES_CREATED, self.on_indices_created)
         self.subscribe(Service.Topic.INDICES_INSERTED, self._on_indices_inserted)
+        self.subscribe(Service.Topic.MAIN_PROMPT_COMPLETE, self._on_prompt_complete)
 
         super().start()
 
@@ -184,6 +187,39 @@ class ProgressService(Service):
                     'progress_type': 'lesson',
                     'id': prompt_id,
                     'target_id': prompt_id,
+                    'percent_complete': 0.05,
+                    'tracking_id': tracking_id,
+                },
+            )
+
+    def on_codify_created(self, msg: dict[str, Any]) -> None:
+        """
+        Handles the creation of a new codification request in the system.
+
+        Sets up progress tracking for the codification and connects it to its parent if one exists.
+
+        Args:
+            msg (dict[str, Any]): Message containing codification creation details.
+        """
+        codify_id = msg['id']
+        parent_id = msg.get('parent_id', '')
+        tracking_id = msg['tracking_id']
+
+        self.progress_array.setdefault(codify_id, ProgressService.ProgressArray('codify'))
+
+        if parent_id:
+            self.progress_array[parent_id].children_is_complete_array[codify_id] = False
+            self.progress_array[parent_id].tracking_id = tracking_id
+            self.lookup_array[codify_id] = parent_id
+        else:
+            self.progress_array[codify_id].tracking_id = tracking_id
+
+            self.send_message_async(
+                Service.Topic.PROGRESS_UPDATED,
+                {
+                    'progress_type': 'codify',
+                    'id': codify_id,
+                    'target_id': codify_id,
                     'percent_complete': 0.05,
                     'tracking_id': tracking_id,
                 },
@@ -284,6 +320,23 @@ class ProgressService(Service):
     # ------------------------------------------------------------------ #
     # propagation logic                                                  #
     # ------------------------------------------------------------------ #
+    def _on_prompt_complete(self, msg: dict[str, Any]) -> None:
+        prompt_msg = msg['prompt']
+        prompt = Prompt(**prompt_msg)
+        if prompt.parent_id is None and not prompt.training_mode:
+            self.send_message_async(
+                Service.Topic.PROGRESS_UPDATED,
+                {
+                    'progress_type': 'lesson',
+                    'id': prompt.prompt_id,
+                    'target_id': None,
+                    'percent_complete': 1,
+                    'tracking_id': prompt.tracking_id,
+                },
+            )
+
+            self._cleanup_subtree(prompt.prompt_id)
+
     def _on_indices_inserted(self, msg: dict[str, Any]) -> None:
         """
         Handles the insertion of indices into the system.
@@ -351,6 +404,8 @@ class ProgressService(Service):
                 self.send_message_async(Service.Topic.LESSON_INSERTED, {'id': node_id})
             elif progress.item_type == 'prompt':
                 self.send_message_async(Service.Topic.PROMPT_INSERTED, {'id': node_id})
+            elif progress.item_type == 'codify':
+                self.send_message_async(Service.Topic.CODIFY_INSERTED, {'id': node_id})
 
             # mark completion in the parent (if any)
             if parent_id is not None:

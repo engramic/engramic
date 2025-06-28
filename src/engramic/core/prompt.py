@@ -15,6 +15,7 @@ class Prompt:
     repo_ids_filters: list[str] | None = None
     training_mode: bool | None = False
     is_lesson: bool | None = False
+    is_on_demand: bool | None = False
     input_data: dict[str, Any] = field(default_factory=dict)
     parent_id: str | None = None
     tracking_id: str | None = None
@@ -31,6 +32,7 @@ class Prompt:
             'prompt_str': self.prompt_str,
             'training_mode': self.training_mode,
             'is_lesson': self.is_lesson,
+            'is_on_demand': self.is_on_demand,
             'repo_ids_filters': self.repo_ids_filters,
         })  # include the prompt_str as input_data to be used in mako rendering.
 

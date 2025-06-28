@@ -20,11 +20,12 @@ class PromptGenIndices(Prompt):
 
     Write a set of indices, phrases of 5 to 8 words, that will be used by a vector database to search for data that will satisfy the user_prompt.
 
+
     When building indices for a list, pay careful attention to the names of the items in the list to ensure that you don't combine similar names.
 
 
     % if len(meta_list)>0:
-    The domain_knowledge gives you insight into knowledge stored in your long term memory. It's here because it's the most closely related information you have stored about the user_prompt.
+    The domain_knowledge gives you insight into knowledge stored in your long term memory. It's here because it's the most closely related information you have stored about the user_prompt. If you have domain knowledge that satisfies the user prompt, consider the information when formulating the indices. Form your set of indices with context items followed by your phrases as defined by this template: context_item: value, context_item2: value, 5 to 8 word phrase.
     % endif
 
     % for meta in meta_list:
@@ -38,7 +39,12 @@ class PromptGenIndices(Prompt):
     % endfor
 
     <user_prompt>
-        ${prompt_str}
+        <prompt_string>
+            ${prompt_str}
+        </prompt_string>
+        <current_user_intent>
+            ${current_user_intent}
+        </current_user_intent>
     </user_prompt>
 
     """).render(**self.input_data)

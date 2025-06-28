@@ -78,7 +78,7 @@ class ObservationRepository:
         for engram_dict in toml_data['engram']:
             self._normalize_engram(engram_dict, meta_id, response)
 
-        toml_data['parent_id'] = response.prompt.prompt_id
+        toml_data['parent_id'] = response.id
         toml_data['tracking_id'] = response.prompt.tracking_id
         return toml_data
 
@@ -102,6 +102,7 @@ class ObservationRepository:
         engram.setdefault('source_ids', [response.id])
         engram.setdefault('locations', [f'llm://{response.model}'])
         engram.setdefault('meta_ids', [meta_id])
+        engram.setdefault('repo_ids', response.prompt.repo_ids_filters)
         engram.setdefault('is_native_source', False)
         if engram['context']:
             try:
