@@ -132,6 +132,8 @@ class Ask(Retrieval):
 
         if len(self.service.repo_folders.items()) > 0:
             input_data.update({'all_repos': self.service.repo_folders})
+        else:
+            input_data.update({'all_repos': None})
 
         # add prompt engineering here and submit as the full prompt.
         prompt_gen = PromptGenConversation(
@@ -299,8 +301,11 @@ class Ask(Retrieval):
             'meta_list': meta_list,
             'current_user_intent': self.conversation_direction['current_user_intent'],
         }
+
         if len(self.service.repo_folders.items()) > 0:
             input_data.update({'all_repos': self.service.repo_folders})
+        else:
+            input_data.update({'all_repos': None})
 
         prompt = PromptGenIndices(
             prompt_str=self.prompt.prompt_str, input_data=input_data, repo_ids_filters=self.prompt.repo_ids_filters

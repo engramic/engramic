@@ -3,6 +3,7 @@
 # See the LICENSE file in the project root for more details.
 
 import json
+import re
 import time
 import uuid
 from typing import Any
@@ -106,7 +107,12 @@ class ObservationRepository:
         engram.setdefault('is_native_source', False)
         if engram['context']:
             try:
-                engram['context'] = json.loads(engram['context'])
+                context_str = engram['context']
+                # Remove JSON fences with optional whitespace using regex
+                context_str = re.sub(r'^\s*```(?:json)?\s*', '', context_str)
+                context_str = re.sub(r'\s*```\s*$', '', context_str)
+
+                engram['context'] = json.loads(context_str)
             except json.JSONDecodeError as e:
                 error = (
                     f"Failed to decode JSON in 'context' in Normalize Engram (a formatting issue with LLM output): {e}"
