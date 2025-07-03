@@ -78,7 +78,9 @@ class RepoService(Service):
         """
         self.subscribe(Service.Topic.REPO_SUBMIT_IDS, self._on_submit_ids)
         self.subscribe(Service.Topic.DOCUMENT_COMPLETE, self.on_document_complete)
+        self.subscribe(Service.Topic.REPO_UPDATE_REPOS, self.scan_folders)
         super().start()
+        self.scan_folders()
 
     def init_async(self) -> None:
         """
@@ -213,62 +215,103 @@ class RepoService(Service):
             {'repo': folder, 'repo_id': repo_id, 'files': document_dicts},
         )
 
-    def scan_folders(self) -> None:
+    def scan_folders(self, repo_id: dict[str, str] | None = None) -> None:
         """
         Scans repository folders and indexes their files.
 
         Discovers repositories, indexes their files, and sends messages with the repository information.
 
+        Args:
+            repo_id (dict[str,str] | None): Optional dictionary containing repository ID with key "repo_id". If None, scans all repositories.
+
         Raises:
             RuntimeError: If the REPO_ROOT environment variable is not set.
+            ValueError: If the specified repo_id is not found.
         """
+        repo_root = self._get_repo_root()
+        repos_to_scan = self._determine_repos_to_scan(repo_id, repo_root)
+
+        self._send_repo_folders_message()
+        self._scan_and_index_repos(repos_to_scan, repo_root)
+
+    def _get_repo_root(self) -> Path:
+        """Get and validate the repository root path."""
         repo_root = os.getenv('REPO_ROOT')
         if repo_root is None:
             error = "Environment variable 'REPO_ROOT' is not set."
             raise RuntimeError(error)
+        return Path(repo_root).expanduser()
 
-        expanded_repo_root = Path(repo_root).expanduser()
+    def _determine_repos_to_scan(self, repo_id: dict[str, str] | None, repo_root: Path) -> dict[str, str]:
+        """Determine which repositories need to be scanned."""
+        target_repo_id = repo_id.get('repo_id') if repo_id is not None else None
 
-        self._discover_repos(expanded_repo_root)
+        if target_repo_id is not None:
+            return self._get_specific_repo(target_repo_id, repo_root)
+        self._discover_repos(repo_root)
+        return self.repos
+
+    def _get_specific_repo(self, target_repo_id: str, repo_root: Path) -> dict[str, str]:
+        """Get a specific repository, discovering it if necessary."""
+        if target_repo_id not in self.repos:
+            self._discover_repos(repo_root)
+            if target_repo_id not in self.repos:
+                error = f"Repository with ID '{target_repo_id}' not found."
+                raise ValueError(error)
+        return {target_repo_id: self.repos[target_repo_id]}
+
+    def _send_repo_folders_message(self) -> None:
+        """Send async message with repository folders."""
 
         async def send_message() -> None:
             self.send_message_async(Service.Topic.REPO_FOLDERS, {'repo_folders': self.repos})
 
         self.run_task(send_message())
 
-        for repo_id in self.repos:
-            folder = self.repos[repo_id]
-            document_ids = []
-            # Recursively walk through all files in repo
-            for root, dirs, files in os.walk(expanded_repo_root / folder):
-                del dirs
-                for file in files:
-                    if file.startswith('.'):
-                        continue  # Skip hidden files
-                    file_path = Path(root) / file
-                    relative_path = file_path.relative_to(expanded_repo_root / folder)
-                    relative_dir = str(relative_path.parent) if relative_path.parent != Path('.') else ''
-                    doc = Document(
-                        root_directory=Document.Root.DATA.value,
-                        file_path=folder + relative_dir,
-                        file_name=file,
-                        repo_id=repo_id,
-                        tracking_id=str(uuid.uuid4()),
-                    )
-
-                    # Check to see if the document has been loaded before.
-                    fetched_doc: dict[str, Any] = self.document_repository.load(doc.id)
-
-                    # If it has been loaded, add that one to the file_index.
-                    if len(fetched_doc['document']) != 0:
-                        doc = Document(**fetched_doc['document'][0])
-
-                    document_ids.append(doc.id)
-                    self.file_index[doc.id] = doc
-
-            self.file_repos[repo_id] = document_ids
-            future = self.run_task(self.update_repo_files(repo_id))
+    def _scan_and_index_repos(self, repos_to_scan: dict[str, str], repo_root: Path) -> None:
+        """Scan and index files in the specified repositories."""
+        for current_repo_id, folder in repos_to_scan.items():
+            document_ids = self._index_repo_files(current_repo_id, folder, repo_root)
+            self.file_repos[current_repo_id] = document_ids
+            future = self.run_task(self.update_repo_files(current_repo_id))
             future.add_done_callback(self._on_update_repo_files_complete)
+
+    def _index_repo_files(self, repo_id: str, folder: str, repo_root: Path) -> list[str]:
+        """Index all files in a repository folder."""
+        document_ids = []
+        for root, dirs, files in os.walk(repo_root / folder):
+            del dirs
+            for file in files:
+                if file.startswith('.'):
+                    continue  # Skip hidden files
+
+                doc = self._create_document_from_file(repo_id, folder, root, file, repo_root)
+                document_ids.append(doc.id)
+                self.file_index[doc.id] = doc
+        return document_ids
+
+    def _create_document_from_file(self, repo_id: str, folder: str, root: str, file: str, repo_root: Path) -> Document:
+        """Create a Document object from a file path."""
+        file_path = Path(root) / file
+        relative_path = file_path.relative_to(repo_root / folder)
+        relative_dir = str(relative_path.parent) if relative_path.parent != Path('.') else ''
+
+        doc = Document(
+            root_directory=Document.Root.DATA.value,
+            file_path=folder + relative_dir,
+            file_name=file,
+            repo_id=repo_id,
+            tracking_id=str(uuid.uuid4()),
+        )
+
+        # Check to see if the document has been loaded before.
+        fetched_doc: dict[str, Any] = self.document_repository.load(doc.id)
+
+        # If it has been loaded, add that one to the file_index.
+        if len(fetched_doc['document']) != 0:
+            doc = Document(**fetched_doc['document'][0])
+
+        return doc
 
     def _on_update_repo_files_complete(self, ret: Future[Any]) -> None:
         """

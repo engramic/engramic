@@ -51,9 +51,6 @@ def main() -> None:
         ],
     )
 
-    repo_service = host.get_service(RepoService)
-    repo_service.scan_folders()
-
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()
 

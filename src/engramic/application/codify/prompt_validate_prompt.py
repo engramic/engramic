@@ -10,7 +10,9 @@ from engramic.core.prompt import Prompt
 class PromptValidatePrompt(Prompt):
     def render_prompt(self) -> str:
         return_string = Template("""
-Your task is to study the article searching for suitable long term memories called engrams that are extracted from the article, and ONLY from the article, saving your notes as a valid TOML file.
+Your task is to study the original_prompt and article forming long term memories called Engrams that are extracted from the original_prompt and article saving your memories as valid TOML file.
+
+You should never form Engrams from data in the <sources></sources>. That data is only provided to help you calculate relevancy and accuracy.
 
 Engrams are important or unique topics. Something unimportant that just happened isn't a long term memory, that will be saved in working memory. Something that I should remember to inform and contribute to my existence or make me smarter is a long term memory. Write responses in absolute terms such as a four digit year rather than saying "last year".
 
@@ -31,35 +33,38 @@ In each engram, validate the content of the engram as it relates to the sources.
 -The field accuracy is a ranking of how accurate the content is relative to the sources.
 
 Engrams are unique, so if there is already a engram in the source, there is no need to generate another one that is sematnically the same. That is not memorable.
+
+Instructions are memorable.
 % endif
 
-If the article contains no memorable data, then you should respond with the following table:
+If the original_prompt and article contains no memorable data, then you should respond with the following table:
 [not_memorable]
 reason = "insert briefly why you don't think it's memorable."
 
-If the article contains memorable data, you may choose to provide one, two, or three engrams, but if you do provide an engram, you must also provide a meta table. Never provide more than one meta table.
+If the original_prompt and article contains memorable data, you may choose to provide one, two, or three engrams, but if you do provide an engram, you must also provide a meta table. Never provide more than one meta table.
 
 An engram should be a unique, complete thought, with enough information to fill an index card. Grab as much memorable information as you can, which may be as little as a single sentence or as big as a large table. You should avoid breaking up information that is semantically related. For exmaple, if there is a list, it would be better to have a single engram with the entire list than three engrams that split the contextually related information.
 
 % if is_lesson:
-This particular article is special and needs special treatment. You should try and generate one, maybe two engrams for this article.
+This particular original_prompt and article is special and needs special treatment. You should try and generate one, maybe two engrams for this original_prompt and article.
 The information is designed to be cohesive and it's better to consolidate simlar topics agressively into as few engrams as possible.
 
-If the article contains <instruction></instruction> tags, then set content to all of the text inside of the instruction tag including the instruction tags themselves. Context should include the name of the instructions and a type of "instructions".
+If the original_prompt and article contains <tool></tool> tags, meticulously copy in verbatim all of the text inside the instruction tag starting with the instruction tags themselves. Context should include the name of the tool and the description tool name <insert name>, tool description <insert description>
 % endif
 
 % if is_on_demand:
-This particular article is special and needs special treatment. You should try and generate one engram for this article that extracts the main topic and captures it verbatim including formatting.
+This particular original_prompt and article is special and needs special treatment. You should try and generate one engram for this original_prompt and article that extracts the main topic and captures it verbatim including formatting.
 % endif
 
 In the meta section, insert keywords and an outline summary based on the content and context of all engrams.
 
 Valid TOML file:
 A multi-line text requires tripple double quotes.
+never includes ```toml fences or any fences at all such as ```
 
 <TOML_file_description>
 [[engram]]
-content = "extract memorable facts from the article."
+content = "extract memorable facts from the original_prompt and article."
 context = a tripple quote wrapped valid json string (you must escape quotes correctly) of key pair data that provides a contextual understandng of the content. Think of context as all of the relevant details you would need to give someone to fully understand the content such as a title, section, document name, subject, etc.
 % if engram_list:
 relevancy = value from 0 to 4
