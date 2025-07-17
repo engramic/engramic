@@ -266,8 +266,8 @@ class Scan(Media):
         for page in result['_scan_page']:
             assembled += page
 
-        # matches1 = re.findall(r'<h1[^>]*>(.*?)</h1>', assembled, re.DOTALL | re.IGNORECASE)
-        # matches2 = re.findall(r'<h3[^>]*>(.*?)</h3>', assembled, re.DOTALL | re.IGNORECASE)
+        matches1 = re.findall(r'<h1[^>]*>(.*?)</h1>', assembled, re.DOTALL | re.IGNORECASE)
+        matches2 = re.findall(r'<h3[^>]*>(.*?)</h3>', assembled, re.DOTALL | re.IGNORECASE)
 
         self._process_engrams(assembled, context)
 
@@ -307,10 +307,10 @@ class Scan(Media):
 
             engram = Engram(
                 str(uuid.uuid4()),
-                [self.inital_scan['file_path']],
+                ["file://"+self.inital_scan['file_path']+"/"+self.inital_scan['file_name']],
                 [self.document.id],
                 text_in,
-                True,
+                'native',
                 context,
                 None,
                 [self.meta_id],

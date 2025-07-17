@@ -23,6 +23,9 @@ class MetaRepository:
         self.db_plugin['func'].insert_documents(table=DB.DBTables.META, docs=[asdict(meta)], args=None)
 
     def load(self, meta_dict: dict[str, Any]) -> Meta:
+        if meta_dict is None:
+            return None
+
         if isinstance(meta_dict.get('summary_full'), dict):
             summary = meta_dict['summary_full']
             meta_dict['summary_full'] = Index(summary['text'], summary['embedding'])

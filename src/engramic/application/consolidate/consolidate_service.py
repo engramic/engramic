@@ -111,6 +111,7 @@ class ConsolidateService(Service):
 
         # So, a bit of a race condition here. If meta lags engrams could signal inserterd before the meta.
         # I think this is unlikely to happen practically, but it would be better to fix this and know for sure.
+
         future = self.run_task(self._generate_summary_embeddings(observation))
         future.add_done_callback(self.on_generate_summary_embeddings)
 
@@ -121,6 +122,7 @@ class ConsolidateService(Service):
     """
 
     async def _generate_summary_embeddings(self, observation: Observation) -> Meta:
+        
         if observation.meta.summary_full is None:
             error = 'Summary full is none.'
             raise ValueError(error)

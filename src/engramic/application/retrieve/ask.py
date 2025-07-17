@@ -85,6 +85,7 @@ class Ask(Retrieval):
         )
         self.library = library
         self.prompt = prompt
+        self.widget_cmd = None
         self.conversation_direction: dict[str, str]
         self.prompt_analysis: PromptAnalysis | None = None
         self.retrieve_gen_conversation_direction_plugin = plugin_manager.get_plugin(
@@ -109,7 +110,7 @@ class Ask(Retrieval):
     async def _fetch_history(self) -> list[dict[str, Any]]:
         plugin = self.prompt_db_document_plugin
         args = plugin['args']
-        args['history_limit'] = 3
+        args['history_limit'] = 1
         args['repo_ids_filters'] = self.prompt.repo_ids_filters
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)
@@ -127,13 +128,32 @@ class Ask(Retrieval):
         if __debug__:
             self.service.send_message_async(self.service.Topic.DEBUG_ASK_CREATED, {'ask_id': self.id})
 
-        input_data = response_array
+        input_data = {'history':None}
+
+        if  response_array['history']:
+            previous_conversation_id = response_array['history'][0]['prompt']['conversation_id']
+            if self.prompt.conversation_id == previous_conversation_id:
+                input_data = response_array
+
         plugin = self.retrieve_gen_conversation_direction_plugin
 
         if len(self.service.repo_folders.items()) > 0:
             input_data.update({'all_repos': self.service.repo_folders})
         else:
             input_data.update({'all_repos': None})
+
+        self.conversation_direction = {}
+
+        if self.prompt.widget_cmds:
+            self.conversation_direction['current_engramic_widget'] = self.prompt.widget_cmds[0]
+            input_data.update({'current_engramic_widget':self.prompt.widget_cmds[0]}) #focus on one for now.
+        else:
+            input_data.update({'current_engramic_widget':None}) #focus on one for now.
+            if response_array['history']:
+                previous_widget = response_array['history'][0]['retrieve_result']['conversation_direction']['current_engramic_widget']
+                self.conversation_direction['current_engramic_widget'] = previous_widget
+            else:
+                self.conversation_direction['current_engramic_widget'] = None
 
         # add prompt engineering here and submit as the full prompt.
         prompt_gen = PromptGenConversation(
@@ -158,10 +178,11 @@ class Ask(Retrieval):
 
         json_parsed: dict[str, str] = json.loads(ret[0]['llm_response'])
 
-        self.conversation_direction = {}
+        
         self.conversation_direction['current_user_intent'] = json_parsed['current_user_intent']
-
         self.conversation_direction['working_memory'] = json_parsed['working_memory_step_4']
+
+        
 
         if __debug__:
             self.service.send_message_async(
@@ -175,22 +196,20 @@ class Ask(Retrieval):
             engramic.application.retrieve.retrieve_service.RetrieveMetric.CONVERSATION_DIRECTION_CALCULATED
         )
 
-        return json_parsed
+        return None
 
     def on_direction_ret_complete(self, fut: Future[Any]) -> None:
-        direction_ret = fut.result()
+        ret_val = fut.result()
+        del ret_val
 
-        logging.debug('current_user_intent: %s', direction_ret)
-        intent_and_direction = direction_ret['current_user_intent']
-
-        embed_step = self.service.run_task(self._embed_gen_direction(intent_and_direction))
+        embed_step = self.service.run_task(self._embed_gen_direction())
         embed_step.add_done_callback(self.on_embed_direction_complete)
 
-    async def _embed_gen_direction(self, current_user_intent: str) -> list[float]:
+    async def _embed_gen_direction(self) -> list[float]:
         plugin = self.embeddings_gen_embed
 
         ret = await asyncio.to_thread(
-            plugin['func'].gen_embed, strings=[current_user_intent], args=self.service.host.mock_update_args(plugin)
+            plugin['func'].gen_embed, strings=[self.conversation_direction['current_user_intent']], args=self.service.host.mock_update_args(plugin)
         )
 
         self.service.host.update_mock_data(plugin, ret)
@@ -199,19 +218,19 @@ class Ask(Retrieval):
         return float_array
 
     def on_embed_direction_complete(self, fut: Future[Any]) -> None:
-        user_intent_embedding = fut.result()
-        fetch_direction_step = self.service.run_task(self._vector_fetch_direction_meta(user_intent_embedding))
+        intent_embedding = fut.result()
+        fetch_direction_step = self.service.run_task(self._vector_fetch_direction_meta(intent_embedding))
         fetch_direction_step.add_done_callback(self.on_vector_fetch_direction_meta_complete)
 
-    async def _vector_fetch_direction_meta(self, user_intent_embedding: list[float]) -> list[str]:
+    async def _vector_fetch_direction_meta(self, intent_embedding: list[float]) -> list[str]:
         plugin = self.prompt_vector_db_plugin
         plugin['args'].update({'threshold': 0.6})  # meta needs a broader threshold.
-        plugin['args'].update({'n_results': 10})  # meta needs a broader threshold.
+        plugin['args'].update({'n_results': 15})  # meta needs a broader threshold.
 
         ret = await asyncio.to_thread(
             plugin['func'].query,
             collection_name='meta',
-            embeddings=user_intent_embedding,
+            embeddings=intent_embedding,
             filters=self.prompt.repo_ids_filters,
             args=self.service.host.mock_update_args(plugin),
         )
@@ -255,7 +274,12 @@ class Ask(Retrieval):
         # add prompt engineering here and submit as the full prompt.
         prompt = PromptAnalyzePrompt(
             prompt_str=self.prompt.prompt_str,
-            input_data={'meta_list': meta_list, 'working_memory': self.conversation_direction['working_memory']},
+            input_data={
+                        'working_memory': self.conversation_direction['working_memory'],
+                        'current_user_intent': self.conversation_direction['current_user_intent'],
+                        'current_engramic_widget':self.conversation_direction['current_engramic_widget'],
+                        'current_user_intent':self.conversation_direction['current_user_intent'],
+                        }
         )
         structured_response = {
             'response_length': str,
@@ -279,20 +303,10 @@ class Ask(Retrieval):
             error = f'Expected dict[str, str], got {type(ret[0])}'
             raise TypeError(error)
 
-        return ret[0]
+        json_ret = json.loads(ret[0]['llm_response'])
+        return json_ret
 
-    def on_analyze_complete(self, fut: Future[Any]) -> None:
-        analysis = fut.result()  # This will raise an exception if the coroutine fails
-
-        self.prompt_analysis = PromptAnalysis(
-            json.loads(analysis['_analyze_prompt'][0]['llm_response']),
-            json.loads(analysis['_generate_indices'][0]['llm_response']),
-        )
-
-        genrate_indices_future = self.service.run_task(
-            self._generate_indicies_embeddings(self.prompt_analysis.indices['indices'])
-        )
-        genrate_indices_future.add_done_callback(self.on_indices_embeddings_generated)
+    
 
     async def _generate_indices(self, meta_list: list[Meta]) -> dict[str, str]:
         plugin = self.prompt_retrieve_indices_plugin
@@ -328,7 +342,14 @@ class Ask(Retrieval):
 
         self.service.host.update_mock_data(plugin, ret)
         response = ret[0]['llm_response']
-        response_json = json.loads(response)
+        
+        try:
+            response_json = json.loads(response)
+        except json.JSONDecodeError as e:
+            logging.error("Failed to parse JSON in _generate_indices: %s. Response: %s", e, response)
+            raise
+
+
         count = len(response_json['indices'])
         self.metrics_tracker.increment(
             engramic.application.retrieve.retrieve_service.RetrieveMetric.DYNAMIC_INDICES_GENERATED, count
@@ -338,7 +359,31 @@ class Ask(Retrieval):
             error = f'Expected dict[str, str], got {type(ret[0])}'
             raise TypeError(error)
 
-        return ret[0]
+        json_ret = json.loads(ret[0]['llm_response'])
+        return json_ret
+    
+    def on_analyze_complete(self, fut: Future[Any]) -> None:
+        analysis = fut.result()  # This will raise an exception if the coroutine fails
+
+        try:
+            analysis_json = analysis['_analyze_prompt'][0]
+            indices_json = analysis['_generate_indices'][0]
+        except json.JSONDecodeError as e:
+            logging.error("Failed to parse JSON in on_analyze_complete: %s", e)
+            raise
+
+        if self.conversation_direction['current_engramic_widget']:
+            indices_json['indices'].append("widget: " + self.conversation_direction['current_engramic_widget'])
+
+        self.prompt_analysis = PromptAnalysis(
+            analysis_json,
+            indices_json,
+        )
+
+        genrate_indices_future = self.service.run_task(
+            self._generate_indicies_embeddings(self.prompt_analysis.indices['indices'])
+        )
+        genrate_indices_future.add_done_callback(self.on_indices_embeddings_generated)
 
     def on_indices_embeddings_generated(self, fut: Future[Any]) -> None:
         embeddings = fut.result()
@@ -348,6 +393,9 @@ class Ask(Retrieval):
 
     async def _generate_indicies_embeddings(self, indices: list[str]) -> list[list[float]]:
         plugin = self.embeddings_gen_embed
+
+        if not indices:
+            return []
 
         ret = await asyncio.to_thread(
             plugin['func'].gen_embed, strings=indices, args=self.service.host.mock_update_args(plugin)
@@ -365,6 +413,9 @@ class Ask(Retrieval):
 
     async def _query_index_db(self, embeddings: list[list[float]]) -> set[str]:
         plugin = self.prompt_vector_db_plugin
+
+        if not embeddings:
+            return []
 
         ids = set()
 

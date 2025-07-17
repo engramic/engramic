@@ -14,32 +14,28 @@ class PromptGenIndices(Prompt):
     def render_prompt(self) -> str:
         try:
             rendered_template = Template("""
-
-        % if selected_repos is not None and repo_ids_filters is not None and all_repos is not None:
-        Repos hold files that the user is interested in. The user has selected the following repos:
-        % for repo_id in repo_ids_filters:
-            ${all_repos[repo_id]}
-        % endfor
-        % endif
-
-        Write a set of indices, phrases of 5 to 8 words, that will be used by a vector database to search for data that will satisfy the user_prompt.
-
-        If the user is asking you to achieve something, look for instructions. If you find them, build one or more indices about the "instructions" related to the user prompt.
-
+        Write a set of lookup indices, phrases of 5 to 8 words, that will be used to query a vector database. An index is a query is important to know in order to satisfy the current_user_intent. If domain_knolwedge does not relate, then do not make an index for it.
+                                         
+        Do not create duplicate indexes.
 
         % if len(meta_list)>0:
-        The domain_knowledge gives you insight into knowledge stored in your long term memory. It's here because it's the most closely related information you have stored about the user_prompt. If you have domain knowledge that satisfies the user prompt, consider the information when formulating the indices. Form your set of indices with context items followed by your phrases as defined by this template: context_item: value, context_item2: value, 5 to 8 word phrase.
+        The domain_knowledge gives you insight into the knowledge in the vector database. If you have domain knowledge that relates to the current_user_intent, use that information when formulating the indices. Form your set of indices with a few context items from the context keywords, followed by your phrases as defined by this template:
+        
+        context_item: value, context_item2: value, 5 to 8 word phrase.
         % endif
 
-        % for meta in meta_list:
         <domain_knowledge>
+        % for meta in meta_list:
             <knowledge>
-                information location: ${" ".join(meta.locations)}
+                type: ${meta.type}
+                % if meta.locations:
+                    information location: ${" ".join(meta.locations)}
+                % endif
                 context keywords: ${" ".join(meta.keywords)}
                 knowledge: ${meta.summary_full.text}
             </knowledge>
-        </domain_knowledge>
         % endfor
+        </domain_knowledge>
 
         <user_prompt>
             <prompt_string>

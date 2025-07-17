@@ -16,6 +16,7 @@ from engramic.core.host import Host
 from engramic.core.interface.db import DB
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.prompt import Prompt
+from engramic.core.repo import Repo
 from engramic.core.response import Response
 from engramic.core.retrieve_result import RetrieveResult
 from engramic.infrastructure.repository.engram_repository import EngramRepository
@@ -78,6 +79,7 @@ class ResponseService(Service):
         self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
         self.llm_main = self.plugin_manager.get_plugin('llm', 'response_main')
         self.metrics_tracker: MetricsTracker[ResponseMetric] = MetricsTracker[ResponseMetric]()
+        self.repo_folders: dict[str, Any] = {}
         ##
         # Many methods are not ready to be until their async component is running.
         # Do not call async context methods in the constructor.
@@ -85,6 +87,7 @@ class ResponseService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
+        self.subscribe(Service.Topic.REPO_FOLDERS, self._on_repo_folders)
         self.web_socket_manager.init_async()
         super().start()
 
@@ -94,6 +97,9 @@ class ResponseService(Service):
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
+    
+    def _on_repo_folders(self, msg: dict[str, Any]) -> None:
+        self.repo_folders = msg['repo_folders']
 
     def on_retrieve_complete(self, retrieve_result_in: dict[str, Any]) -> None:
         if __debug__:
@@ -123,6 +129,7 @@ class ResponseService(Service):
         args = plugin['args']
         args['history_limit'] = 3
         args['repo_ids_filters'] = prompt.repo_ids_filters
+        args['conversation_id'] = prompt.conversation_id
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)
         history: dict[str, Any] = ret_val[0]
@@ -194,6 +201,7 @@ class ResponseService(Service):
                 'history': history_array['history'],
                 'working_memory': retrieve_result.conversation_direction,
                 'analysis': retrieve_result.analysis,
+                'all_repos': self.repo_folders
             },
         )
 

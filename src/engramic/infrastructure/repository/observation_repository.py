@@ -15,6 +15,7 @@ from engramic.core.interface.db import DB
 from engramic.core.meta import Meta
 from engramic.core.observation import Observation
 from engramic.core.response import Response
+from engramic.core.engram import EngramType
 from engramic.infrastructure.repository.engram_repository import EngramRepository
 from engramic.infrastructure.repository.meta_repository import MetaRepository
 from engramic.infrastructure.system.observation_system import ObservationSystem
@@ -104,7 +105,7 @@ class ObservationRepository:
         engram.setdefault('locations', [f'llm://{response.model}'])
         engram.setdefault('meta_ids', [meta_id])
         engram.setdefault('repo_ids', response.prompt.repo_ids_filters)
-        engram.setdefault('is_native_source', False)
+        engram.setdefault('engram_type', EngramType.EPISODIC)#episodic
         if engram['context']:
             try:
                 context_str = engram['context']
@@ -113,6 +114,10 @@ class ObservationRepository:
                 context_str = re.sub(r'\s*```\s*$', '', context_str)
 
                 engram['context'] = json.loads(context_str)
+
+                if engram['engram_type']=='artifact':
+                    engram['context'].update({'engram_type':'artifact'})
+
             except json.JSONDecodeError as e:
                 error = (
                     f"Failed to decode JSON in 'context' in Normalize Engram (a formatting issue with LLM output): {e}"

@@ -77,10 +77,10 @@ class ChromaDB(VectorDB):
             documents = documents_groups[i]
 
             for j, distance in enumerate(distances):
-                if distance < threshold:
+                if distance < threshold and documents[j] not in ret_ids:
                     ret_ids.append(documents[j])
 
-        return {'query_set': set(ret_ids)}
+        return {'query_set': ret_ids}
 
     @vector_db_impl
     def insert(
@@ -106,11 +106,13 @@ class ChromaDB(VectorDB):
                 metadatas.update({'null': True})
                 metadatas_container.append(metadatas)
 
+        meta_datas = cast(list[Mapping[str, str | int | float | bool | None]], metadatas_container)
+
         self.collection[collection_name].add(
             documents=documents,
             embeddings=embeddings,
             ids=ids,
-            metadatas=cast(list[Mapping[str, str | int | float | bool | None]], metadatas_container),
+            metadatas=meta_datas,
         )
 
         # end = time.perf_counter()

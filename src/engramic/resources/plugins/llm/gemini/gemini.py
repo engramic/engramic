@@ -57,17 +57,16 @@ class Gemini(LLM):
 
         contents = [
             types.Content(
-                role='user',
                 parts=parts,
             ),
         ]
 
         temperature = 0.5
-        top_p = 0.95
-        top_k = 40
+        top_p = 0.5
+        top_k = 30
 
         if 'deterministic' in args and (not args.get('deterministic') or args['deterministic'].lower() == 'true'):
-            temperature = 0
+            temperature = 0.01
             top_p = 1
             top_k = 1
 
@@ -76,6 +75,7 @@ class Gemini(LLM):
         response_mime_type = 'text/plain'
         response_schema = None
         thinking_config = None
+        frequency_penalty = None
 
         # Structured response case
         if structured_schema is not None:
@@ -84,24 +84,26 @@ class Gemini(LLM):
             response_mime_type = 'application/json'
 
         # Model-specific config
-        if model == 'gemini-2.5-flash-preview-04-17':
-            thinking_config = types.ThinkingConfig(include_thoughts=False, thinking_budget=0)
+        config_kwargs = {
+            'temperature': temperature,
+            'top_p': top_p,
+            'top_k': top_k,
+            'max_output_tokens': max_output_tokens,
+            'response_mime_type': response_mime_type,
+            'response_schema': response_schema,
+        }
+        
+        if model in ['gemini-2.5-flash-preview-04-17', 'gemini-2.5-flash', 'gemini-2.5-pro']:
+            config_kwargs['thinking_config'] = types.ThinkingConfig(include_thoughts=False, thinking_budget=500)
+            
 
         # Construct config explicitly
-        generate_content_config = types.GenerateContentConfig(
-            temperature=temperature,
-            top_p=top_p,
-            top_k=top_k,
-            max_output_tokens=max_output_tokens,
-            response_mime_type=response_mime_type,
-            response_schema=response_schema,
-            thinking_config=thinking_config,
-        )
+        generate_content_config = types.GenerateContentConfig(**config_kwargs)
 
         response = self._api_client.models.generate_content(
             model=model,
             contents=contents,
-            config=generate_content_config,
+            config=generate_content_config
         )
 
         # finish_reason = response.candidates[0].finish_reason
@@ -124,7 +126,6 @@ class Gemini(LLM):
         model = args['model']
         contents = [
             types.Content(
-                role='user',
                 parts=[
                     types.Part.from_text(text=prompt.render_prompt()),
                 ],

@@ -184,7 +184,7 @@ class ProgressService(Service):
             self.send_message_async(
                 Service.Topic.PROGRESS_UPDATED,
                 {
-                    'progress_type': 'lesson',
+                    'progress_type': 'prompt',
                     'id': prompt_id,
                     'target_id': prompt_id,
                     'percent_complete': 0.05,
@@ -275,8 +275,12 @@ class ProgressService(Service):
         parent_id = msg['parent_id']
 
         self.progress_array.setdefault(obs_id, ProgressService.ProgressArray('observation'))
-        self.progress_array[parent_id].children_is_complete_array[obs_id] = False
-        self.lookup_array[obs_id] = parent_id
+
+        if parent_id:
+            self.progress_array[parent_id].children_is_complete_array[obs_id] = False
+            self.lookup_array[obs_id] = parent_id
+
+            #todo implement else and progress_update if needed.
 
     def on_engrams_created(self, msg: dict[str, Any]) -> None:
         """
@@ -317,9 +321,7 @@ class ProgressService(Service):
 
         self.tracking_array[tracking_id].total_indices += len(msg['index_id_array'])
 
-    # ------------------------------------------------------------------ #
-    # propagation logic                                                  #
-    # ------------------------------------------------------------------ #
+   
     def _on_prompt_complete(self, msg: dict[str, Any]) -> None:
         prompt_msg = msg['prompt']
         prompt = Prompt(**prompt_msg)
@@ -327,7 +329,7 @@ class ProgressService(Service):
             self.send_message_async(
                 Service.Topic.PROGRESS_UPDATED,
                 {
-                    'progress_type': 'lesson',
+                    'progress_type': 'prompt',
                     'id': prompt.prompt_id,
                     'target_id': None,
                     'percent_complete': 1,
@@ -360,6 +362,7 @@ class ProgressService(Service):
         self._bubble_up_if_complete(parent_id, bubble_return)
         originating_object = self.progress_array[bubble_return.root_node]
 
+        
         self.send_message_async(
             Service.Topic.PROGRESS_UPDATED,
             {

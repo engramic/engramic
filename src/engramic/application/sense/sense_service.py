@@ -64,7 +64,7 @@ class SenseService(Service):
         self.submit_document(document, overwrite=overwrite)
 
     def submit_document(self, document: Document, *, overwrite: bool = False) -> Document | None:
-        if document.is_scanned is True and overwrite is False:
+        if document.percent_complete_document>0.99 is True and overwrite is False:
             return None
 
         self.host.update_mock_data_input(
