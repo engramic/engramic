@@ -5,7 +5,7 @@
 # Engramic: Build Apps that Answer, Learn, and Remember
 
 ## What is Engramic?
-Engramic is an advanced system designed to enhance AI applications with sophisticated context management and memory capabilities. Unlike conventional RAG implementations, Engramic goes beyond simple retrieval and response by integrating memory and learning mechanisms, enabling applications to synthesize their data, improving it's undersanding over time.
+Engramic is an advanced system designed to enhance AI applications with sophisticated context management and memory capabilities. Unlike conventional RAG implementations, Engramic goes beyond simple retrieval and response by integrating memory and learning mechanisms, enabling applications to synthesize their data, improving its understanding over time.
 
 ## Core Features
 - **Context Management**: Maintain and utilize contextual awareness across multiple interactions.
@@ -121,7 +121,7 @@ Plugins are managed in the engram_profiles.toml file which is generated during t
 *Note: Plugin dependencies are downloaded on first run of the plugin and can be viewed in the plugin.toml file located in the root directory of the plugin.*
 
 Vector DB
-- ChomraDB
+- ChromaDB
 
 Database
 - SQLite
