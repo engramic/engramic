@@ -25,7 +25,7 @@ from engramic.application.sense.prompt_gen_full_summary import PromptGenFullSumm
 from engramic.application.sense.prompt_gen_meta import PromptGenMeta
 from engramic.application.sense.prompt_scan_page import PromptScanPage
 from engramic.core.document import Document
-from engramic.core.engram import Engram
+from engramic.core.engram import Engram, EngramType
 from engramic.core.index import Index
 from engramic.core.interface.media import Media
 from engramic.core.meta import Meta
@@ -266,8 +266,8 @@ class Scan(Media):
         for page in result['_scan_page']:
             assembled += page
 
-        matches1 = re.findall(r'<h1[^>]*>(.*?)</h1>', assembled, re.DOTALL | re.IGNORECASE)
-        matches2 = re.findall(r'<h3[^>]*>(.*?)</h3>', assembled, re.DOTALL | re.IGNORECASE)
+        # matches1 = re.findall(r'<h1[^>]*>(.*?)</h1>', assembled, re.DOTALL | re.IGNORECASE)
+        # matches2 = re.findall(r'<h3[^>]*>(.*?)</h3>', assembled, re.DOTALL | re.IGNORECASE)
 
         self._process_engrams(assembled, context)
 
@@ -307,10 +307,10 @@ class Scan(Media):
 
             engram = Engram(
                 str(uuid.uuid4()),
-                ["file://"+self.inital_scan['file_path']+"/"+self.inital_scan['file_name']],
+                ['file://' + self.inital_scan['file_path'] + '/' + self.inital_scan['file_name']],
                 [self.document.id],
                 text_in,
-                'native',
+                EngramType.NATIVE,
                 context,
                 None,
                 [self.meta_id],

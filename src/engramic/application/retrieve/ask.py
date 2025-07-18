@@ -86,7 +86,7 @@ class Ask(Retrieval):
         self.library = library
         self.prompt = prompt
         self.widget_cmd = None
-        self.conversation_direction: dict[str, str]
+        self.conversation_direction: dict[str, Any]
         self.prompt_analysis: PromptAnalysis | None = None
         self.retrieve_gen_conversation_direction_plugin = plugin_manager.get_plugin(
             'llm', 'retrieve_gen_conversation_direction'
@@ -124,13 +124,13 @@ class Ask(Retrieval):
         )
         retrieve_gen_conversation_direction_step.add_done_callback(self.on_direction_ret_complete)
 
-    async def _retrieve_gen_conversation_direction(self, response_array: dict[str, Any]) -> dict[str, str]:
+    async def _retrieve_gen_conversation_direction(self, response_array: dict[str, Any]) -> None:
         if __debug__:
             self.service.send_message_async(self.service.Topic.DEBUG_ASK_CREATED, {'ask_id': self.id})
 
-        input_data = {'history':None}
+        input_data: dict[str, Any] = {'history': None}
 
-        if  response_array['history']:
+        if response_array['history']:
             previous_conversation_id = response_array['history'][0]['prompt']['conversation_id']
             if self.prompt.conversation_id == previous_conversation_id:
                 input_data = response_array
@@ -146,11 +146,13 @@ class Ask(Retrieval):
 
         if self.prompt.widget_cmds:
             self.conversation_direction['current_engramic_widget'] = self.prompt.widget_cmds[0]
-            input_data.update({'current_engramic_widget':self.prompt.widget_cmds[0]}) #focus on one for now.
+            input_data.update({'current_engramic_widget': self.prompt.widget_cmds[0]})  # focus on one for now.
         else:
-            input_data.update({'current_engramic_widget':None}) #focus on one for now.
+            input_data.update({'current_engramic_widget': None})  # focus on one for now.
             if response_array['history']:
-                previous_widget = response_array['history'][0]['retrieve_result']['conversation_direction']['current_engramic_widget']
+                previous_widget = response_array['history'][0]['retrieve_result']['conversation_direction'][
+                    'current_engramic_widget'
+                ]
                 self.conversation_direction['current_engramic_widget'] = previous_widget
             else:
                 self.conversation_direction['current_engramic_widget'] = None
@@ -178,11 +180,8 @@ class Ask(Retrieval):
 
         json_parsed: dict[str, str] = json.loads(ret[0]['llm_response'])
 
-        
         self.conversation_direction['current_user_intent'] = json_parsed['current_user_intent']
         self.conversation_direction['working_memory'] = json_parsed['working_memory_step_4']
-
-        
 
         if __debug__:
             self.service.send_message_async(
@@ -196,8 +195,6 @@ class Ask(Retrieval):
             engramic.application.retrieve.retrieve_service.RetrieveMetric.CONVERSATION_DIRECTION_CALCULATED
         )
 
-        return None
-
     def on_direction_ret_complete(self, fut: Future[Any]) -> None:
         ret_val = fut.result()
         del ret_val
@@ -209,7 +206,9 @@ class Ask(Retrieval):
         plugin = self.embeddings_gen_embed
 
         ret = await asyncio.to_thread(
-            plugin['func'].gen_embed, strings=[self.conversation_direction['current_user_intent']], args=self.service.host.mock_update_args(plugin)
+            plugin['func'].gen_embed,
+            strings=[self.conversation_direction['current_user_intent']],
+            args=self.service.host.mock_update_args(plugin),
         )
 
         self.service.host.update_mock_data(plugin, ret)
@@ -260,7 +259,7 @@ class Ask(Retrieval):
 
     def on_fetch_direction_meta_complete(self, fut: Future[Any]) -> None:
         meta_list = fut.result()
-        analyze_step = self.service.run_tasks([self._analyze_prompt(meta_list), self._generate_indices(meta_list)])
+        analyze_step = self.service.run_tasks([self._analyze_prompt(), self._generate_indices(meta_list)])
         analyze_step.add_done_callback(self.on_analyze_complete)
 
     """
@@ -269,17 +268,16 @@ class Ask(Retrieval):
     Analyzies the prompt and generates lookups that will aid in vector searching of related content
     """
 
-    async def _analyze_prompt(self, meta_list: list[Meta]) -> dict[str, str]:
+    async def _analyze_prompt(self) -> dict[str, Any]:
         plugin = self.prompt_analysis_plugin
         # add prompt engineering here and submit as the full prompt.
         prompt = PromptAnalyzePrompt(
             prompt_str=self.prompt.prompt_str,
             input_data={
-                        'working_memory': self.conversation_direction['working_memory'],
-                        'current_user_intent': self.conversation_direction['current_user_intent'],
-                        'current_engramic_widget':self.conversation_direction['current_engramic_widget'],
-                        'current_user_intent':self.conversation_direction['current_user_intent'],
-                        }
+                'working_memory': self.conversation_direction['working_memory'],
+                'current_user_intent': self.conversation_direction['current_user_intent'],
+                'current_engramic_widget': self.conversation_direction['current_engramic_widget'],
+            },
         )
         structured_response = {
             'response_length': str,
@@ -303,12 +301,10 @@ class Ask(Retrieval):
             error = f'Expected dict[str, str], got {type(ret[0])}'
             raise TypeError(error)
 
-        json_ret = json.loads(ret[0]['llm_response'])
+        json_ret: dict[str, Any] = json.loads(ret[0]['llm_response'])
         return json_ret
 
-    
-
-    async def _generate_indices(self, meta_list: list[Meta]) -> dict[str, str]:
+    async def _generate_indices(self, meta_list: list[Meta]) -> dict[str, Any]:
         plugin = self.prompt_retrieve_indices_plugin
         # add prompt engineering here and submit as the full prompt.
         input_data: dict[str, Any] = {
@@ -342,13 +338,12 @@ class Ask(Retrieval):
 
         self.service.host.update_mock_data(plugin, ret)
         response = ret[0]['llm_response']
-        
+
         try:
             response_json = json.loads(response)
-        except json.JSONDecodeError as e:
-            logging.error("Failed to parse JSON in _generate_indices: %s. Response: %s", e, response)
+        except json.JSONDecodeError:
+            logging.exception('Failed to parse JSON in _generate_indices: Response: %s', response)
             raise
-
 
         count = len(response_json['indices'])
         self.metrics_tracker.increment(
@@ -359,21 +354,21 @@ class Ask(Retrieval):
             error = f'Expected dict[str, str], got {type(ret[0])}'
             raise TypeError(error)
 
-        json_ret = json.loads(ret[0]['llm_response'])
+        json_ret: dict[str, Any] = json.loads(ret[0]['llm_response'])
         return json_ret
-    
+
     def on_analyze_complete(self, fut: Future[Any]) -> None:
         analysis = fut.result()  # This will raise an exception if the coroutine fails
 
         try:
             analysis_json = analysis['_analyze_prompt'][0]
             indices_json = analysis['_generate_indices'][0]
-        except json.JSONDecodeError as e:
-            logging.error("Failed to parse JSON in on_analyze_complete: %s", e)
+        except json.JSONDecodeError:
+            logging.exception('Failed to parse JSON in on_analyze_complete')
             raise
 
         if self.conversation_direction['current_engramic_widget']:
-            indices_json['indices'].append("widget: " + self.conversation_direction['current_engramic_widget'])
+            indices_json['indices'].append('widget: ' + self.conversation_direction['current_engramic_widget'])
 
         self.prompt_analysis = PromptAnalysis(
             analysis_json,
@@ -415,7 +410,7 @@ class Ask(Retrieval):
         plugin = self.prompt_vector_db_plugin
 
         if not embeddings:
-            return []
+            return set()
 
         ids = set()
 

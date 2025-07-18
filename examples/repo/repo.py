@@ -51,8 +51,10 @@ class TestService(Service):
     def _on_repo_folders(self, message_in: dict[str, Any]) -> None:
         if message_in['repo_folders'] is not None:
             self.repos = message_in['repo_folders']
-            self.repo_id1 = next((key for key, value in self.repos.items() if value == 'QuantumNetworking'), None)
-            self.repo_id2 = next((key for key, value in self.repos.items() if value == 'ElysianFields'), None)
+            self.repo_id1 = next(
+                (key for key, value in self.repos.items() if value['name'] == 'QuantumNetworking'), None
+            )
+            self.repo_id2 = next((key for key, value in self.repos.items() if value['name'] == 'ElysianFields'), None)
         else:
             logging.info('No repos found. You can add a repo by adding a folder to home/.local/share/engramic')
 
@@ -60,7 +62,7 @@ class TestService(Service):
         # Only logging information about the files
         logging.info('Repo: %s, Files received: %d', message_in['repo'], len(message_in['files']))
         for file in message_in['files']:
-            status = 'previously scanned' if file['is_scanned'] else 'unscanned'
+            status = 'previously scanned' if file['percent_complete_document'] else 'unscanned'
             logging.info('File: %s - %s', file['file_name'], status)
 
     def on_document_inserted(self, message_in: dict[str, Any]) -> None:

@@ -122,7 +122,6 @@ class ConsolidateService(Service):
     """
 
     async def _generate_summary_embeddings(self, observation: Observation) -> Meta:
-        
         if observation.meta.summary_full is None:
             error = 'Summary full is none.'
             raise ValueError(error)

@@ -2,8 +2,9 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+from datetime import datetime, timezone
+
 from mako.template import Template
-from datetime import datetime
 
 from engramic.core.prompt import Prompt
 
@@ -12,7 +13,7 @@ class PromptMainPrompt(Prompt):
     def render_prompt(self) -> str:
         render_string = Template("""
 Your name is Engramic.
-                                 
+
 Date is ${timestamp}
 
 You are having a casual business conversation with a user and are responding to the current_user_prompt and providing a current response. Your job is to provide factual answers from sources that satisfy user intent and follow any instructions provided by widgets. You only generate synthectic data if you are explictly asked to.
@@ -152,7 +153,7 @@ Deliver results related to the user_intent and resist explaining the work you ar
         % endfor
         % if not history:
             Attention! History is empty. There has been no conversation so far. If the user asks about past conversations tell them the conversation has just began and give them some ideas of what they can ask based on the sources.
-        % endif    
+        % endif
     </engramic_previous_responses>
     % endif
 </sources>
@@ -171,5 +172,5 @@ ${analysis['thinking_steps']}
 
 
 
-""").render(timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"), **self.input_data)
+""").render(timestamp=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'), **self.input_data)
         return str(render_string)

@@ -10,23 +10,24 @@ from typing import Any
 
 from cachetools import LRUCache
 
+from engramic.core.engram import EngramType
 from engramic.core.index import Index
 from engramic.core.interface.db import DB
 from engramic.core.meta import Meta
 from engramic.core.observation import Observation
 from engramic.core.response import Response
-from engramic.core.engram import EngramType
 from engramic.infrastructure.repository.engram_repository import EngramRepository
 from engramic.infrastructure.repository.meta_repository import MetaRepository
 from engramic.infrastructure.system.observation_system import ObservationSystem
 
 
 class ObservationRepository:
-    def __init__(self, plugin: dict[str, Any], cache_size: int = 1000) -> None:
+    def __init__(self, plugin: dict[str, Any] | None, cache_size: int = 1000) -> None:
         self.db_plugin = plugin
 
-        self.meta_repository = MetaRepository(plugin)
-        self.engram_repository = EngramRepository(plugin)
+        if plugin:
+            self.meta_repository = MetaRepository(plugin)
+            self.engram_repository = EngramRepository(plugin)
 
         # LRU Cache to store Engram objects
         self.cache: LRUCache[str, Observation] = LRUCache(maxsize=cache_size)
@@ -105,7 +106,7 @@ class ObservationRepository:
         engram.setdefault('locations', [f'llm://{response.model}'])
         engram.setdefault('meta_ids', [meta_id])
         engram.setdefault('repo_ids', response.prompt.repo_ids_filters)
-        engram.setdefault('engram_type', EngramType.EPISODIC)#episodic
+        engram.setdefault('engram_type', EngramType.EPISODIC)  # episodic
         if engram['context']:
             try:
                 context_str = engram['context']
@@ -115,8 +116,8 @@ class ObservationRepository:
 
                 engram['context'] = json.loads(context_str)
 
-                if engram['engram_type']=='artifact':
-                    engram['context'].update({'engram_type':'artifact'})
+                if engram['engram_type'] == 'artifact':
+                    engram['context'].update({'engram_type': 'artifact'})
 
             except json.JSONDecodeError as e:
                 error = (
@@ -125,7 +126,9 @@ class ObservationRepository:
                 raise RuntimeError(error) from e
 
     def save(self, observation: Observation) -> bool:
-        ret: bool = self.db_plugin['func'].insert_documents(
-            table=DB.DBTables.OBSERVATION, query='save_observation', docs=[observation], args=None
-        )
-        return ret
+        if self.db_plugin:
+            ret: bool = self.db_plugin['func'].insert_documents(
+                table=DB.DBTables.OBSERVATION, query='save_observation', docs=[observation], args=None
+            )
+            return ret
+        return False

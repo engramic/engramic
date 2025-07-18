@@ -5,18 +5,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 from enum import Enum
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from engramic.core.index import Index
 
-class EngramType(str, Enum):
-    NATIVE = "native"
-    EPISODIC = "episodic"
-    PROCEDURAL = "procedural"
-    ARTIFACT = "artifact"
 
+class EngramType(str, Enum):
+    NATIVE = 'native'
+    EPISODIC = 'episodic'
+    PROCEDURAL = 'procedural'
+    ARTIFACT = 'artifact'
 
 
 @dataclass()

@@ -15,12 +15,12 @@ class PromptGenIndices(Prompt):
         try:
             rendered_template = Template("""
         Write a set of lookup indices, phrases of 5 to 8 words, that will be used to query a vector database. An index is a query is important to know in order to satisfy the current_user_intent. If domain_knolwedge does not relate, then do not make an index for it.
-                                         
+
         Do not create duplicate indexes.
 
         % if len(meta_list)>0:
         The domain_knowledge gives you insight into the knowledge in the vector database. If you have domain knowledge that relates to the current_user_intent, use that information when formulating the indices. Form your set of indices with a few context items from the context keywords, followed by your phrases as defined by this template:
-        
+
         context_item: value, context_item2: value, 5 to 8 word phrase.
         % endif
 

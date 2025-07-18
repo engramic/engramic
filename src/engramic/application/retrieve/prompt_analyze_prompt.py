@@ -24,7 +24,7 @@ Analyze the users prompt. Your name is Engramic and you act like an individual i
 <current_engramic_widget>
     ${current_engramic_widget}
 </current_engramic_widget>
-        
+
 
 Classify it into the following categories:
 response_type: short | medium | long

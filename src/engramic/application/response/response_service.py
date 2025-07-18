@@ -16,7 +16,6 @@ from engramic.core.host import Host
 from engramic.core.interface.db import DB
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
 from engramic.core.prompt import Prompt
-from engramic.core.repo import Repo
 from engramic.core.response import Response
 from engramic.core.retrieve_result import RetrieveResult
 from engramic.infrastructure.repository.engram_repository import EngramRepository
@@ -97,7 +96,7 @@ class ResponseService(Service):
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
-    
+
     def _on_repo_folders(self, msg: dict[str, Any]) -> None:
         self.repo_folders = msg['repo_folders']
 
@@ -201,7 +200,7 @@ class ResponseService(Service):
                 'history': history_array['history'],
                 'working_memory': retrieve_result.conversation_direction,
                 'analysis': retrieve_result.analysis,
-                'all_repos': self.repo_folders
+                'all_repos': self.repo_folders,
             },
         )
 

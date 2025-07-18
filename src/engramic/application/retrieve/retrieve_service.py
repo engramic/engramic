@@ -75,7 +75,7 @@ class RetrieveService(Service):
         self.metrics_tracker: MetricsTracker[RetrieveMetric] = MetricsTracker[RetrieveMetric]()
         self.meta_repository: MetaRepository = MetaRepository(self.db_plugin)
         self.repo_folders: dict[str, Any] = {}
-        self.default_repos: dict[str] = {} #default repos are always included in a prompt.
+        self.default_repos: dict[str, Any] = {}  # default repos are always included in a prompt.
 
     def init_async(self) -> None:
         self.db_plugin['func'].connect(args=None)
@@ -95,7 +95,7 @@ class RetrieveService(Service):
     def _on_repo_folders(self, msg: dict[str, Any]) -> None:
         self.repo_folders = msg['repo_folders']
         self.default_repos = {}
-        
+
         for repo_id, repo_data in self.repo_folders.items():
             if repo_data.get('is_default', True):
                 self.default_repos[repo_id] = repo_data
@@ -110,14 +110,14 @@ class RetrieveService(Service):
             self.host.update_mock_data_input(self, asdict(prompt))
 
         self.metrics_tracker.increment(RetrieveMetric.PROMPTS_SUBMITTED)
-        
+
         if prompt.include_default_repos:
             # Append default repo IDs to the prompt's repo_ids_filters
-            for repo_id in self.default_repos.keys():
-                if prompt.repo_ids_filters == None:
+            for repo_id in self.default_repos:
+                if prompt.repo_ids_filters is None:
                     prompt.repo_ids_filters = []
                 prompt.repo_ids_filters.append(repo_id)
-            
+
         retrieval = Ask(str(uuid.uuid4()), prompt, self.plugin_manager, self.metrics_tracker, self.db_plugin, self)
         retrieval.get_sources()
 

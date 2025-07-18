@@ -23,14 +23,15 @@ import tomli
 from engramic.core.document import Document
 from engramic.core.repo import Repo  # Add this import
 from engramic.infrastructure.repository.document_repository import DocumentRepository
-from engramic.infrastructure.repository.observation_repository import ObservationRepository
 from engramic.infrastructure.repository.engram_repository import EngramRepository
+from engramic.infrastructure.repository.observation_repository import ObservationRepository
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
     from concurrent.futures import Future
 
     from engramic.core.host import Host
+    from engramic.core.observation import Observation
     from engramic.infrastructure.system.plugin_manager import PluginManager
 
 
@@ -71,7 +72,7 @@ class RepoService(Service):
         self.db_document_plugin = self.plugin_manager.get_plugin('db', 'document')
         self.document_repository: DocumentRepository = DocumentRepository(self.db_document_plugin)
         self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
-        self.observation_repository: ObservationRepository = ObservationRepository(None) #doesn't really need the plugin, we aren't using it.
+        self.observation_repository: ObservationRepository = ObservationRepository(self.db_document_plugin)
         self.repos: dict[str, Repo] = {}  # memory copy of all folders
         self.file_index: dict[str, Any] = {}  # memory copy of all files
         self.file_repos: dict[str, Any] = {}  # memory copy of all files in repos
@@ -83,7 +84,7 @@ class RepoService(Service):
         """
         self.subscribe(Service.Topic.REPO_SUBMIT_IDS, self._on_submit_ids)
         self.subscribe(Service.Topic.REPO_UPDATE_REPOS, self.scan_folders)
-        self.subscribe(Service.Topic.PROGRESS_UPDATED,self._on_progress_updated)
+        self.subscribe(Service.Topic.PROGRESS_UPDATED, self._on_progress_updated)
         super().start()
         self.scan_folders()
 
@@ -122,8 +123,7 @@ class RepoService(Service):
             )
             self.submitted_documents.add(document.id)
 
-
-    def _load_repository(self, folder_path: Path) -> str:
+    def _load_repository(self, folder_path: Path) -> tuple[str, bool]:
         """
         Loads the repository ID from a .repo file.
 
@@ -145,13 +145,16 @@ class RepoService(Service):
             data = tomli.load(f)
         try:
             repository_id = data['repository']['id']
-            is_default = data['repository']['is_default']
+            is_default = False
+            if 'is_default' in data['repository']:
+                is_default = data['repository']['is_default']
+
         except KeyError as err:
             error = f"Missing 'repository.id' entry in .repo file at '{repo_file}'."
             raise RuntimeError(error) from err
         if not isinstance(repository_id, str):
-            error = f"'repository.id' must be a string in '{repo_file}'."
-            raise TypeError
+            error = "'repository.id' must be a string in '%s'."
+            raise TypeError(error % repo_file)
         return repository_id, is_default
 
     def _discover_repos(self, repo_root: Path) -> None:
@@ -175,19 +178,18 @@ class RepoService(Service):
                     repo_id, is_default = self._load_repository(folder_path)
                     self.repos[repo_id] = Repo(name=name, repo_id=repo_id, is_default=is_default)
                 except (FileNotFoundError, PermissionError, ValueError, OSError) as e:
-                    info = f"Skipping '{name}': {e}"
-                    logging.info(info)
+                    info = "Skipping '%s': %s"
+                    logging.info(info, name, e)
 
-    def _on_progress_updated(self, msg:dict[str,Any])->None:
-        
+    def _on_progress_updated(self, msg: dict[str, Any]) -> None:
         progress_type = msg['progress_type']
         doc_id = None
         if progress_type == 'document':
             doc_id = msg['id']
         if progress_type == 'lesson':
             doc_id = msg['target_id']
-        
-        if doc_id is not None and doc_id in self.file_index: #might be a different progress update
+
+        if doc_id is not None and doc_id in self.file_index:  # might be a different progress update
             file = self.file_index[doc_id]
 
             if progress_type == 'document':
@@ -198,12 +200,9 @@ class RepoService(Service):
             folder = self.repos[file.repo_id].name
 
             self.send_message_async(
-            Service.Topic.REPO_FILES,
-            {'repo': folder, 'repo_id': file.repo_id, 'files': [asdict(file)]},
+                Service.Topic.REPO_FILES,
+                {'repo': folder, 'repo_id': file.repo_id, 'files': [asdict(file)]},
             )
-
-        
-      
 
     async def update_repo_files(self, repo_id: str, update_ids: list[str] | None = None) -> None:
         """
@@ -310,18 +309,17 @@ class RepoService(Service):
         file_path = Path(root) / file
         relative_path = file_path.relative_to(repo_root / folder)
         relative_dir = str(relative_path.parent) if relative_path.parent != Path('.') else ''
-        
+
         # Handle different file types
         file_extension = Path(file).suffix.lower()
-        
+
         if file_extension == '.pdf':
             return self._create_document_from_pdf(repo_id, folder, relative_dir, file)
-        elif file_extension == '.engram':
-            self._load_engram_file(repo_id, folder, relative_dir, file, file_path)
+        if file_extension == '.engram':
+            self._load_engram_file(file_path)
             return None
-        else:
-            # Skip other file types
-            return None
+        # Skip other file types
+        return None
 
     def _create_document_from_pdf(self, repo_id: str, folder: str, relative_dir: str, file_name: str) -> Document:
         """Create a Document object for PDF files."""
@@ -342,10 +340,10 @@ class RepoService(Service):
 
         return doc
 
-    def _load_engram_file(self, repo_id: str, folder: str, relative_dir: str, file_name: str, file_path: Path) -> None:
+    def _load_engram_file(self, file_path: Path) -> None:
         """
         Load an .engram TOML file.
-        
+
         Args:
             repo_id (str): Repository ID
             folder (str): Repository folder name
@@ -360,37 +358,35 @@ class RepoService(Service):
 
             engram_id = engram_data['engram'][0]['id']
             engram = self.engram_repository.fetch_engram(engram_id)
-            
+
             if engram is None:
-                logging.info(f"Loaded .engram file: {file_path}")
-                logging.debug(f"Engram data: {engram_data}")
-                engram_data.update({'parent_id':None})
-                engram_data.update({'tracking_id':''})
+                logging.info('Loaded .engram file: %s', file_path)
+                logging.debug('Engram data: %s', engram_data)
+                engram_data.update({'parent_id': None})
+                engram_data.update({'tracking_id': ''})
 
                 engram_data['engram'][0]['context'] = json.loads(engram_data['engram'][0]['context'])
 
-                
-
                 observation = self.observation_repository.load_toml_dict(engram_data)
 
-                async def send_message()->None:
+                async def send_message() -> Observation:
                     self.send_message_async(
-                        Service.Topic.OBSERVATION_CREATED, {'id': observation.id, 'parent_id':None}
+                        Service.Topic.OBSERVATION_CREATED, {'id': observation.id, 'parent_id': None}
                     )
 
                     return observation
 
                 task = self.run_task(send_message())
                 task.add_done_callback(self._on_observation_created_complete)
-                
+
                 # TODO: Process the loaded TOML data according to .engram file schema
-            
-        except (FileNotFoundError, PermissionError) as e:
-            logging.warning(f"Could not read .engram file '{file_path}': {e}")
-        except tomli.TOMLDecodeError as e:
-            logging.error(f"Invalid TOML format in .engram file '{file_path}': {e}")
-        except Exception as e:
-            logging.error(f"Unexpected error loading .engram file '{file_path}': {e}")
+
+        except (FileNotFoundError, PermissionError):
+            logging.warning("Could not read .engram file '%s'", file_path)
+        except tomli.TOMLDecodeError:
+            logging.exception("Invalid TOML format in .engram file '%s'", file_path)
+        except Exception:
+            logging.exception("Unexpected error loading .engram file '%s'", file_path)
 
     def _on_observation_created_complete(self, ret: Future[Any]) -> None:
         observation = ret.result()

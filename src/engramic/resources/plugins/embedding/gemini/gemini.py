@@ -20,16 +20,10 @@ class Gemini(Embedding):
 
     @embedding_impl
     def gen_embed(self, strings: list[str], args: dict[str, Any]) -> dict[str, list[list[float]]]:
-        
-
         result = self._api_client.models.embed_content(
-            model=args['model'], 
-            contents=strings, 
-            config=types.EmbedContentConfig(
-                task_type='RETRIEVAL_QUERY',
-                output_dimensionality=args['dimensions']
-                )
-
+            model=args['model'],
+            contents=strings,
+            config=types.EmbedContentConfig(task_type='RETRIEVAL_QUERY', output_dimensionality=args['dimensions']),
         )
 
         if not result.embeddings:

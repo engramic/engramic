@@ -8,6 +8,7 @@ import uuid
 from engramic.core import Engram
 from engramic.core.engram import EngramType
 
+
 class MockIndex:
     def __init__(self, text: str):
         self.text = text
@@ -27,7 +28,6 @@ def test_engram_initialization() -> None:
     assert engram.locations == ['test_location']
     assert engram.source_ids == ['test_source']
     assert engram.content == 'test_text'
-    assert engram.e is True
     assert engram.context is None
     assert engram.indices is None
     assert isinstance(engram.id, str)

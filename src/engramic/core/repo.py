@@ -3,13 +3,11 @@
 # See the LICENSE file in the project root for more details.
 from __future__ import annotations
 
-import uuid
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 
 
 @dataclass
 class Repo:
-    name:str = ''
-    repo_id:str = ''
-    is_default:bool = False
+    name: str = ''
+    repo_id: str = ''
+    is_default: bool = False

@@ -3,10 +3,11 @@
 # See the LICENSE file in the project root for more details.
 from __future__ import annotations
 
+import re
 import uuid
 from dataclasses import dataclass, field
 from typing import Any
-import re
+
 
 @dataclass
 class Prompt:
@@ -36,7 +37,7 @@ class Prompt:
             self.widget_cmds = widget_matches  # Store all matches as a list
         else:
             self.widget_cmds = []
-        
+
         # Remove all widget commands from prompt_str
         self.prompt_str = re.sub(r'widget=\w+\s*', '', self.prompt_str).strip()
         self.input_data['prompt_str'] = self.prompt_str

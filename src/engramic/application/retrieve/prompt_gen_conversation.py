@@ -15,7 +15,7 @@ class PromptGenConversation(Prompt):
         try:
             return_str = Template("""
     Your name is Engramic and you are in a conversation with the user. "you" = Engramic. Review the current_user_input and previous_exchange and provide the current user intent and a description of your working memory.
-                                  
+
     <previous_exchange>
         Previous Input
         Previous Response
@@ -46,7 +46,7 @@ class PromptGenConversation(Prompt):
     % endif
 
     current_user_intent:str - Write in dense keywords what the current user input is intending, which may not explicitly be stated. You should infer this first from the current_user_input but also all of the previous_exchanges, especially each previous_user_intent. If relavant, include enough contextual information to make user intent clear an informative. If the user asks you to build or make something, include in intent that they want you to also display it.
-                                  
+
     % if history and current_engramic_widget is None and history[0]['retrieve_result']['conversation_direction']['current_engramic_widget'] is not None:
     Add to the current_user_intent the intent to keep open the widget (include widget name which is ${history[0]['retrieve_result']['conversation_direction']['current_engramic_widget']}.
     % endif
@@ -54,7 +54,7 @@ class PromptGenConversation(Prompt):
     working_memory - Update working memory which is register of variables you will use to track all elements of the conversation. If there are no changes to make on any step, or if the data referenced doesn't exist, respond with changes = None. Write each step as densely as you can, but make sure you maintain context and scope by wrapping related topics:
 
     memory{topic = {variable1:value1,varaiable2:value2}}
-                                  
+
     Your variables act as a condensed version of the conversation. It should include all elements of the state of conversation, especially items that should be tracked across exchanges. This may include the following:
     -A tool you are using.
     -The theme of the conversation.
