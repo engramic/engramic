@@ -5,9 +5,9 @@
 """
 Tracks and manages progress of various components through the Engramic system.
 
-This module provides tracking capabilities for lessons, prompts, documents, observations,
-engrams, and indices as they move through the processing pipeline, and reports completion
-percentages to interested components.
+This module provides tracking capabilities for lessons, prompts, codifications, documents,
+observations, engrams, and indices as they move through the processing pipeline, and reports
+completion percentages to interested components.
 """
 
 from __future__ import annotations
@@ -27,8 +27,8 @@ class ProgressService(Service):
     Monitors and reports progress of various components through the system pipeline.
 
     Tracks the creation and completion status of multiple object types (lessons, prompts,
-    documents, observations, engrams, indices) in parent-child hierarchies, calculates
-    completion percentages, and notifies the system when objects are fully processed.
+    codifications, documents, observations, engrams, indices) in parent-child hierarchies,
+    calculates completion percentages, and notifies the system when objects are fully processed.
 
     Attributes:
         progress_array (dict[str, ProgressArray]): Maps object IDs to their progress tracking data.
@@ -38,6 +38,7 @@ class ProgressService(Service):
     Methods:
         on_lesson_created(msg): Handles lesson creation events.
         on_prompt_created(msg): Handles prompt creation events.
+        on_codify_created(msg): Handles codification creation events.
         on_document_created(msg): Handles document creation events.
         on_observation_created(msg): Handles observation creation events.
         on_engrams_created(msg): Handles engrams creation events.
@@ -50,7 +51,7 @@ class ProgressService(Service):
         Stores progress tracking data for a single object in the system.
 
         Attributes:
-            item_type (str): Type of the object being tracked (lesson, prompt, document, etc).
+            item_type (str): Type of the object being tracked (lesson, prompt, codify, document, etc).
             tracking_id (str | None): Identifier used to track a processing chain.
             children_is_complete_array (dict[str, bool]): Maps child IDs to completion status.
             target_id (str | None): ID of the target object (usually a document).
@@ -102,8 +103,8 @@ class ProgressService(Service):
         """
         Starts the progress service by subscribing to relevant system events.
 
-        Subscribes to creation events for lessons, prompts, documents, observations,
-        engrams, and indices to begin tracking their progress through the system.
+        Subscribes to creation events for lessons, prompts, codifications, documents,
+        observations, engrams, and indices to begin tracking their progress through the system.
         """
         self.subscribe(Service.Topic.LESSON_CREATED, self.on_lesson_created)
         self.subscribe(Service.Topic.PROMPT_CREATED, self.on_prompt_created)

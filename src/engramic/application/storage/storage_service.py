@@ -54,12 +54,14 @@ class StorageService(Service):
             Registers the service to relevant message topics and begins operation.
         init_async() -> None:
             Connects to the database plugin asynchronously before full service startup.
+        on_engram_request(msg) -> None:
+            Handles requests for fetching engrams by ID and sends results.
         on_engram_complete(engram_dict) -> None:
             Callback for storing completed engram batches.
         on_observation_complete(response) -> None:
             Callback for storing completed observations.
         on_prompt_complete(response_dict) -> None:
-            Callback for storing completed prompt/response history.
+            Callback for storing completed prompt/response history (excludes lessons).
         on_meta_complete(meta_dict) -> None:
             Callback for storing finalized meta configuration.
         save_observation(response) -> None:

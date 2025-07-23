@@ -39,13 +39,14 @@ class ConsolidateService(Service):
     This service is triggered when an observation is marked complete and coordinates summarization,
     engram generation, index generation, and embedding creation through the following pipeline stages:
 
-    1. **Summarization** - Generates a natural language summary from the observation using an LLM plugin.
-    2. **Embedding Summaries** - Uses an embedding plugin to create vector embeddings of the summary text.
-    3. **Engram Generation** - Extracts or constructs engrams from the observation's content.
-    4. **Index Generation** - Applies an LLM to generate meaningful textual indices for each engram.
-    5. **Embedding Indices** - Uses an embedding plugin to convert each index into a vector representation.
-    6. **Publishing Results** - Emits messages like `ENGRAM_COMPLETE`, `META_COMPLETE`, and `INDEX_COMPLETE`
-       at various stages to notify downstream systems.
+    1. **Summary Embedding** - Generates vector embeddings for the observation's summary text using an embedding plugin.
+    2. **Engram Processing** - Extracts engrams from the observation and notifies downstream systems via ENGRAMS_CREATED.
+    3. **Index Generation** - Uses an LLM to generate meaningful textual indices for each engram, including context.
+    4. **Index Embedding** - Creates vector embeddings for each generated index using an embedding plugin.
+    5. **Publishing Results** - Emits messages like `ENGRAM_COMPLETE`, `META_COMPLETE`, `INDICES_COMPLETE`,
+       and `INDICES_CREATED` at various stages to notify downstream systems.
+
+    The service maintains in-memory engram builders during processing and tracks metrics for observability.
 
     Attributes:
         plugin_manager (PluginManager): Manages access to all system plugins.
@@ -65,13 +66,17 @@ class ConsolidateService(Service):
         on_observation_complete(observation_dict) -> None:
             Handles post-processing when an observation completes.
         _generate_summary_embeddings(observation) -> Meta:
-            Creates and attaches embeddings for a summary.
+            Creates and attaches embeddings for an observation's summary.
         process_engrams(observation) -> None:
             Orchestrates the generation of indices and embeddings for engrams.
         _gen_indices(index, engram, repo_ids, tracking_id) -> dict:
-            Uses an LLM to create indices from an engram.
+            Uses an LLM to create contextual indices from an engram.
         _gen_embeddings(id_and_index_dict, process_index) -> dict:
-            Creates embeddings for generated indices.
+            Creates embeddings for generated indices and attaches them to engrams.
+        on_indices_done(indices_list_fut) -> None:
+            Callback that processes completed index generation and triggers embedding creation.
+        on_embeddings_done(embed_fut) -> None:
+            Callback that finalizes engram processing and publishes completion messages.
         on_acknowledge(message_in) -> None:
             Sends a metrics snapshot for observability/debugging.
     """

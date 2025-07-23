@@ -40,24 +40,31 @@ class RepoService(Service):
     Service for managing repositories and their document contents.
 
     Handles repository discovery, file indexing, and document submission for processing.
-    Maintains in-memory indices of repositories and their files.
+    Maintains in-memory indices of repositories and their files. Supports loading of .engram
+    files and processing of PDF documents.
 
     Attributes:
         plugin_manager (PluginManager): Manager for system plugins.
         db_document_plugin (Any): Plugin for document database operations.
         document_repository (DocumentRepository): Repository for document storage and retrieval.
-        repos (dict[str, str]): Mapping of repository IDs to folder names.
-        file_index (dict[str, Any): Index of all files by document ID.
+        engram_repository (EngramRepository): Repository for engram storage and retrieval.
+        observation_repository (ObservationRepository): Repository for observation storage and retrieval.
+        repos (dict[str, Repo]): Mapping of repository IDs to Repo objects.
+        file_index (dict[str, Any]): Index of all files by document ID.
         file_repos (dict[str, Any]): Mapping of repository IDs to lists of document IDs.
         submitted_documents (set[str]): Set of document IDs that have been submitted for processing.
 
     Methods:
         start() -> None:
             Starts the service and subscribes to relevant topics.
+        init_async() -> None:
+            Initializes asynchronous components of the service.
         submit_ids(id_array, overwrite) -> None:
             Submits documents for processing by their IDs.
-        scan_folders() -> None:
+        scan_folders(repo_id) -> None:
             Discovers repositories and indexes their files.
+        update_repo_files(repo_id, update_ids) -> None:
+            Updates the list of files for a repository.
     """
 
     def __init__(self, host: Host) -> None:

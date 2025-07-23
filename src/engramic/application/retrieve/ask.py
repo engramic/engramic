@@ -37,35 +37,52 @@ class Ask(Retrieval):
     Attributes:
         id (str): Unique identifier for this retrieval session.
         prompt (Prompt): The original prompt provided by the user.
-        plugin_manager (PluginManager): Access to LLM, vector DB, and embedding components.
-        metrics_tracker (MetricsTracker): Tracks operational metrics for observability.
-        db_plugin (dict): Plugin for document database interactions.
         service (RetrieveService): Parent service coordinating this request.
+        metrics_tracker (MetricsTracker): Tracks operational metrics for observability.
         library (str | None): Optional target library to search within.
-        conversation_direction (dict[str, str]): Stores user intent and working memory.
+        widget_cmd (Any): Widget command from the prompt.
+        conversation_direction (dict[str, Any]): Stores user intent and working memory.
         prompt_analysis (PromptAnalysis | None): Structured analysis of the prompt.
+        new_conversation (bool): Flag indicating if this is a new conversation thread.
+        type_filters (list[str]): Content type filters for vector database queries.
 
     Methods:
         get_sources() -> None:
             Initiates the async pipeline for directional memory retrieval.
         _fetch_history() -> list[dict[str, Any]]:
-            Retrieves prior user history from the document DB.
-        _retrieve_gen_conversation_direction(response_array) -> dict[str, str]:
-            Extracts user intent and conversational memory.
-        _embed_gen_direction(main_prompt) -> list[float]:
-            Converts extracted intent into embeddings.
-        _vector_fetch_direction_meta(embedding) -> list[str]:
-            Queries metadata collection using intent embeddings.
-        _fetch_direction_meta(meta_id) -> list[Meta]:
-            Loads Meta objects from metadata store.
-        _analyze_prompt(meta_list) -> dict[str, str]:
-            Analyzes user prompt in context of metadata.
-        _generate_indices(meta_list) -> dict[str, str]:
-            Generates semantic indices for retrieval.
-        _generate_indicies_embeddings(indices) -> list[list[float]]:
-            Converts index phrases into embeddings.
-        _query_index_db(embeddings) -> set[str]:
-            Searches vector DB to identify related engrams.
+            Retrieves prior conversation history from the document database.
+        on_fetch_history_complete(fut: Future[Any]) -> None:
+            Processes history results and initiates conversation direction analysis.
+        _retrieve_gen_conversation_direction(response_array: dict[str, Any]) -> None:
+            Extracts user intent and conversational working memory using LLM analysis.
+        on_direction_ret_complete(fut: Future[Any]) -> None:
+            Processes conversation direction and initiates embedding generation.
+        _embed_gen_direction() -> list[float]:
+            Converts extracted user intent into vector embeddings.
+        on_embed_direction_complete(fut: Future[Any]) -> None:
+            Processes intent embeddings and initiates metadata retrieval.
+        _vector_fetch_direction_meta(intent_embedding: list[float]) -> list[str]:
+            Queries metadata collection using intent embeddings to find relevant context.
+        on_vector_fetch_direction_meta_complete(fut: Future[Any]) -> None:
+            Processes metadata IDs and loads full metadata objects.
+        _fetch_direction_meta(meta_id: list[str]) -> list[Meta]:
+            Loads Meta objects from metadata store for context enrichment.
+        on_fetch_direction_meta_complete(fut: Future[Any]) -> None:
+            Initiates parallel prompt analysis and index generation.
+        _analyze_prompt() -> dict[str, Any]:
+            Analyzes user prompt to determine response requirements and thinking steps.
+        _generate_indices(meta_list: list[Meta]) -> dict[str, Any]:
+            Generates semantic search indices based on prompt and metadata context.
+        on_analyze_complete(fut: Future[Any]) -> None:
+            Processes analysis results and initiates index embedding generation.
+        _generate_indicies_embeddings(indices: list[str]) -> list[list[float]]:
+            Converts generated index phrases into vector embeddings.
+        on_indices_embeddings_generated(fut: Future[Any]) -> None:
+            Processes index embeddings and initiates final vector database query.
+        _query_index_db(embeddings: list[list[float]]) -> set[str]:
+            Searches main vector database to identify related engram IDs.
+        on_query_index_db(fut: Future[Any]) -> None:
+            Finalizes retrieval results and sends completion message.
     """
 
     def __init__(

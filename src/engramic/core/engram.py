@@ -30,14 +30,14 @@ class Engram:
         locations (list[str]): One or more file paths, URLs, or other locations associated with the engram.
         source_ids (list[str]): Identifiers of the original source documents from which the engram was derived.
         content (str): The main textual content of the engram.
-        engram_type (EngramType): Type of the engram (native, episodic, or procedural).
-        context (dict[str, str] | None): Optional contextual metadata in key-value format to enhance retrieval or classification.
-        indices (list[Index] | None): Optional semantic indices, typically for vector-based retrieval.
-        meta_ids (list[str] | None): Optional list of metadata tags or identifiers relevant to the engram.
-        repo_ids (list[str] | None): Optional identifiers linking this engram to repositories or code bases.
-        accuracy (int | None): Optional accuracy score assigned during validation (e.g., via Codify Service).
-        relevancy (int | None): Optional relevancy score assigned during validation (e.g., via Codify Service).
-        created_date (int | None): Optional Unix timestamp representing the creation time of the engram.
+        engram_type (EngramType): Type of the engram (native, episodic, procedural, or artifact).
+        context (dict[str, str] | None): Optional contextual metadata in key-value format to enhance retrieval or classification. Defaults to None.
+        indices (list[Index] | None): Optional semantic indices, typically for vector-based retrieval. Defaults to None.
+        meta_ids (list[str] | None): Optional list of metadata tags or identifiers relevant to the engram. Defaults to None.
+        repo_ids (list[str] | None): Optional identifiers linking this engram to repositories or code bases. Defaults to None.
+        accuracy (int | None): Optional accuracy score assigned during validation (e.g., via Codify Service). Defaults to 0.
+        relevancy (int | None): Optional relevancy score assigned during validation (e.g., via Codify Service). Defaults to 0.
+        created_date (int | None): Optional Unix timestamp representing the creation time of the engram. Defaults to None.
 
     Methods:
         generate_toml() -> str:

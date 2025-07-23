@@ -103,6 +103,9 @@ Engramic is designed to learn from your unstructured, proprietary data using any
 - **Long-Term Memory Engrams**  
   Constructed from one or more Citable Engram or other Long-Term Memory Engrams.
 
+- **Procedural Memory Engrams**  
+  Import on server startup, provide prompt based instructions triggered by commands and modified by prompts.
+
 - **Learning**  
   Built through the combination of memory, citable external sources, and user interaction or input.
 

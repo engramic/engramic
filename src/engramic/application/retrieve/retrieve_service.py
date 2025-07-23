@@ -43,25 +43,26 @@ class RetrieveService(Service):
         plugin_manager (PluginManager): Access point for system plugins, including vector and document DBs.
         vector_db_plugin (dict): Plugin used for vector database operations (e.g., semantic search).
         db_plugin (dict): Plugin for interacting with the document database.
-        metrics_tracker (MetricsTracker): Collects and resets retrieval-related metrics for monitoring.
+        metrics_tracker (MetricsTracker[RetrieveMetric]): Collects and resets retrieval-related metrics for monitoring.
         meta_repository (MetaRepository): Handles Meta object persistence and transformation.
         repo_folders (dict[str, Any]): Dictionary containing repository folder information.
+        default_repos (dict[str, Any]): Dictionary of default repositories that are always included in prompts.
 
     Methods:
         init_async(): Initializes database connections and plugin setup asynchronously.
         start(): Subscribes to system topics for prompt processing and indexing lifecycle.
         stop(): Cleans up the service and halts processing.
 
-        submit(prompt: Prompt): Begins the retrieval process and logs submission metrics.
-        on_submit_prompt(msg: dict[Any, Any]): Processes a prompt message and submits for processing.
-        _on_repo_folders(msg: dict[str, Any]): Updates repository folder information.
+        submit(prompt: Prompt): Begins the retrieval process, handles default repos, and logs submission metrics.
+        on_submit_prompt(msg: dict[Any, Any]): Processes a prompt message from monitor service and submits for processing.
+        _on_repo_folders(msg: dict[str, Any]): Updates repository folder information and identifies default repositories.
 
         on_indices_complete(index_message: dict): Converts index payload into Index objects and queues for insertion.
-        _insert_engram_vector(index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str):
-            Asynchronously inserts semantic indices into vector DB with repository filters.
+        _insert_engram_vector(index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str, engram_type: str):
+            Asynchronously inserts semantic indices into vector DB with repository and type filters.
 
         on_meta_complete(meta_dict: dict): Loads and inserts metadata summary into the vector DB.
-        insert_meta_vector(meta: Meta): Runs metadata vector insertion in a background thread.
+        insert_meta_vector(meta: Meta): Runs metadata vector insertion in a background thread using asyncio.to_thread.
 
         on_acknowledge(message_in: str): Emits service metrics to the status channel and resets the tracker.
     """

@@ -39,7 +39,7 @@ class Lesson:
     Methods:
         run_lesson(meta_in) -> None:
             Initiates the lesson generation process.
-        generate_questions() -> Any:
+        generate_questions() -> dict:
             Generates educational questions based on document content.
         on_questions_generated(future) -> None:
             Processes generated questions and creates prompts.
