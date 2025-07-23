@@ -168,7 +168,7 @@ class ConsolidateService(Service):
             if self.engram_builder.get(engram.id) is None:
                 self.engram_builder[engram.id] = engram
             else:
-                error = 'Engram ID Collision. During conslidation, two Engrams with the same IDs were detected.'
+                error = f'Engram ID Collision. During consolidation, two Engrams with the same ID ({engram.id}) were detected.'
                 raise RuntimeError(error)
 
         # 1) Generate indices for each engram
@@ -315,6 +315,7 @@ class ConsolidateService(Service):
                     'engram_id': engram['engram_id'],
                     'tracking_id': engram['tracking_id'],
                     'repo_ids': engram['repo_ids'],
+                    'engram_type': builder_data['engram_type'],
                 },
             )
 

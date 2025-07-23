@@ -3,7 +3,6 @@
 # See the LICENSE file in the project root for more details.
 from __future__ import annotations
 
-import re
 import uuid
 from dataclasses import dataclass, field
 from typing import Any
@@ -18,11 +17,12 @@ class Prompt:
     is_lesson: bool | None = False
     is_on_demand: bool | None = False
     include_default_repos: bool | None = False
-    widget_cmds: list[str] | None = None
+    widget_cmd: str | None = None
     input_data: dict[str, Any] = field(default_factory=dict)
     conversation_id: str | None = None
     parent_id: str | None = None
     tracking_id: str | None = None
+    thinking_level: float | None = None
 
     def __post_init__(self) -> None:
         if not self.prompt_id:
@@ -32,14 +32,7 @@ class Prompt:
             error = 'Empty set [] is not allowed on Prompts for repo_ids_filters, set to None to indicate no repos are in use. If you want all filters, you must name them explicitly.'
             raise RuntimeError(error)
 
-        widget_matches = re.findall(r'widget=(\w+)', self.prompt_str)
-        if widget_matches:
-            self.widget_cmds = widget_matches  # Store all matches as a list
-        else:
-            self.widget_cmds = []
-
         # Remove all widget commands from prompt_str
-        self.prompt_str = re.sub(r'widget=\w+\s*', '', self.prompt_str).strip()
         self.input_data['prompt_str'] = self.prompt_str
 
         self.input_data.update({

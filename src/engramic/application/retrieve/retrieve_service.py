@@ -132,15 +132,21 @@ class RetrieveService(Service):
         engram_id: str = index_message['engram_id']
         tracking_id: str = index_message['tracking_id']
         repo_ids: str = index_message['repo_ids']
+        engram_type: str = index_message['engram_type']
         index_list: list[Index] = [Index(**item) for item in raw_index]
-        self.run_task(self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id))
+        self.run_task(self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id, engram_type))
 
     async def _insert_engram_vector(
-        self, index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str
+        self, index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str, engram_type: str
     ) -> None:
         plugin = self.vector_db_plugin
         self.vector_db_plugin['func'].insert(
-            collection_name='main', index_list=index_list, obj_id=engram_id, args=plugin['args'], filters=repo_ids
+            collection_name='main',
+            index_list=index_list,
+            obj_id=engram_id,
+            args=plugin['args'],
+            filters=repo_ids,
+            type_filter=engram_type,
         )
 
         index_id_array = [index.id for index in index_list]
@@ -165,6 +171,7 @@ class RetrieveService(Service):
             index_list=[meta.summary_full],
             obj_id=meta.id,
             filters=meta.repo_ids,
+            type_filter=meta.type,
             args=plugin['args'],
         )
 

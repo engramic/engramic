@@ -49,11 +49,13 @@ An engram should be a unique, complete thought, with enough information to fill 
 This particular original_prompt and article is special and needs special treatment. You should try and generate one, maybe two engrams for this original_prompt and article.
 The information is designed to be cohesive and it's better to consolidate simlar topics agressively into as few engrams as possible.
 
-If you are saving an artifact you must include all text as the content. Context is also very valuable. Extract the context from the article such as a title, section, key words, that helps further define the meaning and origin of the artifact.
+
 % endif
 
 % if is_on_demand:
 This particular original_prompt and article is special and needs special treatment. You should try and generate one engram for this original_prompt and article that extracts the main topic and captures as much of the meaningful information as possible.
+
+If the data is tabular, save it as a csv.
 % endif
 
 In the meta section, insert keywords and an outline summary based on the content and context of all engrams.

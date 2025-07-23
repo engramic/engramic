@@ -112,6 +112,7 @@ class Ask(Retrieval):
         args = plugin['args']
         args['history_limit'] = 1
         args['repo_ids_filters'] = self.prompt.repo_ids_filters
+        args['conversation_id'] = self.prompt.conversation_id
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)
         history_dict: list[dict[str, Any]] = ret_val[0]
@@ -119,6 +120,14 @@ class Ask(Retrieval):
 
     def on_fetch_history_complete(self, fut: Future[Any]) -> None:
         response_array: dict[str, Any] = fut.result()
+
+        if response_array['history']:
+            self.new_conversation = (
+                response_array['history'][0]['prompt']['conversation_id'] != self.prompt.conversation_id
+            )
+        else:
+            self.new_conversation = True
+
         retrieve_gen_conversation_direction_step = self.service.run_task(
             self._retrieve_gen_conversation_direction(response_array)
         )
@@ -128,12 +137,7 @@ class Ask(Retrieval):
         if __debug__:
             self.service.send_message_async(self.service.Topic.DEBUG_ASK_CREATED, {'ask_id': self.id})
 
-        input_data: dict[str, Any] = {'history': None}
-
-        if response_array['history']:
-            previous_conversation_id = response_array['history'][0]['prompt']['conversation_id']
-            if self.prompt.conversation_id == previous_conversation_id:
-                input_data = response_array
+        input_data: dict[str, Any] = response_array
 
         plugin = self.retrieve_gen_conversation_direction_plugin
 
@@ -144,18 +148,8 @@ class Ask(Retrieval):
 
         self.conversation_direction = {}
 
-        if self.prompt.widget_cmds:
-            self.conversation_direction['current_engramic_widget'] = self.prompt.widget_cmds[0]
-            input_data.update({'current_engramic_widget': self.prompt.widget_cmds[0]})  # focus on one for now.
-        else:
-            input_data.update({'current_engramic_widget': None})  # focus on one for now.
-            if response_array['history']:
-                previous_widget = response_array['history'][0]['retrieve_result']['conversation_direction'][
-                    'current_engramic_widget'
-                ]
-                self.conversation_direction['current_engramic_widget'] = previous_widget
-            else:
-                self.conversation_direction['current_engramic_widget'] = None
+        if self.prompt.widget_cmd:
+            input_data.update({'current_engramic_widget': self.prompt.widget_cmd})
 
         # add prompt engineering here and submit as the full prompt.
         prompt_gen = PromptGenConversation(
@@ -224,13 +218,19 @@ class Ask(Retrieval):
     async def _vector_fetch_direction_meta(self, intent_embedding: list[float]) -> list[str]:
         plugin = self.prompt_vector_db_plugin
         plugin['args'].update({'threshold': 0.6})  # meta needs a broader threshold.
-        plugin['args'].update({'n_results': 15})  # meta needs a broader threshold.
+        plugin['args'].update({'n_results': 2})  # num results per vector
+
+        self.type_filters = ['native', 'episodic']
+
+        if self.prompt.widget_cmd:
+            self.type_filters.append('procedural')
 
         ret = await asyncio.to_thread(
             plugin['func'].query,
             collection_name='meta',
             embeddings=intent_embedding,
-            filters=self.prompt.repo_ids_filters,
+            repo_filters=self.prompt.repo_ids_filters,
+            type_filters=self.type_filters,
             args=self.service.host.mock_update_args(plugin),
         )
 
@@ -276,7 +276,6 @@ class Ask(Retrieval):
             input_data={
                 'working_memory': self.conversation_direction['working_memory'],
                 'current_user_intent': self.conversation_direction['current_user_intent'],
-                'current_engramic_widget': self.conversation_direction['current_engramic_widget'],
             },
         )
         structured_response = {
@@ -367,8 +366,8 @@ class Ask(Retrieval):
             logging.exception('Failed to parse JSON in on_analyze_complete')
             raise
 
-        if self.conversation_direction['current_engramic_widget']:
-            indices_json['indices'].append('widget: ' + self.conversation_direction['current_engramic_widget'])
+        if self.prompt.widget_cmd:
+            indices_json['indices'].append('widget ' + self.prompt.widget_cmd)
 
         self.prompt_analysis = PromptAnalysis(
             analysis_json,
@@ -418,7 +417,8 @@ class Ask(Retrieval):
             plugin['func'].query,
             collection_name='main',
             embeddings=embeddings,
-            filters=self.prompt.repo_ids_filters,
+            repo_filters=self.prompt.repo_ids_filters,
+            type_filters=self.type_filters,
             args=self.service.host.mock_update_args(plugin),
         )
 

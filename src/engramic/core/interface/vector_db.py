@@ -15,7 +15,12 @@ class VectorDB(ABC):
 
     @abstractmethod
     def query(
-        self, collection_name: str, embeddings: list[float], filters: list[str], args: dict[str, Any]
+        self,
+        collection_name: str,
+        embeddings: list[float],
+        repo_filters: list[str],
+        args: dict[str, Any],
+        type_filters: list[str],
     ) -> dict[str, Any]:
         """
         Submits a prompt to the LLM and returns the model-generated text.
@@ -31,6 +36,12 @@ class VectorDB(ABC):
 
     @abstractmethod
     def insert(
-        self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any], filters: list[str]
+        self,
+        collection_name: str,
+        index_list: list[Index],
+        obj_id: str,
+        args: dict[str, Any],
+        repo_filters: list[str],
+        type_filter: str,
     ) -> None:
         pass

@@ -45,10 +45,12 @@ class PromptGenConversation(Prompt):
     There is no history. This is a brand new conversation.
     % endif
 
-    current_user_intent:str - Write in dense keywords what the current user input is intending, which may not explicitly be stated. You should infer this first from the current_user_input but also all of the previous_exchanges, especially each previous_user_intent. If relavant, include enough contextual information to make user intent clear an informative. If the user asks you to build or make something, include in intent that they want you to also display it.
+    current_user_intent:str - Concisely write the current user input is intending, which may not explicitly be stated. You should infer this first from the current_user_input but also all of the previous_exchanges, especially each previous_user_intent. If relevent, include enough contextual information to make user intent clear an informative. If the user asks you to build or make something, include in intent that they want you to also display it.
 
-    % if history and current_engramic_widget is None and history[0]['retrieve_result']['conversation_direction']['current_engramic_widget'] is not None:
-    Add to the current_user_intent the intent to keep open the widget (include widget name which is ${history[0]['retrieve_result']['conversation_direction']['current_engramic_widget']}.
+    % if current_engramic_widget:
+    Add to the current_user_intent the intent to render a widget.
+    % else:
+    There are no widgets currently rendering.
     % endif
 
     working_memory - Update working memory which is register of variables you will use to track all elements of the conversation. If there are no changes to make on any step, or if the data referenced doesn't exist, respond with changes = None. Write each step as densely as you can, but make sure you maintain context and scope by wrapping related topics:

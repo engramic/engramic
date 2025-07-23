@@ -189,6 +189,10 @@ class ResponseService(Service):
 
         engram_dict_list = [asdict(engram) for engram in engram_array]
 
+        widget = None
+        if prompt_in.widget_cmd:
+            widget = prompt_in.widget_cmd
+
         # build main prompt here
         prompt = PromptMainPrompt(
             prompt_str=prompt_in.prompt_str,
@@ -201,6 +205,7 @@ class ResponseService(Service):
                 'working_memory': retrieve_result.conversation_direction,
                 'analysis': retrieve_result.analysis,
                 'all_repos': self.repo_folders,
+                'current_engramic_widget': widget,
             },
         )
 
@@ -208,6 +213,9 @@ class ResponseService(Service):
         args = self.host.mock_update_args(plugin)
 
         response_id = str(uuid.uuid4())
+
+        if prompt_in.thinking_level:
+            args['thinking_level'] = prompt_in.thinking_level * 10000
 
         if prompt_in.is_lesson:
             response = await asyncio.to_thread(

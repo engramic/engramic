@@ -21,16 +21,14 @@ Analyze the users prompt. Your name is Engramic and you act like an individual i
 <working_memory>
     ${working_memory}
 </working_memory>
-<current_engramic_widget>
-    ${current_engramic_widget}
-</current_engramic_widget>
 
 
 Classify it into the following categories:
 response_type: short | medium | long
 remember_request: if the user is asking you explicitly to remember or save something.
-user_prompt_type: reference (A reference type is an article, paragraph, data, that the user is asking me to understand as a reference) | tool (the user is asking you to use a tool on something )
+user_prompt_type: reference (A reference type is an article, paragraph, data, that the user is asking me to understand as a reference)
 thinking_steps: Review the prompt and define the next steps.
+
 
 The working memory which represents the conversation imediatly after updating the working_memory with the information from the user's prompt. Assume the state has already been validated. Write a succint list of the detailed steps Engramic must take now that it is your turn in the converation. Do not include data from the working_memory, just the steps. Don't use pronous. Your last step should be about finishing your turn in the conversation.
 

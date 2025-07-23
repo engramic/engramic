@@ -39,17 +39,28 @@ vector_db_spec = pluggy.HookspecMarker('vector_db')
 class VectorDBspec(VectorDB):
     @vector_db_spec
     def query(
-        self, collection_name: str, embeddings: list[float], filters: list[str], args: dict[str, Any]
+        self,
+        collection_name: str,
+        embeddings: list[float],
+        repo_filters: list[str],
+        args: dict[str, Any],
+        type_filters: list[str],
     ) -> dict[str, Any]:
-        del embeddings, collection_name, args, filters
+        del embeddings, collection_name, args, repo_filters, type_filters
         error_message = 'Subclasses must implement `query`'
         raise NotImplementedError(error_message)
 
     @vector_db_spec
     def insert(
-        self, collection_name: str, index_list: list[Index], obj_id: str, args: dict[str, Any], filters: list[str]
+        self,
+        collection_name: str,
+        index_list: list[Index],
+        obj_id: str,
+        args: dict[str, Any],
+        repo_filters: list[str],
+        type_filter: str,
     ) -> None:
-        del index_list, collection_name, obj_id, args, filters
+        del index_list, collection_name, obj_id, args, repo_filters, type_filter
         error_message = 'Subclasses must implement `index`'
         raise NotImplementedError(error_message)
 

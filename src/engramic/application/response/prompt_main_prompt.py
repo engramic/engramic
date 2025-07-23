@@ -39,10 +39,8 @@ Next, form your current response using a mix of the following:
 2. You use user_intent to stay focused on meeting the user's needs.
 3. You use engramic_working_memory above to understand the current state of the conversation.
 4. You use long term memory to provide meaning through facts and information.
-5. You use response_instructions to execute the current_engramic_widget but you should ignore response_instructions if current widget:None
- is 'None'.
-6. You use artifacts to tell the user what was saved.
-7. You use engramic_previous_responses as the recent history of the ongoing conversation. You only use engramic_previous_response if the user asks you about the past or prior conversation, it is not a source.
+5. You use response_instructions to execute the current_engramic_widget.
+6. You use engramic_previous_responses as the recent history of the ongoing conversation. You only use engramic_previous_response if the user asks you about the past or prior conversation, it is not a source. The exception to this are widgets which quite regularly extract data from the previous conversation.
 
 Never expose your working memory, only use to formulate a response.
 Never respond with context directly (e.g. <context></context> ) in your response. Rather, use it to enrich your responses with that information where and when appropriate.
@@ -127,23 +125,6 @@ Deliver results related to the user_intent and resist explaining the work you ar
             </response_instructions>
         % endif
     % endfor
-    % for engram in engram_list:
-        % if engram["engram_type"] == "artifact":
-            <artifacts>
-                locations: ${", ".join(engram["locations"])}
-                % if engram.get("context"):
-                    <context>
-                    % for key, value in engram["context"].items():
-                        ${key}: ${value}
-                    % endfor
-                    </context>
-                % endif
-                engram_id: ${engram["id"]}
-                content: ${engram["content"]}
-                timestamp: ${engram["created_date"]}
-            </artifacts>
-        % endif
-    % endfor
     % if not is_lesson:
     <engramic_previous_responses>
         % for index, item in enumerate(history):
@@ -162,12 +143,13 @@ Deliver results related to the user_intent and resist explaining the work you ar
     user_intent: ${working_memory['current_user_intent']}
 </current_user_prompt>
 <current_engramic_widget>
-    current widget: ${working_memory['current_engramic_widget']}
+    current widget: ${current_engramic_widget}
+    % if current_engramic_widget is None:
+        The user has not selected a widget. Do not display one.
+    % endif
 </current_engramic_widget>
 
-Follow these steps below for your response. They were written after the working_memory was updated.
-Steps:
-${analysis['thinking_steps']}
+Write your text in dense commonmark markdown.
 
 
 
