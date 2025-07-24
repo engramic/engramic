@@ -1,0 +1,622 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="getting_started/" rel="next"/>
+<link href="assets/logo_100.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.6.15" name="generator"/>
+<title>Engramic Reference</title>
+<link href="assets/stylesheets/main.342714a4.min.css" rel="stylesheet"/>
+<link href="assets/stylesheets/palette.06af60db.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Raleway";--md-code-font:"Roboto Mono"}</style>
+<link href="assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="stylesheets/extra.css" rel="stylesheet"/>
+<script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#engramic-api-reference">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-color-scheme="default" data-md-component="outdated" hidden="">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="Engramic Reference" class="md-header__button md-logo" data-md-component="logo" href="." title="Engramic Reference">
+<img alt="logo" src="assets/logo_100.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Engramic Reference
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Engramic Reference" class="md-nav__button md-logo" data-md-component="logo" href="." title="Engramic Reference">
+<img alt="logo" src="assets/logo_100.png"/>
+</a>
+    Engramic Reference
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    Home
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href=".">
+<span class="md-ellipsis">
+    Home
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#introduction-to-engramic">
+<span class="md-ellipsis">
+      Introduction to Engramic
+    </span>
+</a>
+<nav aria-label="Introduction to Engramic" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#why-engramic">
+<span class="md-ellipsis">
+      Why Engramic?
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#engramic-architecture-philosophy">
+<span class="md-ellipsis">
+      Engramic Architecture Philosophy
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#engramic-core-concepts">
+<span class="md-ellipsis">
+      Engramic Core Concepts
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="getting_started/">
+<span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="host_and_services/">
+<span class="md-ellipsis">
+    Host &amp; Services
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="profiles/">
+<span class="md-ellipsis">
+    Profiles
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    How To's
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            How To's
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="howto/howto/">
+<span class="md-ellipsis">
+    Introduction
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="howto/how_to_parse_documents/">
+<span class="md-ellipsis">
+    Load a Document
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="howto/how_to_run_a_lesson/">
+<span class="md-ellipsis">
+    Run a Lesson
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="howto/how_to_load_a_repo/">
+<span class="md-ellipsis">
+    Load &amp; Query a Repo
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+<span class="md-ellipsis">
+    API Reference
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/emgram/">
+<span class="md-ellipsis">
+    Engram
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+<span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_2_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_6_2">
+<span class="md-nav__icon md-icon"></span>
+            Retrieve Service
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/retrieve_service/">
+<span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/ask/">
+<span class="md-ellipsis">
+    Ask
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/response_service/">
+<span class="md-ellipsis">
+    Response Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/codify_service/">
+<span class="md-ellipsis">
+    Codify Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/consolidate_service/">
+<span class="md-ellipsis">
+    Consolidate Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
+<span class="md-ellipsis">
+    Document Service
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_6_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_6_6">
+<span class="md-nav__icon md-icon"></span>
+            Document Service
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/sense_service/">
+<span class="md-ellipsis">
+    Sense Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/scan/">
+<span class="md-ellipsis">
+    Scan
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6_7" id="__nav_6_7_label" tabindex="0">
+<span class="md-ellipsis">
+    Teach Service
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_7_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_6_7">
+<span class="md-nav__icon md-icon"></span>
+            Teach Service
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/teach/">
+<span class="md-ellipsis">
+    Teach Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/lesson/">
+<span class="md-ellipsis">
+    lesson
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/repo_service/">
+<span class="md-ellipsis">
+    Repo Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/storage_service/">
+<span class="md-ellipsis">
+    Storage Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/message_service/">
+<span class="md-ellipsis">
+    Message Service
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/progress_service/">
+<span class="md-ellipsis">
+    Progress Service
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#introduction-to-engramic">
+<span class="md-ellipsis">
+      Introduction to Engramic
+    </span>
+</a>
+<nav aria-label="Introduction to Engramic" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#why-engramic">
+<span class="md-ellipsis">
+      Why Engramic?
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#engramic-architecture-philosophy">
+<span class="md-ellipsis">
+      Engramic Architecture Philosophy
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#engramic-core-concepts">
+<span class="md-ellipsis">
+      Engramic Core Concepts
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="engramic-api-reference">Engramic API Reference</h1>
+<p align="center">
+<img alt="Engramic Logo" src="assets/logo_200.png"/>
+</p>
+<p>Engramic is an inference engine. It's special because it natively supports long-term, contextual memory. This specialty makes it very adept at building applications that need to perform reliable question and answer over a corpus of data over time. Additionally, long-term, contextual memory provides the means for basic learning capabilities, resulting in deeper, more thoughtful responses.</p>
+<hr/>
+<p>Engramic is pre-alpha. It's a great time to start working with these core systems for some developers, but we have yet to complete many important features. In other words, use of this code base will require some development experience and the ability to work in maturing environments. The flip side, is that a new community is forming and as a pioneer, you have an opportunity to get in early so that you can someday tell your friends, <em>I used Engramic before it was cool</em>.</p>
+<p>There is currently no support for the following:</p>
+<ul>
+<li>There is no support for individual users.</li>
+<li>There is no HTTP(s) interface at this time.</li>
+<li>There are no fallbacks if API calls fail.</li>
+<li>Windows and MacOS is not being tested as part of our release process.</li>
+</ul>
+<p>These features, along with others, will be available in the near future.</p>
+<p>What Engramic is ready for:</p>
+<ul>
+<li>Proof of concepts focused on folder directories with 10 or so PDFs with less than 100 pages.</li>
+<li>Research related to long term memory.</li>
+<li>Developers looking to support Engramic.</li>
+</ul>
+<hr/>
+<p>For an evergreen overview of Engramic, visit our online <a href="https://www.engramic.org/knowledge-base">Knowledge Base</a>.</p>
+<h2 id="introduction-to-engramic">Introduction to Engramic</h2>
+<pre class="mermaid"><code>flowchart TD
+    %% Define node styles
+    classDef process fill:#f9f9f9,stroke:#333,stroke-width:1px,rounded:true
+    classDef io fill:#e8f4ff,stroke:#4a86e8,stroke-width:1px,rounded:true
+    classDef external fill:#f0fff0,stroke:#2d862d,stroke-width:1px,rounded:true
+
+    %% Input and external processes
+    prompt([User Prompt]):::io
+    stream([User Stream]):::io
+    sense[Sense]:::external
+
+    respond --&gt; stream
+
+    %% Core processes in learning loop
+    subgraph "Engramic Learning Loop"
+      direction RL
+      consolidate[Consolidate]:::process
+      retrieve[Retrieve]:::process
+      respond[Respond]:::process
+      codify[Codify]:::process
+
+      consolidate --&gt; retrieve
+      retrieve --&gt; respond
+      respond --&gt; codify
+      codify --&gt; consolidate
+    end
+
+    %% External connections
+    prompt --&gt; retrieve
+    sense --&gt; consolidate
+
+</code></pre>
+<p><em>Engramic's core services. Engramic uses a learning loop, building memories from responses and responses from memories</em>.</p>
+<h3 id="why-engramic">Why Engramic?</h3>
+<p>Engramic is designed to learn from your unstructured, proprietary data using any large language model (LLM). Understanding comes from synthesizing the information, asking questions, identifying what’s meaningful, and connecting it to prior knowledge and related context. Learning is an iterative process—not a linear one. That’s why we believe a large context window alone doesn’t solve the challenge of truly understanding a dataset. This belief, shaped by two years of research, is what inspired Engramic’s design.</p>
+<hr/>
+<h3 id="engramic-architecture-philosophy">Engramic Architecture Philosophy</h3>
+<ul>
+<li>
+<p><strong>Modular</strong><br/>
+  The plugin system allows easy switching between LLMs, databases, vector databases, and embedding tools.</p>
+</li>
+<li>
+<p><strong>Scalable</strong><br/>
+  Built as a set of independent services, Engramic can run on a single machine or be distributed across multiple systems.</p>
+</li>
+<li>
+<p><strong>Fast</strong><br/>
+  Optimized for usage patterns involving many blocking API calls, ensuring responsive performance.</p>
+</li>
+<li>
+<p><strong>Extensible</strong><br/>
+  Easily create custom services or plugins to extend functionality.</p>
+</li>
+</ul>
+<hr/>
+<h3 id="engramic-core-concepts">Engramic Core Concepts</h3>
+<ul>
+<li>
+<p><strong>Memory</strong><br/>
+  Supports both short-term and long-term memory mechanisms.</p>
+</li>
+<li>
+<p><strong>Engram</strong><br/>
+  The fundamental unit of information, which includes content and base and customizable contextual metadata</p>
+</li>
+<li>
+<p><strong>Citable Engrams</strong><br/>
+  External documents or media that are directly referenced. Citable Engrams are high-fidelity textual representations of the media.</p>
+</li>
+<li>
+<p><strong>Long-Term Memory Engrams</strong><br/>
+  Constructed from one or more Citable Engram or other Long-Term Memory Engrams.</p>
+</li>
+<li>
+<p><strong>Procedural Memory Engrams</strong><br/>
+  Import on server startup, provide prompt based instructions triggered by commands and modified by prompts.</p>
+</li>
+<li>
+<p><strong>Learning</strong><br/>
+  Built through the combination of memory, citable external sources, and user interaction or input.</p>
+</li>
+<li>
+<p><strong>Unified Memory</strong><br/>
+  All engrams are stored within a unified system, enabling both full and selective access to memory content.</p>
+</li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": 0.0, "provider": "mike"}}</script>
+<script src="assets/javascripts/bundle.56ea9cef.min.js"></script>
+<script type="module">import mermaid from "https://unpkg.com/mermaid@10.4.0/dist/mermaid.esm.min.mjs";
+window.mermaidConfig = {default: {
+    startOnLoad: false
+}};</script></body>
+</html>

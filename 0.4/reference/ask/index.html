@@ -1,0 +1,2367 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../retrieve_service/">
+      
+      
+        <link rel="next" href="../response_service/">
+      
+      
+      <link rel="icon" href="../../assets/logo_100.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>Ask - Engramic Reference</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Raleway";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#engramic.application.retrieve.ask.Ask" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Engramic Reference" class="md-header__button md-logo" aria-label="Engramic Reference" data-md-component="logo">
+      
+  <img src="../../assets/logo_100.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Engramic Reference
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Ask
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Engramic Reference" class="md-nav__button md-logo" aria-label="Engramic Reference" data-md-component="logo">
+      
+  <img src="../../assets/logo_100.png" alt="logo">
+
+    </a>
+    Engramic Reference
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../host_and_services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Host & Services
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../profiles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Profiles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How To's
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            How To's
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howto/howto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howto/how_to_parse_documents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Load a Document
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howto/how_to_run_a_lesson/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Run a Lesson
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howto/how_to_load_a_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Load & Query a Repo
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../emgram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Engram
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Retrieve Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../retrieve_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Retrieve Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Ask
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ask
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#engramic.application.retrieve.ask.Ask" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ask
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../response_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Response Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../codify_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Codify Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../consolidate_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Consolidate Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Document Service
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            Document Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sense_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sense Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Scan
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_7" id="__nav_6_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Teach Service
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_7">
+            <span class="md-nav__icon md-icon"></span>
+            Teach Service
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../teach/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Teach Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lesson/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    lesson
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repo_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Repo Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../storage_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Storage Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../message_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Message Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../progress_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Progress Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#engramic.application.retrieve.ask.Ask" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ask
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Ask</h1>
+
+<div class="doc doc-object doc-class">
+
+
+
+<a id="engramic.application.retrieve.ask.Ask"></a>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="engramic.core.Retrieval">Retrieval</span></code></p>
+
+
+        <p>Handles Q&amp;A retrieval by transforming prompts into contextual embeddings and returning relevant engram IDs.</p>
+<p>This class implements the retrieval workflow from raw prompts to vector database queries,
+supporting conversation analysis and dynamic index generation.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.id">id</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Unique identifier for this retrieval session.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.prompt">prompt</span></code></td>
+            <td>
+                  <code><span title="engramic.core.Prompt">Prompt</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The original prompt provided by the user.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.service">service</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="engramic.application.retrieve.retrieve_service.RetrieveService" href="../retrieve_service/#engramic.application.retrieve.retrieve_service.RetrieveService">RetrieveService</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Parent service coordinating this request.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.metrics_tracker">metrics_tracker</span></code></td>
+            <td>
+                  <code><span title="engramic.core.metrics_tracker.MetricsTracker">MetricsTracker</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Tracks operational metrics for observability.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.library">library</span></code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional target library to search within.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.widget_cmd">widget_cmd</span></code></td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Widget command from the prompt.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.conversation_direction">conversation_direction</span></code></td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Stores user intent and working memory.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.prompt_analysis">prompt_analysis</span></code></td>
+            <td>
+                  <code><span title="engramic.core.PromptAnalysis">PromptAnalysis</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Structured analysis of the prompt.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.new_conversation">new_conversation</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Flag indicating if this is a new conversation thread.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="engramic.application.retrieve.ask.Ask.type_filters">type_filters</span></code></td>
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Content type filters for vector database queries.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.get_sources">get_sources</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Initiates the async pipeline for directional memory retrieval.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._fetch_history">_fetch_history</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Retrieves prior conversation history from the document database.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.on_fetch_history_complete">on_fetch_history_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Future[Any]) -&gt; None:
+Processes history results and initiates conversation direction analysis.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._retrieve_gen_conversation_direction">_retrieve_gen_conversation_direction</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>dict[str, Any]) -&gt; None:
+Extracts user intent and conversational working memory using LLM analysis.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.on_direction_ret_complete">on_direction_ret_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Future[Any]) -&gt; None:
+Processes conversation direction and initiates embedding generation.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._embed_gen_direction">_embed_gen_direction</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Converts extracted user intent into vector embeddings.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.on_embed_direction_complete">on_embed_direction_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Future[Any]) -&gt; None:
+Processes intent embeddings and initiates metadata retrieval.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._vector_fetch_direction_meta">_vector_fetch_direction_meta</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>list[float]) -&gt; list[str]:
+Queries metadata collection using intent embeddings to find relevant context.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.on_vector_fetch_direction_meta_complete">on_vector_fetch_direction_meta_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Future[Any]) -&gt; None:
+Processes metadata IDs and loads full metadata objects.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._fetch_direction_meta">_fetch_direction_meta</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>list[str]) -&gt; list[Meta]:
+Loads Meta objects from metadata store for context enrichment.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.on_fetch_direction_meta_complete">on_fetch_direction_meta_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Future[Any]) -&gt; None:
+Initiates parallel prompt analysis and index generation.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._analyze_prompt">_analyze_prompt</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Analyzes user prompt to determine response requirements and thinking steps.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._generate_indices">_generate_indices</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>list[Meta]) -&gt; dict[str, Any]:
+Generates semantic search indices based on prompt and metadata context.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.on_analyze_complete">on_analyze_complete</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Future[Any]) -&gt; None:
+Processes analysis results and initiates index embedding generation.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._generate_indicies_embeddings">_generate_indicies_embeddings</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>list[str]) -&gt; list[list[float]]:
+Converts generated index phrases into vector embeddings.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.on_indices_embeddings_generated">on_indices_embeddings_generated</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Future[Any]) -&gt; None:
+Processes index embeddings and initiates final vector database query.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask._query_index_db">_query_index_db</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>list[list[float]]) -&gt; set[str]:
+Searches main vector database to identify related engram IDs.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="engramic.application.retrieve.ask.Ask.on_query_index_db">on_query_index_db</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Future[Any]) -&gt; None:
+Finalizes retrieval results and sends completion message.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/engramic/application/retrieve/ask.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Ask</span><span class="p">(</span><span class="n">Retrieval</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handles Q&amp;A retrieval by transforming prompts into contextual embeddings and returning relevant engram IDs.</span>
+
+<span class="sd">    This class implements the retrieval workflow from raw prompts to vector database queries,</span>
+<span class="sd">    supporting conversation analysis and dynamic index generation.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        id (str): Unique identifier for this retrieval session.</span>
+<span class="sd">        prompt (Prompt): The original prompt provided by the user.</span>
+<span class="sd">        service (RetrieveService): Parent service coordinating this request.</span>
+<span class="sd">        metrics_tracker (MetricsTracker): Tracks operational metrics for observability.</span>
+<span class="sd">        library (str | None): Optional target library to search within.</span>
+<span class="sd">        widget_cmd (Any): Widget command from the prompt.</span>
+<span class="sd">        conversation_direction (dict[str, Any]): Stores user intent and working memory.</span>
+<span class="sd">        prompt_analysis (PromptAnalysis | None): Structured analysis of the prompt.</span>
+<span class="sd">        new_conversation (bool): Flag indicating if this is a new conversation thread.</span>
+<span class="sd">        type_filters (list[str]): Content type filters for vector database queries.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        get_sources() -&gt; None:</span>
+<span class="sd">            Initiates the async pipeline for directional memory retrieval.</span>
+<span class="sd">        _fetch_history() -&gt; list[dict[str, Any]]:</span>
+<span class="sd">            Retrieves prior conversation history from the document database.</span>
+<span class="sd">        on_fetch_history_complete(fut: Future[Any]) -&gt; None:</span>
+<span class="sd">            Processes history results and initiates conversation direction analysis.</span>
+<span class="sd">        _retrieve_gen_conversation_direction(response_array: dict[str, Any]) -&gt; None:</span>
+<span class="sd">            Extracts user intent and conversational working memory using LLM analysis.</span>
+<span class="sd">        on_direction_ret_complete(fut: Future[Any]) -&gt; None:</span>
+<span class="sd">            Processes conversation direction and initiates embedding generation.</span>
+<span class="sd">        _embed_gen_direction() -&gt; list[float]:</span>
+<span class="sd">            Converts extracted user intent into vector embeddings.</span>
+<span class="sd">        on_embed_direction_complete(fut: Future[Any]) -&gt; None:</span>
+<span class="sd">            Processes intent embeddings and initiates metadata retrieval.</span>
+<span class="sd">        _vector_fetch_direction_meta(intent_embedding: list[float]) -&gt; list[str]:</span>
+<span class="sd">            Queries metadata collection using intent embeddings to find relevant context.</span>
+<span class="sd">        on_vector_fetch_direction_meta_complete(fut: Future[Any]) -&gt; None:</span>
+<span class="sd">            Processes metadata IDs and loads full metadata objects.</span>
+<span class="sd">        _fetch_direction_meta(meta_id: list[str]) -&gt; list[Meta]:</span>
+<span class="sd">            Loads Meta objects from metadata store for context enrichment.</span>
+<span class="sd">        on_fetch_direction_meta_complete(fut: Future[Any]) -&gt; None:</span>
+<span class="sd">            Initiates parallel prompt analysis and index generation.</span>
+<span class="sd">        _analyze_prompt() -&gt; dict[str, Any]:</span>
+<span class="sd">            Analyzes user prompt to determine response requirements and thinking steps.</span>
+<span class="sd">        _generate_indices(meta_list: list[Meta]) -&gt; dict[str, Any]:</span>
+<span class="sd">            Generates semantic search indices based on prompt and metadata context.</span>
+<span class="sd">        on_analyze_complete(fut: Future[Any]) -&gt; None:</span>
+<span class="sd">            Processes analysis results and initiates index embedding generation.</span>
+<span class="sd">        _generate_indicies_embeddings(indices: list[str]) -&gt; list[list[float]]:</span>
+<span class="sd">            Converts generated index phrases into vector embeddings.</span>
+<span class="sd">        on_indices_embeddings_generated(fut: Future[Any]) -&gt; None:</span>
+<span class="sd">            Processes index embeddings and initiates final vector database query.</span>
+<span class="sd">        _query_index_db(embeddings: list[list[float]]) -&gt; set[str]:</span>
+<span class="sd">            Searches main vector database to identify related engram IDs.</span>
+<span class="sd">        on_query_index_db(fut: Future[Any]) -&gt; None:</span>
+<span class="sd">            Finalizes retrieval results and sends completion message.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ask_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">prompt</span><span class="p">:</span> <span class="n">Prompt</span><span class="p">,</span>
+        <span class="n">plugin_manager</span><span class="p">:</span> <span class="n">PluginManager</span><span class="p">,</span>
+        <span class="n">metrics_tracker</span><span class="p">:</span> <span class="n">MetricsTracker</span><span class="p">[</span><span class="n">engramic</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">retrieve</span><span class="o">.</span><span class="n">retrieve_service</span><span class="o">.</span><span class="n">RetrieveMetric</span><span class="p">],</span>
+        <span class="n">db_plugin</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">service</span><span class="p">:</span> <span class="n">RetrieveService</span><span class="p">,</span>
+        <span class="n">library</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">ask_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">service</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="p">:</span> <span class="n">MetricsTracker</span><span class="p">[</span><span class="n">engramic</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">retrieve</span><span class="o">.</span><span class="n">retrieve_service</span><span class="o">.</span><span class="n">RetrieveMetric</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">metrics_tracker</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">library</span> <span class="o">=</span> <span class="n">library</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget_cmd</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis</span><span class="p">:</span> <span class="n">PromptAnalysis</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retrieve_gen_conversation_direction_plugin</span> <span class="o">=</span> <span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span>
+            <span class="s1">&#39;llm&#39;</span><span class="p">,</span> <span class="s1">&#39;retrieve_gen_conversation_direction&#39;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis_plugin</span> <span class="o">=</span> <span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;llm&#39;</span><span class="p">,</span> <span class="s1">&#39;retrieve_prompt_analysis&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_retrieve_indices_plugin</span> <span class="o">=</span> <span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;llm&#39;</span><span class="p">,</span> <span class="s1">&#39;retrieve_gen_index&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_vector_db_plugin</span> <span class="o">=</span> <span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;vector_db&#39;</span><span class="p">,</span> <span class="s1">&#39;db&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_db_document_plugin</span> <span class="o">=</span> <span class="n">db_plugin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embeddings_gen_embed</span> <span class="o">=</span> <span class="n">plugin_manager</span><span class="o">.</span><span class="n">get_plugin</span><span class="p">(</span><span class="s1">&#39;embedding&#39;</span><span class="p">,</span> <span class="s1">&#39;gen_embed&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">direction_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fetch_history</span><span class="p">())</span>
+        <span class="n">direction_step</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_fetch_history_complete</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### CONVERSATION DIRECTION</span>
+
+<span class="sd">    Fetches related domain knowledge based on the prompt intent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_db_document_plugin</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;history_limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;repo_ids_filters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">repo_ids_filters</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;conversation_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">conversation_id</span>
+
+        <span class="n">ret_val</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fetch</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">DB</span><span class="o">.</span><span class="n">DBTables</span><span class="o">.</span><span class="n">HISTORY</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="p">[],</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">history_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ret_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">history_dict</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_fetch_history_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">response_array</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">response_array</span><span class="p">[</span><span class="s1">&#39;history&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_conversation</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">response_array</span><span class="p">[</span><span class="s1">&#39;history&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;prompt&#39;</span><span class="p">][</span><span class="s1">&#39;conversation_id&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">conversation_id</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_conversation</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">retrieve_gen_conversation_direction_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_gen_conversation_direction</span><span class="p">(</span><span class="n">response_array</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">retrieve_gen_conversation_direction_step</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_direction_ret_complete</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_retrieve_gen_conversation_direction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response_array</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">DEBUG_ASK_CREATED</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;ask_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+
+        <span class="n">input_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">response_array</span>
+
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retrieve_gen_conversation_direction_plugin</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">repo_folders</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">input_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;all_repos&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">repo_folders</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">input_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;all_repos&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">widget_cmd</span><span class="p">:</span>
+            <span class="n">input_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;current_engramic_widget&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">widget_cmd</span><span class="p">})</span>
+
+        <span class="c1"># add prompt engineering here and submit as the full prompt.</span>
+        <span class="n">prompt_gen</span> <span class="o">=</span> <span class="n">PromptGenConversation</span><span class="p">(</span>
+            <span class="n">prompt_str</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">prompt_str</span><span class="p">,</span> <span class="n">input_data</span><span class="o">=</span><span class="n">input_data</span><span class="p">,</span> <span class="n">repo_ids_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">repo_ids_filters</span>
+        <span class="p">)</span>
+
+        <span class="n">structured_schema</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;current_user_intent&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="s1">&#39;working_memory_step_1&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="s1">&#39;working_memory_step_2&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="s1">&#39;working_memory_step_3&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="s1">&#39;working_memory_step_4&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">submit</span><span class="p">,</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt_gen</span><span class="p">,</span>
+            <span class="n">structured_schema</span><span class="o">=</span><span class="n">structured_schema</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">),</span>
+            <span class="n">images</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">json_parsed</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;llm_response&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">[</span><span class="s1">&#39;current_user_intent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_parsed</span><span class="p">[</span><span class="s1">&#39;current_user_intent&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">[</span><span class="s1">&#39;working_memory&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_parsed</span><span class="p">[</span><span class="s1">&#39;working_memory_step_4&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">DEBUG_CONVERSATION_DIRECTION</span><span class="p">,</span>
+                <span class="p">{</span><span class="s1">&#39;ask_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;prompt&#39;</span><span class="p">:</span> <span class="n">prompt_gen</span><span class="o">.</span><span class="n">render_prompt</span><span class="p">(),</span> <span class="s1">&#39;working_memory&#39;</span><span class="p">:</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;llm_response&#39;</span><span class="p">]},</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span>
+            <span class="n">engramic</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">retrieve</span><span class="o">.</span><span class="n">retrieve_service</span><span class="o">.</span><span class="n">RetrieveMetric</span><span class="o">.</span><span class="n">CONVERSATION_DIRECTION_CALCULATED</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_direction_ret_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ret_val</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">ret_val</span>
+
+        <span class="n">embed_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_embed_gen_direction</span><span class="p">())</span>
+        <span class="n">embed_step</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_embed_direction_complete</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_embed_gen_direction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embeddings_gen_embed</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">gen_embed</span><span class="p">,</span>
+            <span class="n">strings</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">[</span><span class="s1">&#39;current_user_intent&#39;</span><span class="p">]],</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+
+        <span class="n">float_array</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;embeddings_list&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">float_array</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_embed_direction_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">intent_embedding</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="n">fetch_direction_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vector_fetch_direction_meta</span><span class="p">(</span><span class="n">intent_embedding</span><span class="p">))</span>
+        <span class="n">fetch_direction_step</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_vector_fetch_direction_meta_complete</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_vector_fetch_direction_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">intent_embedding</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_vector_db_plugin</span>
+        <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">})</span>  <span class="c1"># meta needs a broader threshold.</span>
+        <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;n_results&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>  <span class="c1"># num results per vector</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_filters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;native&#39;</span><span class="p">,</span> <span class="s1">&#39;episodic&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">widget_cmd</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type_filters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;procedural&#39;</span><span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">,</span>
+            <span class="n">collection_name</span><span class="o">=</span><span class="s1">&#39;meta&#39;</span><span class="p">,</span>
+            <span class="n">embeddings</span><span class="o">=</span><span class="n">intent_embedding</span><span class="p">,</span>
+            <span class="n">repo_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">repo_ids_filters</span><span class="p">,</span>
+            <span class="n">type_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_filters</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+
+        <span class="n">list_str</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;query_set&#39;</span><span class="p">]</span>
+        <span class="c1"># logging.warning(list_str)</span>
+        <span class="k">return</span> <span class="n">list_str</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_vector_fetch_direction_meta_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">meta_ids</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="n">meta_fetch_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fetch_direction_meta</span><span class="p">(</span><span class="n">meta_ids</span><span class="p">))</span>
+        <span class="n">meta_fetch_step</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_fetch_direction_meta_complete</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_direction_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_id</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Meta</span><span class="p">]:</span>
+        <span class="n">meta_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">meta_repository</span><span class="o">.</span><span class="n">load_batch</span><span class="p">(</span><span class="n">meta_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="n">dict_meta</span> <span class="o">=</span> <span class="p">[</span><span class="n">meta</span><span class="o">.</span><span class="n">summary_full</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">summary_full</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">meta_list</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">DEBUG_ASK_META</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;ask_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;ask_meta&#39;</span><span class="p">:</span> <span class="n">dict_meta</span><span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">meta_list</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_fetch_direction_meta_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">meta_list</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="n">analyze_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">run_tasks</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_analyze_prompt</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_indices</span><span class="p">(</span><span class="n">meta_list</span><span class="p">)])</span>
+        <span class="n">analyze_step</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_analyze_complete</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### Prompt Analysis</span>
+
+<span class="sd">    Analyzies the prompt and generates lookups that will aid in vector searching of related content</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_analyze_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis_plugin</span>
+        <span class="c1"># add prompt engineering here and submit as the full prompt.</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">PromptAnalyzePrompt</span><span class="p">(</span>
+            <span class="n">prompt_str</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">prompt_str</span><span class="p">,</span>
+            <span class="n">input_data</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;working_memory&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">[</span><span class="s1">&#39;working_memory&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;current_user_intent&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">[</span><span class="s1">&#39;current_user_intent&#39;</span><span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">structured_response</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;response_length&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="s1">&#39;user_prompt_type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="s1">&#39;thinking_steps&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="s1">&#39;remember_request&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">submit</span><span class="p">,</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">structured_schema</span><span class="o">=</span><span class="n">structured_response</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">),</span>
+            <span class="n">images</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">engramic</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">retrieve</span><span class="o">.</span><span class="n">retrieve_service</span><span class="o">.</span><span class="n">RetrieveMetric</span><span class="o">.</span><span class="n">PROMPTS_ANALYZED</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Expected dict[str, str], got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="n">json_ret</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;llm_response&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">json_ret</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Meta</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_retrieve_indices_plugin</span>
+        <span class="c1"># add prompt engineering here and submit as the full prompt.</span>
+        <span class="n">input_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;meta_list&#39;</span><span class="p">:</span> <span class="n">meta_list</span><span class="p">,</span>
+            <span class="s1">&#39;current_user_intent&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">[</span><span class="s1">&#39;current_user_intent&#39;</span><span class="p">],</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">repo_folders</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">input_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;all_repos&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">repo_folders</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">input_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;all_repos&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">PromptGenIndices</span><span class="p">(</span>
+            <span class="n">prompt_str</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">prompt_str</span><span class="p">,</span> <span class="n">input_data</span><span class="o">=</span><span class="n">input_data</span><span class="p">,</span> <span class="n">repo_ids_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">repo_ids_filters</span>
+        <span class="p">)</span>
+        <span class="n">structured_output</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;indices&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]}</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">submit</span><span class="p">,</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">structured_schema</span><span class="o">=</span><span class="n">structured_output</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">),</span>
+            <span class="n">images</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="n">prompt_render</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">render_prompt</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span>
+                <span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">DEBUG_ASK_INDICES</span><span class="p">,</span>
+                <span class="p">{</span><span class="s1">&#39;ask_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;prompt&#39;</span><span class="p">:</span> <span class="n">prompt_render</span><span class="p">,</span> <span class="s1">&#39;indices&#39;</span><span class="p">:</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;llm_response&#39;</span><span class="p">]},</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;llm_response&#39;</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;Failed to parse JSON in _generate_indices: Response: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">response_json</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span>
+            <span class="n">engramic</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">retrieve</span><span class="o">.</span><span class="n">retrieve_service</span><span class="o">.</span><span class="n">RetrieveMetric</span><span class="o">.</span><span class="n">DYNAMIC_INDICES_GENERATED</span><span class="p">,</span> <span class="n">count</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Expected dict[str, str], got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="n">json_ret</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;llm_response&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">json_ret</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_analyze_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>  <span class="c1"># This will raise an exception if the coroutine fails</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">analysis_json</span> <span class="o">=</span> <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;_analyze_prompt&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">indices_json</span> <span class="o">=</span> <span class="n">analysis</span><span class="p">[</span><span class="s1">&#39;_generate_indices&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;Failed to parse JSON in on_analyze_complete&#39;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">widget_cmd</span><span class="p">:</span>
+            <span class="n">indices_json</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;widget &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">widget_cmd</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis</span> <span class="o">=</span> <span class="n">PromptAnalysis</span><span class="p">(</span>
+            <span class="n">analysis_json</span><span class="p">,</span>
+            <span class="n">indices_json</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">genrate_indices_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_indicies_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">genrate_indices_future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_indices_embeddings_generated</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_indices_embeddings_generated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+        <span class="n">query_index_db_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_query_index_db</span><span class="p">(</span><span class="n">embeddings</span><span class="p">))</span>
+        <span class="n">query_index_db_future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_query_index_db</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_indicies_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embeddings_gen_embed</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">gen_embed</span><span class="p">,</span> <span class="n">strings</span><span class="o">=</span><span class="n">indices</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+        <span class="n">embeddings_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;embeddings_list&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">embeddings_list</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ### Fetch Engram IDs</span>
+
+<span class="sd">    Use the indices to fetch related Engram IDs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_query_index_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_vector_db_plugin</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">embeddings</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="n">ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+            <span class="n">plugin</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">,</span>
+            <span class="n">collection_name</span><span class="o">=</span><span class="s1">&#39;main&#39;</span><span class="p">,</span>
+            <span class="n">embeddings</span><span class="o">=</span><span class="n">embeddings</span><span class="p">,</span>
+            <span class="n">repo_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">repo_ids_filters</span><span class="p">,</span>
+            <span class="n">type_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_filters</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">mock_update_args</span><span class="p">(</span><span class="n">plugin</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data</span><span class="p">(</span><span class="n">plugin</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+        <span class="n">ids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;query_set&#39;</span><span class="p">])</span>
+
+        <span class="n">num_queries</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_tracker</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span>
+            <span class="n">engramic</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">retrieve</span><span class="o">.</span><span class="n">retrieve_service</span><span class="o">.</span><span class="n">RetrieveMetric</span><span class="o">.</span><span class="n">VECTOR_DB_QUERIES</span><span class="p">,</span> <span class="n">num_queries</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ids</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_query_index_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">:</span> <span class="n">Future</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Query Result: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;on_query_index_db failed: prompt_analysis is None and likely failed during an earlier process.&#39;</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span>
+
+        <span class="n">retrieve_result</span> <span class="o">=</span> <span class="n">RetrieveResult</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">prompt_id</span><span class="p">,</span>
+            <span class="n">engram_id_array</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">ret</span><span class="p">),</span>
+            <span class="n">conversation_direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">conversation_direction</span><span class="p">,</span>
+            <span class="n">analysis</span><span class="o">=</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis</span><span class="p">)[</span><span class="s1">&#39;prompt_analysis&#39;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis</span><span class="o">.</span><span class="n">prompt_analysis</span><span class="p">[</span><span class="s1">&#39;remember_request&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">training_mode</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Prompt analysis None in on_query_index_db&#39;</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="n">retrieve_response</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;analysis&#39;</span><span class="p">:</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_analysis</span><span class="p">),</span>
+            <span class="s1">&#39;prompt&#39;</span><span class="p">:</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">),</span>
+            <span class="s1">&#39;retrieve_response&#39;</span><span class="p">:</span> <span class="n">asdict</span><span class="p">(</span><span class="n">retrieve_result</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">update_mock_data_output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="p">,</span> <span class="n">retrieve_response</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">send_message_async</span><span class="p">(</span><span class="n">Service</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">RETRIEVE_COMPLETE</span><span class="p">,</span> <span class="n">retrieve_response</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": 0.0, "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+    
+  </body>
+</html>
