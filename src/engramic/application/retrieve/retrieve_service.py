@@ -43,25 +43,26 @@ class RetrieveService(Service):
         plugin_manager (PluginManager): Access point for system plugins, including vector and document DBs.
         vector_db_plugin (dict): Plugin used for vector database operations (e.g., semantic search).
         db_plugin (dict): Plugin for interacting with the document database.
-        metrics_tracker (MetricsTracker): Collects and resets retrieval-related metrics for monitoring.
+        metrics_tracker (MetricsTracker[RetrieveMetric]): Collects and resets retrieval-related metrics for monitoring.
         meta_repository (MetaRepository): Handles Meta object persistence and transformation.
         repo_folders (dict[str, Any]): Dictionary containing repository folder information.
+        default_repos (dict[str, Any]): Dictionary of default repositories that are always included in prompts.
 
     Methods:
         init_async(): Initializes database connections and plugin setup asynchronously.
         start(): Subscribes to system topics for prompt processing and indexing lifecycle.
         stop(): Cleans up the service and halts processing.
 
-        submit(prompt: Prompt): Begins the retrieval process and logs submission metrics.
-        on_submit_prompt(msg: dict[Any, Any]): Processes a prompt message and submits for processing.
-        _on_repo_folders(msg: dict[str, Any]): Updates repository folder information.
+        submit(prompt: Prompt): Begins the retrieval process, handles default repos, and logs submission metrics.
+        on_submit_prompt(msg: dict[Any, Any]): Processes a prompt message from monitor service and submits for processing.
+        _on_repo_folders(msg: dict[str, Any]): Updates repository folder information and identifies default repositories.
 
         on_indices_complete(index_message: dict): Converts index payload into Index objects and queues for insertion.
-        _insert_engram_vector(index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str):
-            Asynchronously inserts semantic indices into vector DB with repository filters.
+        _insert_engram_vector(index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str, engram_type: str):
+            Asynchronously inserts semantic indices into vector DB with repository and type filters.
 
         on_meta_complete(meta_dict: dict): Loads and inserts metadata summary into the vector DB.
-        insert_meta_vector(meta: Meta): Runs metadata vector insertion in a background thread.
+        insert_meta_vector(meta: Meta): Runs metadata vector insertion in a background thread using asyncio.to_thread.
 
         on_acknowledge(message_in: str): Emits service metrics to the status channel and resets the tracker.
     """
@@ -75,6 +76,7 @@ class RetrieveService(Service):
         self.metrics_tracker: MetricsTracker[RetrieveMetric] = MetricsTracker[RetrieveMetric]()
         self.meta_repository: MetaRepository = MetaRepository(self.db_plugin)
         self.repo_folders: dict[str, Any] = {}
+        self.default_repos: dict[str, Any] = {}  # default repos are always included in a prompt.
 
     def init_async(self) -> None:
         self.db_plugin['func'].connect(args=None)
@@ -93,6 +95,11 @@ class RetrieveService(Service):
 
     def _on_repo_folders(self, msg: dict[str, Any]) -> None:
         self.repo_folders = msg['repo_folders']
+        self.default_repos = {}
+
+        for repo_id, repo_data in self.repo_folders.items():
+            if repo_data.get('is_default', True):
+                self.default_repos[repo_id] = repo_data
 
     # when called from monitor service
     def on_submit_prompt(self, msg: dict[Any, Any]) -> None:
@@ -104,6 +111,14 @@ class RetrieveService(Service):
             self.host.update_mock_data_input(self, asdict(prompt))
 
         self.metrics_tracker.increment(RetrieveMetric.PROMPTS_SUBMITTED)
+
+        if prompt.include_default_repos:
+            # Append default repo IDs to the prompt's repo_ids_filters
+            for repo_id in self.default_repos:
+                if prompt.repo_ids_filters is None:
+                    prompt.repo_ids_filters = []
+                prompt.repo_ids_filters.append(repo_id)
+
         retrieval = Ask(str(uuid.uuid4()), prompt, self.plugin_manager, self.metrics_tracker, self.db_plugin, self)
         retrieval.get_sources()
 
@@ -118,15 +133,21 @@ class RetrieveService(Service):
         engram_id: str = index_message['engram_id']
         tracking_id: str = index_message['tracking_id']
         repo_ids: str = index_message['repo_ids']
+        engram_type: str = index_message['engram_type']
         index_list: list[Index] = [Index(**item) for item in raw_index]
-        self.run_task(self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id))
+        self.run_task(self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id, engram_type))
 
     async def _insert_engram_vector(
-        self, index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str
+        self, index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str, engram_type: str
     ) -> None:
         plugin = self.vector_db_plugin
         self.vector_db_plugin['func'].insert(
-            collection_name='main', index_list=index_list, obj_id=engram_id, args=plugin['args'], filters=repo_ids
+            collection_name='main',
+            index_list=index_list,
+            obj_id=engram_id,
+            args=plugin['args'],
+            filters=repo_ids,
+            type_filter=engram_type,
         )
 
         index_id_array = [index.id for index in index_list]
@@ -151,6 +172,7 @@ class RetrieveService(Service):
             index_list=[meta.summary_full],
             obj_id=meta.id,
             filters=meta.repo_ids,
+            type_filter=meta.type,
             args=plugin['args'],
         )
 

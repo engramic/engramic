@@ -46,6 +46,7 @@ class ResponseService(Service):
         engram_repository (EngramRepository): Access point for loading engrams.
         llm_main (dict): Plugin for executing the main LLM-based response generation.
         metrics_tracker (MetricsTracker): Tracks internal response metrics.
+        repo_folders (dict): Repository folder information from external services.
 
     Methods:
         start() -> None:
@@ -59,15 +60,17 @@ class ResponseService(Service):
         _fetch_history(prompt: Prompt) -> dict[str, Any]:
             Asynchronously fetches historical conversation context.
         _fetch_retrieval(prompt: Prompt, source_id: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult) -> dict[str, Any]:
-            Loads engrams using retrieve result.
+            Loads engrams using retrieve result and assembles retrieval data.
         on_fetch_data_complete(fut: Future[Any]) -> None:
             Launches main prompt generation after history and engrams are loaded.
         main_prompt(prompt_in: Prompt, source_id: str, analysis: PromptAnalysis, engram_array: list[Engram], retrieve_result: RetrieveResult, history_array: dict[str, Any]) -> Response:
-            Constructs and submits the main prompt to the LLM plugin.
+            Constructs and submits the main prompt to the LLM plugin with streaming or non-streaming execution.
         on_main_prompt_complete(fut: Future[Any]) -> None:
-            Sends generated response and updates metrics.
+            Sends generated response and updates metrics when main prompt execution completes.
         on_acknowledge(message_in: str) -> None:
             Sends current metrics snapshot to monitoring topics.
+        _on_repo_folders(msg: dict[str, Any]) -> None:
+            Updates repository folder information from external services.
     """
 
     def __init__(self, host: Host) -> None:
@@ -78,6 +81,7 @@ class ResponseService(Service):
         self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
         self.llm_main = self.plugin_manager.get_plugin('llm', 'response_main')
         self.metrics_tracker: MetricsTracker[ResponseMetric] = MetricsTracker[ResponseMetric]()
+        self.repo_folders: dict[str, Any] = {}
         ##
         # Many methods are not ready to be until their async component is running.
         # Do not call async context methods in the constructor.
@@ -85,6 +89,7 @@ class ResponseService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
+        self.subscribe(Service.Topic.REPO_FOLDERS, self._on_repo_folders)
         self.web_socket_manager.init_async()
         super().start()
 
@@ -94,6 +99,9 @@ class ResponseService(Service):
     def init_async(self) -> None:
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
+
+    def _on_repo_folders(self, msg: dict[str, Any]) -> None:
+        self.repo_folders = msg['repo_folders']
 
     def on_retrieve_complete(self, retrieve_result_in: dict[str, Any]) -> None:
         if __debug__:
@@ -123,6 +131,7 @@ class ResponseService(Service):
         args = plugin['args']
         args['history_limit'] = 3
         args['repo_ids_filters'] = prompt.repo_ids_filters
+        args['conversation_id'] = prompt.conversation_id
 
         ret_val = await asyncio.to_thread(plugin['func'].fetch, table=DB.DBTables.HISTORY, ids=[], args=args)
         history: dict[str, Any] = ret_val[0]
@@ -183,6 +192,10 @@ class ResponseService(Service):
 
         engram_dict_list = [asdict(engram) for engram in engram_array]
 
+        widget = None
+        if prompt_in.widget_cmd:
+            widget = prompt_in.widget_cmd
+
         # build main prompt here
         prompt = PromptMainPrompt(
             prompt_str=prompt_in.prompt_str,
@@ -194,6 +207,8 @@ class ResponseService(Service):
                 'history': history_array['history'],
                 'working_memory': retrieve_result.conversation_direction,
                 'analysis': retrieve_result.analysis,
+                'all_repos': self.repo_folders,
+                'current_engramic_widget': widget,
             },
         )
 
@@ -201,6 +216,9 @@ class ResponseService(Service):
         args = self.host.mock_update_args(plugin)
 
         response_id = str(uuid.uuid4())
+
+        if prompt_in.thinking_level:
+            args['thinking_level'] = prompt_in.thinking_level * 10000
 
         if prompt_in.is_lesson:
             response = await asyncio.to_thread(

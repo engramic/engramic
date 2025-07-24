@@ -22,7 +22,7 @@ class PromptGenQuestions(Prompt):
 
     I need you to generate study actions that are the most apropriate for the entirety of the document, now is not the time to get overly specific, keep it high level. Consider the purpose of the document so that your study actions are the most relevant.
 
-    Go for it, generate ten relevant study actions based on the entirety of the document.
+    Generate up to ten relevant study actions based on the entirety of the document.
     Popular study actions include:
     location: ${meta['locations'][0]} List all
     location: ${meta['locations'][0]} Summarize all topics

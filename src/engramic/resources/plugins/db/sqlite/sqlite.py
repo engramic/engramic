@@ -107,6 +107,10 @@ class Sqlite(DB):
                 where_clauses.append(f'id IN ({placeholders})')
                 query_params.extend(ids)
 
+            if args and 'conversation_id' in args and args['conversation_id'] is not None:
+                where_clauses.append("json_extract(data, '$.prompt.conversation_id') = ?")
+                query_params.append(args['conversation_id'])
+
             # Filter by repo_ids_filters (assumes self.make_repo_filter_sql returns ("SQL", params))
             if args and 'repo_ids_filters' in args and args['repo_ids_filters'] is not None:
                 repo_ids = args['repo_ids_filters']

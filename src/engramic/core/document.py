@@ -24,7 +24,8 @@ class Document:
     id: str = ''
     repo_id: str | None = None
     tracking_id: str | None = None
-    is_scanned: bool = False
+    percent_complete_document: float | None = 0.0
+    percent_complete_lesson: float | None = 0.0
 
     def get_source_id(self) -> str:
         full_path = self.file_path + '/' + self.file_name

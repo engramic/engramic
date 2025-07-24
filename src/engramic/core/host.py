@@ -83,7 +83,7 @@ class Host:
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
 
-        self.executor = ThreadPoolExecutor(max_workers=8)
+        self.executor = ThreadPoolExecutor(max_workers=64)
         self.loop.set_default_executor(self.executor)
 
         future = asyncio.run_coroutine_threadsafe(self._init_services_async(), self.loop)

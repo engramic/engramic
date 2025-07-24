@@ -31,15 +31,17 @@ class SenseService(Service):
 
     Methods:
         init_async() -> None:
-            Initializes the service asynchronously and sets up any required connections or state.
+            Initializes the service asynchronously by calling the parent's init_async method.
         start() -> None:
-            Subscribes to the system topic for document submissions.
+            Subscribes to the SUBMIT_DOCUMENT topic and starts the service.
         on_document_submit(msg: dict[Any, Any]) -> None:
-            Extracts file information from a message and submits the document.
+            Extracts document and overwrite flag from message and submits the document for processing.
         submit_document(document: Document, *, overwrite: bool = False) -> Document | None:
-            Triggers scanning of the submitted document and sends async notification.
+            Checks if document processing should proceed, updates mock data, sends async notification,
+            and triggers document scanning. Returns None if document is already complete and overwrite is False.
         on_document_created_sent(ret: Future[Any]) -> None:
-            Callback function that initiates document scanning after creation notification.
+            Callback function that creates a Scan instance and initiates document parsing after
+            the document creation notification is sent.
     """
 
     def __init__(self, host: Host) -> None:
@@ -64,7 +66,7 @@ class SenseService(Service):
         self.submit_document(document, overwrite=overwrite)
 
     def submit_document(self, document: Document, *, overwrite: bool = False) -> Document | None:
-        if document.is_scanned is True and overwrite is False:
+        if document.percent_complete_document and document.percent_complete_document >= 1.0 and overwrite is False:
             return None
 
         self.host.update_mock_data_input(

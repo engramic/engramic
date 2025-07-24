@@ -5,10 +5,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from engramic.core.index import Index
+
+
+class EngramType(str, Enum):
+    NATIVE = 'native'
+    EPISODIC = 'episodic'
+    PROCEDURAL = 'procedural'
+    ARTIFACT = 'artifact'
 
 
 @dataclass()
@@ -22,14 +30,14 @@ class Engram:
         locations (list[str]): One or more file paths, URLs, or other locations associated with the engram.
         source_ids (list[str]): Identifiers of the original source documents from which the engram was derived.
         content (str): The main textual content of the engram.
-        is_native_source (bool): Indicates if the content was directly extracted (True) or generated (False).
-        context (dict[str, str] | None): Optional contextual metadata in key-value format to enhance retrieval or classification.
-        indices (list[Index] | None): Optional semantic indices, typically for vector-based retrieval.
-        meta_ids (list[str] | None): Optional list of metadata tags or identifiers relevant to the engram.
-        repo_ids (list[str] | None): Optional identifiers linking this engram to repositories or code bases.
-        accuracy (int | None): Optional accuracy score assigned during validation (e.g., via Codify Service).
-        relevancy (int | None): Optional relevancy score assigned during validation (e.g., via Codify Service).
-        created_date (int | None): Optional Unix timestamp representing the creation time of the engram.
+        engram_type (EngramType): Type of the engram (native, episodic, procedural, or artifact).
+        context (dict[str, str] | None): Optional contextual metadata in key-value format to enhance retrieval or classification. Defaults to None.
+        indices (list[Index] | None): Optional semantic indices, typically for vector-based retrieval. Defaults to None.
+        meta_ids (list[str] | None): Optional list of metadata tags or identifiers relevant to the engram. Defaults to None.
+        repo_ids (list[str] | None): Optional identifiers linking this engram to repositories or code bases. Defaults to None.
+        accuracy (int | None): Optional accuracy score assigned during validation (e.g., via Codify Service). Defaults to 0.
+        relevancy (int | None): Optional relevancy score assigned during validation (e.g., via Codify Service). Defaults to 0.
+        created_date (int | None): Optional Unix timestamp representing the creation time of the engram. Defaults to None.
 
     Methods:
         generate_toml() -> str:
@@ -41,7 +49,7 @@ class Engram:
     locations: list[str]
     source_ids: list[str]
     content: str
-    is_native_source: bool
+    engram_type: EngramType
     context: dict[str, str] | None = None
     indices: list[Index] | None = None
     meta_ids: list[str] | None = None
@@ -60,7 +68,7 @@ class Engram:
         lines = [
             f'id = {toml_escape(self.id)}',
             f'content = {toml_escape(self.content)}',
-            f'is_native_source = {str(self.is_native_source).lower()}',
+            f'engram_type = {self.engram_type}',
             f'locations = {toml_list(self.locations)}',
             f'source_ids = {toml_list(self.source_ids)}',
         ]

@@ -25,7 +25,7 @@ from engramic.application.sense.prompt_gen_full_summary import PromptGenFullSumm
 from engramic.application.sense.prompt_gen_meta import PromptGenMeta
 from engramic.application.sense.prompt_scan_page import PromptScanPage
 from engramic.core.document import Document
-from engramic.core.engram import Engram
+from engramic.core.engram import Engram, EngramType
 from engramic.core.index import Index
 from engramic.core.interface.media import Media
 from engramic.core.meta import Meta
@@ -52,7 +52,8 @@ class Scan(Media):
     - Constructs a Meta object and emits an observation to the system.
 
     Attributes:
-        id (str): Unique identifier for the scan session.
+        scan_id (str): Unique identifier for the scan session.
+        observation_id (str): Unique identifier for the observation created during scanning.
         service (SenseService): Reference to the parent service orchestrating the scan.
         page_images (list[str]): Base64-encoded representations of PDF pages.
         sense_initial_summary (Plugin): Plugin used to generate an initial summary from early pages.
@@ -60,15 +61,20 @@ class Scan(Media):
         repo_ids (list[str] | None): List of repository IDs or None if no repository is specified.
         document (Document | None): The document being processed.
         tracking_id (str): ID for tracking the scan process.
+        source_ids (list[str]): List of source document IDs.
+        total_pages (int): Total number of pages in the document.
+        inital_scan (dict): Results from the initial summary scan.
+        meta_id (str): Unique identifier for the generated Meta object.
+        engrams (list[Engram]): List of processed Engram objects.
 
     Constants:
-        DPI (int): Resolution used for image extraction.
-        DPI_DIVISOR (int): Used to calculate zoom level for rendering.
-        TEST_PAGE_LIMIT (int): Max number of pages scanned during test runs.
-        MAX_CHUNK_SIZE (int): Max text length before recursive engram chunking.
-        SHORT_SUMMARY_PAGE_COUNT (int): Number of pages used to generate initial summary.
-        MAX_DEPTH (int): Maximum recursion depth for engram processing.
-        SECTION, H1, H3 (int): Enum-like values to manage tag-based engram splitting depth.
+        DPI (int): Resolution used for image extraction (72).
+        DPI_DIVISOR (int): Used to calculate zoom level for rendering (72).
+        TEST_PAGE_LIMIT (int): Max number of pages scanned during test runs (100).
+        MAX_CHUNK_SIZE (int): Max text length before recursive engram chunking (1200).
+        SHORT_SUMMARY_PAGE_COUNT (int): Number of pages used to generate initial summary (4).
+        MAX_DEPTH (int): Maximum recursion depth for engram processing (3).
+        SECTION, H1, H3 (int): Enum-like values to manage tag-based engram splitting depth (0, 1, 2).
 
     Methods:
         parse_media_resource(document): Loads and validates a PDF, then initiates conversion.
@@ -307,10 +313,10 @@ class Scan(Media):
 
             engram = Engram(
                 str(uuid.uuid4()),
-                [self.inital_scan['file_path']],
+                ['file://' + self.inital_scan['file_path'] + '/' + self.inital_scan['file_name']],
                 [self.document.id],
                 text_in,
-                True,
+                EngramType.NATIVE,
                 context,
                 None,
                 [self.meta_id],

@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class CodifyMetric(Enum):
-    RESPONSE_RECIEVED = 'response_recieved'
+    RESPONSE_RECEIVED = 'response_received'  # Fixed typo: RECIEVED -> RECEIVED
     ENGRAM_FETCHED = 'engram_fetched'
     ENGRAM_VALIDATED = 'engram_validated'
 
@@ -60,7 +60,13 @@ class CodifyService(Service):
             Stops the service.
         init_async() -> None:
             Initializes async components, including DB connections.
-        on_main_prompt_complete(response_dict: dict[str, Any]) -> None:
+        on_codify_response(msg: dict[str, Any]) -> None:
+            Handles on-demand codification requests for specific response IDs.
+        _fetch_history(response_id: str, repo_ids_filters: list[str]) -> list[dict[str, Any]]:
+            Asynchronously fetches history for a specific response ID.
+        _on_fetch_history_codify(fut: Future[Any]) -> None:
+            Callback that processes fetched history and triggers codification.
+        on_main_prompt_complete(response_dict: dict[str, Any], *, is_on_demand: bool = False) -> None:
             Main entry point triggered after a model completes a prompt.
         _fetch_engrams(response: Response) -> dict[str, Any]:
             Asynchronously fetches engrams associated with a response.
@@ -169,7 +175,7 @@ class CodifyService(Service):
             Service.Topic.CODIFY_CREATED, {'id': response.id, 'parent_id': parent_id, 'tracking_id': tracking_id}
         )
 
-        self.metrics_tracker.increment(CodifyMetric.RESPONSE_RECIEVED)
+        self.metrics_tracker.increment(CodifyMetric.RESPONSE_RECEIVED)
         fetch_engram_step = self.run_task(self._fetch_engrams(response))
         fetch_engram_step.add_done_callback(self.on_fetch_engram_complete)
 

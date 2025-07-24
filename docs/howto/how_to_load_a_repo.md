@@ -91,8 +91,10 @@ The TestService subscribes to key events related to repositories:
 def _on_repo_folders(self, message_in: dict[str, Any]) -> None:
     if message_in['repo_folders'] is not None:
         self.repos = message_in['repo_folders']
-        self.repo_id1 = next((key for key, value in self.repos.items() if value == 'QuantumNetworking'), None)
-        self.repo_id2 = next((key for key, value in self.repos.items() if value == 'ElysianFields'), None)
+        self.repo_id1 = next(
+            (key for key, value in self.repos.items() if value['name'] == 'QuantumNetworking'), None
+        )
+        self.repo_id2 = next((key for key, value in self.repos.items() if value['name'] == 'ElysianFields'), None)
     else:
         logging.info('No repos found. You can add a repo by adding a folder to home/.local/share/engramic')
 ```
@@ -100,10 +102,27 @@ def _on_repo_folders(self, message_in: dict[str, Any]) -> None:
 This code:
 
 1. Stores the discovered repository folders
-2. Looks up specific repository IDs by their folder names
+2. Looks up specific repository IDs by their folder names (accessing the 'name' key from the repository dictionary)
 3. Provides feedback if no repositories are found
 
-### 6. Document Submission Process
+### 6. Processing Repository Files
+
+```python
+def _on_repo_files(self, message_in: dict[str, Any]) -> None:
+    # Only logging information about the files
+    logging.info('Repo: %s, Files received: %d', message_in['repo'], len(message_in['files']))
+    for file in message_in['files']:
+        status = 'previously scanned' if file['percent_complete_document'] else 'unscanned'
+        logging.info('File: %s - %s', file['file_name'], status)
+```
+
+This code:
+
+1. Logs information about the repository and number of files found
+2. Iterates through each file and checks its scanning status using the 'percent_complete_document' field
+3. Logs each file's name and whether it has been previously scanned
+
+### 7. Document Submission Process
 
 ```python
 async def submit_documents(self) -> None:
@@ -120,7 +139,7 @@ This code:
 2. Submits the first document with overwrite=True to force reprocessing
 3. Submits the second document without overwrite, using cached version if available
 
-### 7. Querying with Repository Filters
+### 8. Querying with Repository Filters
 
 When documents are fully processed (`DOCUMENT_INSERTED` events), the code sends queries with different repository filters:
 

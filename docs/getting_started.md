@@ -6,7 +6,7 @@ Please contact us at info@engramic.org if you have any issues with these instruc
 
 
 ??? note "1. Pre-Requisites - OS & IDE"
-    We are currently developing Engramic on **WSL on Windows** using **Visual Studio Code** With Ubuntu 24.0.1 LTS. It *may* run on other configurations—we'll begin cross-platform testing soon. If you'd like to help us, please reach out at [info@engramic.org](mailto:info@engramic.org).
+    We are currently developing Engramic on **WSL on Windows** using **Visual Studio Code** With Ubuntu 24.0.1 LTS. It *may* run on other configurations with minimal edits. If you'd like to help us, please reach out at [info@engramic.org](mailto:info@engramic.org).
 
     Engramic is availible via pip, however, working from source is recommended for this release.
 

@@ -57,17 +57,16 @@ class Gemini(LLM):
 
         contents = [
             types.Content(
-                role='user',
                 parts=parts,
             ),
         ]
 
         temperature = 0.5
-        top_p = 0.95
-        top_k = 40
+        top_p = 0.5
+        top_k = 30
 
         if 'deterministic' in args and (not args.get('deterministic') or args['deterministic'].lower() == 'true'):
-            temperature = 0
+            temperature = 0.01
             top_p = 1
             top_k = 1
 
@@ -75,7 +74,6 @@ class Gemini(LLM):
         max_output_tokens = 8192
         response_mime_type = 'text/plain'
         response_schema = None
-        thinking_config = None
 
         # Structured response case
         if structured_schema is not None:
@@ -84,24 +82,31 @@ class Gemini(LLM):
             response_mime_type = 'application/json'
 
         # Model-specific config
-        if model == 'gemini-2.5-flash-preview-04-17':
-            thinking_config = types.ThinkingConfig(include_thoughts=False, thinking_budget=0)
+        config_kwargs = {
+            'temperature': temperature,
+            'top_p': top_p,
+            'top_k': top_k,
+            'max_output_tokens': max_output_tokens,
+            'response_mime_type': response_mime_type,
+            'response_schema': response_schema,
+        }
+
+        if model in {'gemini-2.5-flash-preview-04-17', 'gemini-2.5-flash', 'gemini-2.5-pro'}:
+            config_kwargs['thinking_config'] = types.ThinkingConfig(include_thoughts=False, thinking_budget=128)
 
         # Construct config explicitly
         generate_content_config = types.GenerateContentConfig(
-            temperature=temperature,
-            top_p=top_p,
-            top_k=top_k,
-            max_output_tokens=max_output_tokens,
-            response_mime_type=response_mime_type,
-            response_schema=response_schema,
-            thinking_config=thinking_config,
+            temperature=config_kwargs['temperature'],
+            top_p=config_kwargs['top_p'],
+            top_k=config_kwargs['top_k'],
+            max_output_tokens=config_kwargs['max_output_tokens'],
+            response_mime_type=config_kwargs['response_mime_type'],
+            thinking_config=config_kwargs.get('thinking_config'),
+            response_schema=config_kwargs['response_schema'],
         )
 
         response = self._api_client.models.generate_content(
-            model=model,
-            contents=contents,
-            config=generate_content_config,
+            model=model, contents=contents, config=generate_content_config
         )
 
         # finish_reason = response.candidates[0].finish_reason
@@ -124,19 +129,36 @@ class Gemini(LLM):
         model = args['model']
         contents = [
             types.Content(
-                role='user',
                 parts=[
                     types.Part.from_text(text=prompt.render_prompt()),
                 ],
             ),
         ]
 
+        temperature = 0.5
+        top_p = 0.5
+        top_k = 30
+        max_output_tokens = 8192
+        response_mime_type = 'text/plain'
+
+        thinking_budget = 0
+        if 'thinking_budget' in args:
+            thinking_budget = args['thinking_budget'] * 10000
+
+        if model == 'gemini-2.5-pro':
+            thinking_budget = 300
+
+        thinking_config = None
+        if model in {'gemini-2.5-flash-preview-04-17', 'gemini-2.5-flash', 'gemini-2.5-pro'}:
+            thinking_config = types.ThinkingConfig(include_thoughts=False, thinking_budget=thinking_budget)
+
         generate_content_config = types.GenerateContentConfig(
-            temperature=1,
-            top_p=0.95,
-            top_k=40,
-            max_output_tokens=8192,
-            response_mime_type='text/plain',
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            max_output_tokens=max_output_tokens,
+            response_mime_type=response_mime_type,
+            thinking_config=thinking_config,
         )
 
         response = self._api_client.models.generate_content_stream(

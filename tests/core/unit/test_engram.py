@@ -6,6 +6,7 @@
 import uuid
 
 from engramic.core import Engram
+from engramic.core.engram import EngramType
 
 
 class MockIndex:
@@ -21,13 +22,12 @@ def test_engram_initialization() -> None:
         locations=['test_location'],
         source_ids=['test_source'],
         content='test_text',
-        is_native_source=True,
+        engram_type=EngramType.EPISODIC,
     )
 
     assert engram.locations == ['test_location']
     assert engram.source_ids == ['test_source']
     assert engram.content == 'test_text'
-    assert engram.is_native_source is True
     assert engram.context is None
     assert engram.indices is None
     assert isinstance(engram.id, str)
