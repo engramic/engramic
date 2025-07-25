@@ -92,6 +92,7 @@ class RepoService(Service):
         self.subscribe(Service.Topic.REPO_SUBMIT_IDS, self._on_submit_ids)
         self.subscribe(Service.Topic.REPO_UPDATE_REPOS, self.scan_folders)
         self.subscribe(Service.Topic.PROGRESS_UPDATED, self._on_progress_updated)
+        self.subscribe(Service.Topic.REPO_ADD_REPO, self._on_repo_create)
         super().start()
         self.scan_folders()
 
@@ -210,6 +211,56 @@ class RepoService(Service):
                 Service.Topic.REPO_FILES,
                 {'repo': folder, 'repo_id': file.repo_id, 'files': [asdict(file)]},
             )
+
+
+    def _on_repo_create(self, msg: str) -> None:
+        """
+        Handles repository creation by creating a new folder with a .repo configuration file.
+
+        Args:
+            msg (str): JSON message containing the repository name.
+        """
+        try:
+            repo_name = msg['repo_name']
+
+            # Get the repository root path
+            repo_root = self._get_repo_root()
+
+            # Create the new repository folder
+            repo_folder = repo_root / repo_name
+            repo_folder.mkdir(parents=True, exist_ok=True)
+
+            # Generate a new UUID for the repository
+            repo_id = str(uuid.uuid4())
+
+            # Create the .repo file content
+            repo_config = f"""[repository]
+id = "{repo_id}"
+"""
+
+            # Write the .repo file
+            repo_file = repo_folder / '.repo'
+            with repo_file.open('w', encoding='utf-8') as f:
+                f.write(repo_config)
+
+            # Add the new repository to our in-memory index
+            self.repos[repo_id] = Repo(name=repo_name, repo_id=repo_id, is_default=False)
+            self.file_repos[repo_id] = []
+
+            # Send message to update the UI
+            self.send_message_async(
+                Service.Topic.REPO_FOLDERS,
+                {'repo_folders': {repo_id: asdict(self.repos[repo_id]) for repo_id in self.repos}}
+            )
+
+            logging.info(f"Created new repository '{repo_name}' with ID '{repo_id}'")
+
+        except (json.JSONDecodeError, KeyError) as e:
+            logging.error(f"Invalid message format for repo creation: {e}")
+        except (OSError, PermissionError) as e:
+            logging.error(f"Failed to create repository folder: {e}")
+        except Exception as e:
+            logging.error(f"Unexpected error creating repository: {e}")
 
     async def update_repo_files(self, repo_id: str, update_ids: list[str] | None = None) -> None:
         """

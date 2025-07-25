@@ -47,6 +47,7 @@ class Service(ABC):
         REPO_FILES = 'repo_files'
         REPO_SUBMIT_IDS = 'repo_submit_files'
         REPO_UPDATE_REPOS = 'repo_update_repos'
+        REPO_ADD_REPO = 'repo_add_repo'
         RETRIEVE_COMPLETE = 'retrieve_complete'
         MAIN_PROMPT_COMPLETE = 'main_prompt_complete'
         START_PROFILER = 'start_profiler'
