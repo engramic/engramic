@@ -80,8 +80,8 @@ This code sets up all necessary services, with `TeachService` being essential fo
 ```python
 # In TestService.start():
 sense_service = self.host.get_service(SenseService)
-document = Document(
-    Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+document = FileNode(
+    FileNode.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
 )
 self.document_id = document.id
 sense_service.submit_document(document, overwrite=True)
@@ -179,8 +179,8 @@ To add lesson functionality to your Engramic application:
 
     ```python
     sense_service = host.get_service(SenseService)
-    document = Document(
-        Document.Root.RESOURCE.value, 
+    document = FileNode(
+        FileNode.Root.RESOURCE.value, 
         'engramic.resources.your_document_path', 
         'YourDocument.pdf'
     )

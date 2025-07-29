@@ -15,7 +15,7 @@ from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.sense.sense_service import SenseService
 from engramic.application.storage.storage_service import StorageService
 from engramic.application.teach.teach_service import TeachService
-from engramic.core.document import Document
+from engramic.core.file_node import FileNode
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
 from engramic.core.response import Response
@@ -33,11 +33,13 @@ class TestService(Service):
         self.subscribe(Service.Topic.LESSON_INSERTED, self.on_lesson_inserted)
 
         sense_service = self.host.get_service(SenseService)
-        document = Document(
-            Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+        document = FileNode(
+            FileNode.Root.RESOURCE.value,
+            'IntroductiontoQuantumNetworking.pdf',
+            module_path='engramic.resources.rag_document',
         )
-        # document = Document(
-        #    Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+        # document = FileNode(
+        #    FileNode.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
         # )
         self.document_id = document.id
         sense_service.submit_document(document, overwrite=True)

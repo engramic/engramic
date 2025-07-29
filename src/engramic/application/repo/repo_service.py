@@ -14,13 +14,14 @@ import json
 import logging
 import os
 import uuid
+import warnings
 from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import tomli
 
-from engramic.core.document import Document
+from engramic.core.file_node import FileNode
 from engramic.core.repo import Repo  # Add this import
 from engramic.infrastructure.repository.document_repository import DocumentRepository
 from engramic.infrastructure.repository.engram_repository import EngramRepository
@@ -50,8 +51,7 @@ class RepoService(Service):
         engram_repository (EngramRepository): Repository for engram storage and retrieval.
         observation_repository (ObservationRepository): Repository for observation storage and retrieval.
         repos (dict[str, Repo]): Mapping of repository IDs to Repo objects.
-        file_index (dict[str, Any]): Index of all files by document ID.
-        file_repos (dict[str, Any]): Mapping of repository IDs to lists of document IDs.
+        file_node_index (dict[str, Any]): Index of all files by document ID.
         submitted_documents (set[str]): Set of document IDs that have been submitted for processing.
 
     Methods:
@@ -81,8 +81,7 @@ class RepoService(Service):
         self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
         self.observation_repository: ObservationRepository = ObservationRepository(self.db_document_plugin)
         self.repos: dict[str, Repo] = {}  # memory copy of all folders
-        self.file_index: dict[str, Any] = {}  # memory copy of all files
-        self.file_repos: dict[str, Any] = {}  # memory copy of all files in repos
+        self.file_node_index: dict[str, Any] = {}  # memory copy of all files and folders across the system
         self.submitted_documents: set[str] = set()
 
     def start(self) -> None:
@@ -125,7 +124,7 @@ class RepoService(Service):
             overwrite (bool): Whether to overwrite existing documents. Defaults to False.
         """
         for sub_id in id_array:
-            document = self.file_index[sub_id]
+            document = self.file_node_index[sub_id]
             self.send_message_async(
                 Service.Topic.SUBMIT_DOCUMENT, {'document': asdict(document), 'overwrite': overwrite}
             )
@@ -197,23 +196,27 @@ class RepoService(Service):
         if progress_type == 'lesson':
             doc_id = msg['target_id']
 
-        if doc_id is not None and doc_id in self.file_index:  # might be a different progress update
-            file = self.file_index[doc_id]
+        if doc_id is not None and doc_id in self.file_node_index:  # might be a different progress update
+            file = self.file_node_index[doc_id]
 
             if progress_type == 'document':
                 file.percent_complete_document = msg['percent_complete']
             elif progress_type == 'lesson':
                 file.percent_complete_lesson = msg['percent_complete']
 
-            folder = self.repos[file.repo_id].name
+            # folder = self.repos[file.repo_id].name
 
-            self.send_message_async(
-                Service.Topic.REPO_FILES,
-                {'repo': folder, 'repo_id': file.repo_id, 'files': [asdict(file)]},
+            warnings.warn(
+                '_on_progress_updated is deprecated and may be removed in a future release.',
+                DeprecationWarning,
+                stacklevel=2,
             )
+            # self.send_message_async(
+            #    Service.Topic.REPO_UPDATE_REPOS,
+            #    {'repo': folder, 'repo_id': file.repo_id, 'files': [asdict(file)]},
+            # )
 
-
-    def _on_repo_create(self, msg: str) -> None:
+    def _on_repo_create(self, msg: dict[str, Any]) -> None:
         """
         Handles repository creation by creating a new folder with a .repo configuration file.
 
@@ -245,42 +248,95 @@ id = "{repo_id}"
 
             # Add the new repository to our in-memory index
             self.repos[repo_id] = Repo(name=repo_name, repo_id=repo_id, is_default=False)
-            self.file_repos[repo_id] = []
 
             # Send message to update the UI
             self.send_message_async(
-                Service.Topic.REPO_FOLDERS,
-                {'repo_folders': {repo_id: asdict(self.repos[repo_id]) for repo_id in self.repos}}
+                Service.Topic.REPO_DIRECTORY_SCANNED,
+                {'repos': {repo_id: asdict(self.repos[repo_id]) for repo_id in self.repos}},
             )
 
-            logging.info(f"Created new repository '{repo_name}' with ID '{repo_id}'")
+            system_repo_root = os.getenv('REPO_ROOT')
+            if system_repo_root:
+                env_root = Path(system_repo_root)
+                repo_file_folder_tree = self._index_repo_files(repo_id, repo_name, env_root)
+                future = self.run_task(self.update_repo_files(repo_id, repo_file_folder_tree))
+                future.add_done_callback(self._on_update_repo_files_complete)
 
-        except (json.JSONDecodeError, KeyError) as e:
-            logging.error(f"Invalid message format for repo creation: {e}")
-        except (OSError, PermissionError) as e:
-            logging.error(f"Failed to create repository folder: {e}")
-        except Exception as e:
-            logging.error(f"Unexpected error creating repository: {e}")
+                logging.info("Created new repository '%s' with ID '%s'", repo_name, repo_id)
 
-    async def update_repo_files(self, repo_id: str, update_ids: list[str] | None = None) -> None:
+        except (json.JSONDecodeError, KeyError):
+            logging.exception(
+                'Invalid message format for repo creation',
+            )
+        except (OSError, PermissionError):
+            logging.exception('Failed to create repository folder:')
+        except Exception:
+            logging.exception('Unexpected error creating repository:')
+
+    def _traverse_file_folder_tree(self, tree_node: dict[str, Any]) -> dict[str, Any]:
+        """
+        Traverse the file_folder_tree and collect all files and folders.
+
+        Args:
+            tree_node (dict[str, Any]): The tree node to traverse
+
+        Returns:
+            dict[str, Any]: Dictionary containing all files and folders indexed by their IDs
+        """
+        files_and_folders = {}
+
+        # Add folder to collection if it has an ID
+        if tree_node.get('folder_id') is not None:
+            folder_id = tree_node['folder_id']
+            if folder_id in self.file_node_index:
+                file_node = self.file_node_index[folder_id]
+                files_and_folders[folder_id] = {
+                    'file_name': file_node.file_name,
+                    'file_dirs': file_node.file_dirs,  # Changed from file_path
+                    'node_type': file_node.node_type,
+                    'id': file_node.id,
+                    'repo_id': file_node.repo_id,
+                }
+
+        # Add all files in current node
+        for file_id in tree_node.get('files', []):
+            if file_id in self.file_node_index:
+                file_node = self.file_node_index[file_id]
+                files_and_folders[file_id] = {
+                    'file_name': file_node.file_name,
+                    'file_dirs': file_node.file_dirs,  # Changed from file_path
+                    'node_type': file_node.node_type,
+                    'id': file_node.id,
+                    'repo_id': file_node.repo_id,
+                }
+
+        # Recursively traverse subfolders
+        for subfolder in tree_node.get('folders', []):
+            subfolder_files_and_folders = self._traverse_file_folder_tree(subfolder)
+            files_and_folders.update(subfolder_files_and_folders)
+
+        return files_and_folders
+
+    async def update_repo_files(self, repo_id: str, file_folder_tree: dict[str, Any]) -> None:
         """
         Updates the list of files for a repository.
 
         Args:
             repo_id (str): ID of the repository to update.
-            update_ids (list[str] | None): List of document IDs to update. If None, updates all files.
+            file_folder_tree (dict[str, Any]): The hierarchical tree structure of files and folders.
+            repo_files_and_folders (dict[str, Any], optional): Pre-computed files and folders dict.
         """
-        document_dicts = []
 
-        folder = self.repos[repo_id].name
-
-        update_list = self.file_repos[repo_id] if update_ids is None else update_ids
-
-        document_dicts = [asdict(self.file_index[document_id]) for document_id in update_list]
+        # If repo_files_and_folders is not provided, traverse the tree to collect it
+        repo_files_and_folders = self._traverse_file_folder_tree(file_folder_tree)
 
         self.send_message_async(
-            Service.Topic.REPO_FILES,
-            {'repo': folder, 'repo_id': repo_id, 'files': document_dicts},
+            Service.Topic.REPO_FILE_FOLDER_TREE_UPDATED,
+            {
+                'repo': asdict(self.repos[repo_id]),
+                'file_tree': file_folder_tree,
+                'files_and_folders': repo_files_and_folders,
+            },
         )
 
     def scan_folders(self, repo_id: dict[str, str] | None = None) -> None:
@@ -299,7 +355,7 @@ id = "{repo_id}"
         repo_root = self._get_repo_root()
         repos_to_scan = self._determine_repos_to_scan(repo_id, repo_root)
 
-        self._send_repo_folders_message()
+        self._send_repo_directory_scanned()
         self._scan_and_index_repos(repos_to_scan, repo_root)
 
     def _get_repo_root(self) -> Path:
@@ -328,63 +384,149 @@ id = "{repo_id}"
                 raise ValueError(error)
         return {target_repo_id: self.repos[target_repo_id]}
 
-    def _send_repo_folders_message(self) -> None:
+    def _send_repo_directory_scanned(self) -> None:
         """Send async message with repository folders."""
 
         async def send_message() -> None:
             # Convert Repo objects to dictionaries for serialization
             repos_dict = {repo_id: asdict(repo) for repo_id, repo in self.repos.items()}
-            self.send_message_async(Service.Topic.REPO_FOLDERS, {'repo_folders': repos_dict})
+            self.send_message_async(Service.Topic.REPO_DIRECTORY_SCANNED, {'repos': repos_dict})
 
         self.run_task(send_message())
 
-    def _scan_and_index_repos(self, repos_to_scan: dict[str, Repo], repo_root: Path) -> None:
+    def _scan_and_index_repos(self, repos_to_scan: dict[str, Repo], system_repo_root: Path) -> None:
         """Scan and index files in the specified repositories."""
         for current_repo_id, repo in repos_to_scan.items():
-            document_ids = self._index_repo_files(current_repo_id, repo.name, repo_root)
-            self.file_repos[current_repo_id] = document_ids
-            future = self.run_task(self.update_repo_files(current_repo_id))
+            repo_file_folder_tree = self._index_repo_files(current_repo_id, repo.name, system_repo_root)
+
+            future = self.run_task(self.update_repo_files(current_repo_id, repo_file_folder_tree))
             future.add_done_callback(self._on_update_repo_files_complete)
 
-    def _index_repo_files(self, repo_id: str, folder: str, repo_root: Path) -> list[str]:
-        """Index all files in a repository folder."""
-        document_ids = []
-        for root, dirs, files in os.walk(repo_root / folder):
-            del dirs
-            for file in files:
-                if file.startswith('.'):
-                    continue  # Skip hidden files
+    # store all files and folders in file_node_index
 
-                doc = self._handle_file_by_type(repo_id, folder, root, file, repo_root)
-                if doc is not None:
-                    document_ids.append(doc.id)
-                    self.file_index[doc.id] = doc
+    def _index_repo_files(self, repo_id: str, repo_name: str, system_repo_root: Path) -> dict[str, Any]:
+        """Index all files and folders in a repository folder."""
+        repo_root_object = self._create_folder_node(repo_id, repo_name, '', [])
 
-        return document_ids
+        if repo_root_object is None:
+            error = 'Expected an id but None was found.'
+            raise RuntimeError(error)
 
-    def _handle_file_by_type(self, repo_id: str, folder: str, root: str, file: str, repo_root: Path) -> Document | None:
-        """Handle different file types and return a Document if applicable."""
-        file_path = Path(root) / file
-        relative_path = file_path.relative_to(repo_root / folder)
-        relative_dir = str(relative_path.parent) if relative_path.parent != Path('.') else ''
+        self.file_node_index[repo_root_object.id] = repo_root_object
+
+        tree_root = {'folder_id': repo_root_object.id, 'folder_name': '', 'files': [], 'folders': []}
+
+        # Keep track of folder nodes by their path for tree building
+        folder_nodes: dict[str, Any] = {str(system_repo_root / repo_name): tree_root}
+
+        # Create folder nodes for each directory
+        for absolute_dir_path, dirs, files in os.walk(system_repo_root / repo_name):
+            current_path = str(Path(absolute_dir_path))
+            current_node = folder_nodes.get(current_path, tree_root)
+
+            # Calculate the relative path from repo root to build dir_list
+            relative_root = Path(absolute_dir_path).relative_to(system_repo_root / repo_name)
+            dir_list = list(relative_root.parts) if relative_root != Path('.') else []
+
+            self._process_subdirectories(
+                dirs, repo_id, repo_name, dir_list, absolute_dir_path, current_node, folder_nodes
+            )
+            self._process_files(files, system_repo_root, repo_id, repo_name, dir_list, current_node)
+
+        return tree_root
+
+    def _process_subdirectories(
+        self,
+        dirs: list[str],
+        repo_id: str,
+        repo_name: str,
+        dir_list: list[str],
+        absolute_dir_path: str,
+        current_node: dict[str, Any],
+        folder_nodes: dict[str, Any],
+    ) -> None:
+        for dir_name in dirs:
+            if dir_name.startswith('.'):
+                continue  # Skip hidden directories
+
+            folder_node = self._create_folder_node(repo_id, repo_name, dir_name, dir_list)
+            if folder_node is not None:
+                self.file_node_index[folder_node.id] = folder_node
+
+                # Create the folder entry in the tree
+                folder_entry = {
+                    'folder_id': folder_node.id,
+                    'folder_name': folder_node.file_name,
+                    'files': [],
+                    'folders': [],
+                }
+
+                if not isinstance(current_node['folders'], list):
+                    current_node['folders'] = []
+                elif current_node['folders'] and isinstance(current_node['folders'][0], str):
+                    # If it's a list of strings, clear it
+                    current_node['folders'] = []
+
+                current_node['folders'].append(folder_entry)
+
+                # Map the full path to this folder entry for future reference
+                dir_path = str(Path(absolute_dir_path) / dir_name)
+                folder_nodes[dir_path] = folder_entry
+
+    def _process_files(
+        self,
+        files: list[str],
+        system_repo_root: Path,
+        repo_id: str,
+        repo_name: str,
+        dir_list: list[str],
+        current_node: dict[str, Any],
+    ) -> None:
+        for file in files:
+            if file.startswith('.'):
+                continue  # Skip hidden files
+
+            doc = self._handle_file_by_type(str(system_repo_root), repo_id, repo_name, file, dir_list)
+            if doc is not None:
+                self.file_node_index[doc.id] = doc
+                current_node['files'].append(doc.id)
+
+    def _create_folder_node(self, repo_id: str, repo_name: str, dir_name: str, dir_list: list[str]) -> FileNode | None:
+        """Create a File_ode object for folders."""
+
+        folder_node = FileNode(
+            root_directory=FileNode.Root.DATA.value,
+            file_dirs=[repo_name, *dir_list],
+            file_name=dir_name,
+            node_type=FileNode.Type.FOLDER.value,
+            repo_id=repo_id,
+        )
+
+        return folder_node
+
+    def _handle_file_by_type(
+        self, system_repo_root: str, repo_id: str, repo_name: str, file_name: str, folder_dir_list: list[str]
+    ) -> FileNode | None:
+        """Handle different file types and return a FileNode if applicable."""
 
         # Handle different file types
-        file_extension = Path(file).suffix.lower()
+        file_extension = Path(file_name).suffix.lower()
 
         if file_extension == '.pdf':
-            return self._create_document_from_pdf(repo_id, folder, relative_dir, file)
+            return self._create_document_from_pdf(repo_id, [repo_name, *folder_dir_list], file_name)
         if file_extension == '.engram':
-            self._load_engram_file(file_path)
+            self._load_engram_file(system_repo_root, [repo_name, *folder_dir_list], file_name)
             return None
-        # Skip other file types
+        # For other file types, create a generic file node
         return None
 
-    def _create_document_from_pdf(self, repo_id: str, folder: str, relative_dir: str, file_name: str) -> Document:
-        """Create a Document object for PDF files."""
-        doc = Document(
-            root_directory=Document.Root.DATA.value,
-            file_path=folder + relative_dir,
+    def _create_document_from_pdf(self, repo_id: str, folder_dir_list: list[str], file_name: str) -> FileNode:
+        """Create a FileNode object for PDF files."""
+        doc = FileNode(
+            root_directory=FileNode.Root.DATA.value,
+            file_dirs=folder_dir_list,
             file_name=file_name,
+            node_type=FileNode.Type.FILE.value,
             repo_id=repo_id,
             tracking_id=str(uuid.uuid4()),
         )
@@ -392,23 +534,18 @@ id = "{repo_id}"
         # Check to see if the document has been loaded before.
         fetched_doc: dict[str, Any] = self.document_repository.load(doc.id)
 
-        # If it has been loaded, add that one to the file_index.
+        # If it has been loaded, add that one to the file_node_index.
         if len(fetched_doc['document']) != 0:
-            doc = Document(**fetched_doc['document'][0])
+            doc = FileNode(**fetched_doc['document'][0])
 
         return doc
 
-    def _load_engram_file(self, file_path: Path) -> None:
+    def _load_engram_file(self, system_repo_root: str, file_list: list[str], file_name: str) -> None:
         """
         Load an .engram TOML file.
-
-        Args:
-            repo_id (str): Repository ID
-            folder (str): Repository folder name
-            relative_dir (str): Relative directory path
-            file_name (str): Name of the .engram file
-            file_path (Path): Full path to the .engram file
         """
+        file_path = Path(system_repo_root, *file_list, file_name)  # <-- Use Path here
+
         try:
             # Load the TOML content
             with file_path.open('rb') as f:

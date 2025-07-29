@@ -81,7 +81,7 @@ class ResponseService(Service):
         self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
         self.llm_main = self.plugin_manager.get_plugin('llm', 'response_main')
         self.metrics_tracker: MetricsTracker[ResponseMetric] = MetricsTracker[ResponseMetric]()
-        self.repo_folders: dict[str, Any] = {}
+        self.repos: dict[str, Any] = {}
         ##
         # Many methods are not ready to be until their async component is running.
         # Do not call async context methods in the constructor.
@@ -89,7 +89,7 @@ class ResponseService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
-        self.subscribe(Service.Topic.REPO_FOLDERS, self._on_repo_folders)
+        self.subscribe(Service.Topic.REPO_DIRECTORY_SCANNED, self._on_repo_directory_scanned)
         self.web_socket_manager.init_async()
         super().start()
 
@@ -100,8 +100,8 @@ class ResponseService(Service):
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
 
-    def _on_repo_folders(self, msg: dict[str, Any]) -> None:
-        self.repo_folders = msg['repo_folders']
+    def _on_repo_directory_scanned(self, msg: dict[str, Any]) -> None:
+        self.repos = msg['repos']
 
     def on_retrieve_complete(self, retrieve_result_in: dict[str, Any]) -> None:
         if __debug__:
@@ -207,7 +207,7 @@ class ResponseService(Service):
                 'history': history_array['history'],
                 'working_memory': retrieve_result.conversation_direction,
                 'analysis': retrieve_result.analysis,
-                'all_repos': self.repo_folders,
+                'all_repos': self.repos,
                 'current_engramic_widget': widget,
             },
         )

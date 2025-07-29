@@ -58,8 +58,8 @@ The example code creates a `TestService` class that demonstrates how to:
 ```python
 # In TestService.start():
 sense_service = self.host.get_service(SenseService)
-document = Document(
-    Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+document = FileNode(
+    FileNode.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
 )
 self.document_id = document.id
 sense_service.submit_document(document)
@@ -145,8 +145,8 @@ In the example above, the code is referencing a file saved in the resources dire
 
 ```
 # Loading from local data directory
-document = Document(
-    Document.Root.DATA.value,
+document = FileNode(
+    FileNode.Root.DATA.value,
     '/path/to/document/folder',
     'document.pdf'
 )

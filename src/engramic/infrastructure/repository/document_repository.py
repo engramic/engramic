@@ -6,7 +6,7 @@ import logging
 from dataclasses import asdict
 from typing import Any
 
-from engramic.core.document import Document
+from engramic.core.file_node import FileNode
 from engramic.core.interface.db import DB
 
 
@@ -20,7 +20,7 @@ class DocumentRepository:
 
         self.db_plugin = plugin
 
-    def save(self, document: Document) -> None:
+    def save(self, document: FileNode) -> None:
         self.db_plugin['func'].insert_documents(table=DB.DBTables.DOCUMENT, docs=[asdict(document)], args=None)
 
     def load(self, document_id: str) -> dict[str, Any]:

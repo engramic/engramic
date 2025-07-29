@@ -7,7 +7,7 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
 from engramic.application.sense.scan import Scan
-from engramic.core.document import Document
+from engramic.core.file_node import FileNode
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
@@ -36,7 +36,7 @@ class SenseService(Service):
             Subscribes to the SUBMIT_DOCUMENT topic and starts the service.
         on_document_submit(msg: dict[Any, Any]) -> None:
             Extracts document and overwrite flag from message and submits the document for processing.
-        submit_document(document: Document, *, overwrite: bool = False) -> Document | None:
+        submit_document(document: FileNode, *, overwrite: bool = False) -> FileNode | None:
             Checks if document processing should proceed, updates mock data, sends async notification,
             and triggers document scanning. Returns None if document is already complete and overwrite is False.
         on_document_created_sent(ret: Future[Any]) -> None:
@@ -58,14 +58,14 @@ class SenseService(Service):
         super().start()
 
     def on_document_submit(self, msg: dict[Any, Any]) -> None:
-        document = Document(**msg['document'])
+        document = FileNode(**msg['document'])
         overwrite = False
         if 'overwrite' in msg:
             overwrite = msg['overwrite']
 
         self.submit_document(document, overwrite=overwrite)
 
-    def submit_document(self, document: Document, *, overwrite: bool = False) -> Document | None:
+    def submit_document(self, document: FileNode, *, overwrite: bool = False) -> FileNode | None:
         if document.percent_complete_document and document.percent_complete_document >= 1.0 and overwrite is False:
             return None
 
@@ -74,7 +74,7 @@ class SenseService(Service):
             asdict(document),
         )
 
-        async def send_message() -> Document:
+        async def send_message() -> FileNode:
             self.send_message_async(
                 Service.Topic.DOCUMENT_CREATED,
                 {'id': document.id, 'type': 'document', 'tracking_id': document.tracking_id},

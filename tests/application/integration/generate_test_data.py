@@ -13,7 +13,7 @@ from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.sense.sense_service import SenseService
 from engramic.application.storage.storage_service import StorageService
-from engramic.core.document import Document
+from engramic.core.file_node import FileNode
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
 from engramic.infrastructure.system import Service
@@ -47,8 +47,10 @@ class TestService(Service):
 
         if prompt_id == self.prompt_id:
             sense_service = self.host.get_service(SenseService)
-            document = Document(
-                Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+            document = FileNode(
+                FileNode.Root.RESOURCE.value,
+                'IntroductiontoQuantumNetworking.pdf',
+                module_path='engramic.resources.rag_document',
             )
             self.document_id = document.id
             document.tracking_id = 2
