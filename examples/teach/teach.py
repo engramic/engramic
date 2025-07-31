@@ -8,13 +8,13 @@ from typing import Any
 from engramic.application.codify.codify_service import CodifyService
 from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
+from engramic.application.process.process_service import TeachService
 from engramic.application.progress.progress_service import ProgressService
 from engramic.application.repo.repo_service import RepoService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.sense.sense_service import SenseService
 from engramic.application.storage.storage_service import StorageService
-from engramic.application.teach.teach_service import TeachService
 from engramic.core.file_node import FileNode
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
@@ -42,7 +42,7 @@ class TestService(Service):
         #    FileNode.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
         # )
         self.document_id = document.id
-        sense_service.submit_document(document, overwrite=True)
+        sense_service.scan_document(document, overwrite=True)
 
     def on_main_prompt_complete(self, message_in: dict[str, Any]) -> None:
         response = Response(**message_in)

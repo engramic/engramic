@@ -167,6 +167,17 @@ class Ask(Retrieval):
 
         if self.prompt.widget_cmd:
             input_data.update({'current_engramic_widget': self.prompt.widget_cmd})
+            if self.prompt.is_background is False:  # very important to prevent recursion.
+                # process cmd will spawn another prompt. This is used in prompts that need to query a server resoruces as part of it's repsonse.
+                # it will give the user initial feedback and then answer the question.
+                self.service.send_message_async(
+                    Service.Topic.PROCESS_CMD,
+                    {
+                        'cmd': self.prompt.widget_cmd,
+                        'repo_ids_filters': self.prompt.repo_ids_filters,
+                        'tracking_id': self.prompt.tracking_id,
+                    },
+                )
 
         # add prompt engineering here and submit as the full prompt.
         prompt_gen = PromptGenConversation(

@@ -52,7 +52,7 @@
       //"args": ["${workspaceFolder}/tests/application/integration/test_response.py"],
       //"args": ["${workspaceFolder}/tests/application/integration/test_codify.py"],
       //"args": ["${workspaceFolder}/tests/application/integration/test_consolidate.py","-s"],
-      "args": ["${workspaceFolder}/tests/application/integration/test_sense.py"],
+      //"args": ["${workspaceFolder}/tests/application/integration/test_sense.py"],
       "console": "integratedTerminal"
     },
     {

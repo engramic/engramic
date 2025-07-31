@@ -66,7 +66,7 @@ def start(self):
     self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
     repo_service = self.host.get_service(RepoService)
     repo_service.scan_folders()
-    self.run_task(self.submit_documents())
+    self.run_task(self.scan_documents())
 ```
 
 This code:
@@ -125,12 +125,12 @@ This code:
 ### 7. Document Submission Process
 
 ```python
-async def submit_documents(self) -> None:
+async def scan_documents(self) -> None:
     repo_service = self.host.get_service(RepoService)
     self.document_id1 = '97a1ae1b8461076cdc679d6e0a5f885e'  # 'IntroductiontoQuantumNetworking.pdf'
     self.document_id2 = '9c9f0237620b77fa69e2ca63e40a9f27'  # 'Elysian_Fields.pdf'
-    repo_service.submit_ids([self.document_id1], overwrite=True)
-    repo_service.submit_ids([self.document_id2])
+    repo_service.scan_ids([self.document_id1], overwrite=True)
+    repo_service.scan_ids([self.document_id2])
 ```
 
 This code:

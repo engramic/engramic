@@ -106,7 +106,6 @@ class ProgressService(Service):
         Subscribes to creation events for lessons, prompts, codifications, documents,
         observations, engrams, and indices to begin tracking their progress through the system.
         """
-        self.subscribe(Service.Topic.LESSON_CREATED, self.on_lesson_created)
         self.subscribe(Service.Topic.PROMPT_CREATED, self.on_prompt_created)
         self.subscribe(Service.Topic.CODIFY_CREATED, self.on_codify_created)
         self.subscribe(Service.Topic.DOCUMENT_CREATED, self.on_document_created)
@@ -149,16 +148,16 @@ class ProgressService(Service):
         else:
             self.progress_array[lesson_id].tracking_id = tracking_id
             self.progress_array[lesson_id].target_id = doc_id
-            self.send_message_async(
-                Service.Topic.PROGRESS_UPDATED,
-                {
-                    'progress_type': 'lesson',
-                    'id': lesson_id,
-                    'target_id': doc_id,
-                    'percent_complete': 0.05,
-                    'tracking_id': tracking_id,
-                },
-            )
+            # self.send_message_async(
+            #     Service.Topic.PROGRESS_UPDATED,
+            #     {
+            #         'progress_type': 'lesson',
+            #         'id': lesson_id,
+            #         'target_id': doc_id,
+            #         'percent_complete': 0.05,
+            #         'tracking_id': tracking_id,
+            #     },
+            # )
 
     def on_prompt_created(self, msg: dict[str, Any]) -> None:
         """
@@ -182,16 +181,16 @@ class ProgressService(Service):
         else:
             self.progress_array[prompt_id].tracking_id = tracking_id
 
-            self.send_message_async(
-                Service.Topic.PROGRESS_UPDATED,
-                {
-                    'progress_type': 'prompt',
-                    'id': prompt_id,
-                    'target_id': prompt_id,
-                    'percent_complete': 0.05,
-                    'tracking_id': tracking_id,
-                },
-            )
+            # self.send_message_async(
+            #     Service.Topic.PROGRESS_UPDATED,
+            #     {
+            #         'progress_type': 'prompt',
+            #         'id': prompt_id,
+            #         'target_id': prompt_id,
+            #         'percent_complete': 0.05,
+            #         'tracking_id': tracking_id,
+            #     },
+            # )
 
     def on_codify_created(self, msg: dict[str, Any]) -> None:
         """
@@ -215,16 +214,16 @@ class ProgressService(Service):
         else:
             self.progress_array[codify_id].tracking_id = tracking_id
 
-            self.send_message_async(
-                Service.Topic.PROGRESS_UPDATED,
-                {
-                    'progress_type': 'codify',
-                    'id': codify_id,
-                    'target_id': codify_id,
-                    'percent_complete': 0.05,
-                    'tracking_id': tracking_id,
-                },
-            )
+            # self.send_message_async(
+            #     Service.Topic.PROGRESS_UPDATED,
+            #     {
+            #         'progress_type': 'codify',
+            #         'id': codify_id,
+            #         'target_id': codify_id,
+            #         'percent_complete': 0.05,
+            #         'tracking_id': tracking_id,
+            #     },
+            # )
 
     def on_document_created(self, msg: dict[str, Any]) -> None:
         """
@@ -252,16 +251,17 @@ class ProgressService(Service):
         else:  # an originating node
             self.progress_array[doc_id].tracking_id = tracking_id
             self.progress_array[doc_id].target_id = doc_id
-            self.send_message_async(
-                Service.Topic.PROGRESS_UPDATED,
-                {
-                    'progress_type': 'document',
-                    'id': doc_id,
-                    'target_id': doc_id,
-                    'percent_complete': 0.05,
-                    'tracking_id': tracking_id,
-                },
-            )
+
+            # self.send_message_async(
+            #     Service.Topic.PROGRESS_UPDATED,
+            #     {
+            #         'progress_type': 'document',
+            #         'id': doc_id,
+            #         'target_id': doc_id,
+            #         'percent_complete': 0.05,
+            #         'tracking_id': tracking_id,
+            #     },
+            # )
 
     def on_observation_created(self, msg: dict[str, Any]) -> None:
         """
@@ -327,7 +327,7 @@ class ProgressService(Service):
         prompt = Prompt(**prompt_msg)
         if prompt.parent_id is None and not prompt.training_mode:
             self.send_message_async(
-                Service.Topic.PROGRESS_UPDATED,
+                Service.Topic.PROGRESS_PROGRESS_UPDATED,
                 {
                     'progress_type': 'prompt',
                     'id': prompt.prompt_id,
@@ -363,7 +363,7 @@ class ProgressService(Service):
         originating_object = self.progress_array[bubble_return.root_node]
 
         self.send_message_async(
-            Service.Topic.PROGRESS_UPDATED,
+            Service.Topic.PROGRESS_PROGRESS_UPDATED,
             {
                 'progress_type': originating_object.item_type,
                 'id': bubble_return.root_node,
@@ -402,8 +402,8 @@ class ProgressService(Service):
 
             if progress.item_type == 'document':
                 self.send_message_async(Service.Topic.DOCUMENT_INSERTED, {'id': node_id})
-            elif progress.item_type == 'lesson':
-                self.send_message_async(Service.Topic.LESSON_INSERTED, {'id': node_id})
+            # elif progress.item_type == 'lesson':
+            #    self.send_message_async(Service.Topic.LESSON_INSERTED, {'id': node_id})
             elif progress.item_type == 'prompt':
                 self.send_message_async(Service.Topic.PROMPT_INSERTED, {'id': node_id})
             elif progress.item_type == 'codify':

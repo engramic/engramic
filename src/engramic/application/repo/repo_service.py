@@ -13,8 +13,8 @@ from __future__ import annotations
 import json
 import logging
 import os
+import shutil
 import uuid
-import warnings
 from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -88,12 +88,17 @@ class RepoService(Service):
         """
         Starts the repository service and subscribes to relevant topics.
         """
-        self.subscribe(Service.Topic.REPO_SUBMIT_IDS, self._on_submit_ids)
+        self.subscribe(Service.Topic.REPO_SUBMIT_IDS, self._on_scan_ids)
         self.subscribe(Service.Topic.REPO_UPDATE_REPOS, self.scan_folders)
-        self.subscribe(Service.Topic.PROGRESS_UPDATED, self._on_progress_updated)
         self.subscribe(Service.Topic.REPO_ADD_REPO, self._on_repo_create)
+        self.subscribe(Service.Topic.REPO_DELETE_FILE, self._on_delete_file_node)
+        self.subscribe(Service.Topic.REPO_ADD_FILE, self._on_add_file_node)
         super().start()
-        self.scan_folders()
+
+        async def scan_folders() -> None:
+            self.scan_folders()
+
+        self.run_task(scan_folders())
 
     def init_async(self) -> None:
         """
@@ -101,21 +106,61 @@ class RepoService(Service):
         """
         return super().init_async()
 
-    def _on_submit_ids(self, msg: str) -> None:
+    def _on_delete_file_node(self, msg: dict[str, Any]) -> None:
+        file_node = FileNode(**msg)
+
+        repo_root = os.path.expanduser(os.environ.get('REPO_ROOT', ''))
+
+        # Construct file path
+        file_path = Path(os.path.join(repo_root, *file_node.file_dirs, file_node.file_name))
+
+        # Delete based on node_type
+        if file_path.exists():
+            if file_node.node_type == 'folder':
+                # Delete folder and all its contents recursively
+
+                shutil.rmtree(file_path)  # replace this with a call to S3 or similar.
+            else:
+                # Delete file
+                file_path.unlink()  # replace this with a call to S3 or similar.
+                self.document_repository.delete(file_node.id)
+
+        if file_node.repo_id is None:
+            error = 'Filenode.repo_id is None but not expected to be.'
+            raise RuntimeError(error)
+
+        repo = self.repos[file_node.repo_id]
+        self.scan_folders(asdict(repo))
+
+    def _on_add_file_node(self, msg: dict[str, Any]) -> None:
+        repo_id = msg['repo_id']
+        file_name = msg['file_name']
+        file_dirs = msg['file_dirs']
+
+        file_node = FileNode(FileNode.Root.DATA.value, file_name, FileNode.Type.FILE.value, file_dirs)
+        self.document_repository.save(file_node)
+
+        async def send_message() -> None:
+            self.send_message_async(Service.Topic.REPO_UPDATE_REPOS, {'repo_id': repo_id})
+
+        self.run_task(send_message())
+
+    def _on_scan_ids(self, msg: dict[str, Any]) -> None:
         """
         Handles the REPO_SUBMIT_IDS message.
 
         Args:
             msg (str): JSON message containing document IDs to submit.
         """
-        json_msg = json.loads(msg)
-        id_array = json_msg['submit_ids']
+        id_array = msg['submit_ids']
         overwrite = False
-        if 'overwrite' in json_msg:
-            overwrite = json_msg['overwrite']
-        self.submit_ids(id_array, overwrite=overwrite)
 
-    def submit_ids(self, id_array: list[str], *, overwrite: bool = False) -> None:
+        if 'overwrite' in msg:
+            overwrite = msg['overwrite']
+
+        self.scan_ids(id_array, overwrite=overwrite)
+
+    def scan_ids(self, id_array: list[str], *, overwrite: bool = False) -> None:
         """
         Submits documents for processing by their IDs.
 
@@ -125,8 +170,9 @@ class RepoService(Service):
         """
         for sub_id in id_array:
             document = self.file_node_index[sub_id]
+
             self.send_message_async(
-                Service.Topic.SUBMIT_DOCUMENT, {'document': asdict(document), 'overwrite': overwrite}
+                Service.Topic.DOCUMENT_SCAN_DOCUMENT, {'document': asdict(document), 'overwrite': overwrite}
             )
             self.submitted_documents.add(document.id)
 
@@ -187,34 +233,6 @@ class RepoService(Service):
                 except (FileNotFoundError, PermissionError, ValueError, OSError) as e:
                     info = "Skipping '%s': %s"
                     logging.info(info, name, e)
-
-    def _on_progress_updated(self, msg: dict[str, Any]) -> None:
-        progress_type = msg['progress_type']
-        doc_id = None
-        if progress_type == 'document':
-            doc_id = msg['id']
-        if progress_type == 'lesson':
-            doc_id = msg['target_id']
-
-        if doc_id is not None and doc_id in self.file_node_index:  # might be a different progress update
-            file = self.file_node_index[doc_id]
-
-            if progress_type == 'document':
-                file.percent_complete_document = msg['percent_complete']
-            elif progress_type == 'lesson':
-                file.percent_complete_lesson = msg['percent_complete']
-
-            # folder = self.repos[file.repo_id].name
-
-            warnings.warn(
-                '_on_progress_updated is deprecated and may be removed in a future release.',
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            # self.send_message_async(
-            #    Service.Topic.REPO_UPDATE_REPOS,
-            #    {'repo': folder, 'repo_id': file.repo_id, 'files': [asdict(file)]},
-            # )
 
     def _on_repo_create(self, msg: dict[str, Any]) -> None:
         """
@@ -290,25 +308,13 @@ id = "{repo_id}"
             folder_id = tree_node['folder_id']
             if folder_id in self.file_node_index:
                 file_node = self.file_node_index[folder_id]
-                files_and_folders[folder_id] = {
-                    'file_name': file_node.file_name,
-                    'file_dirs': file_node.file_dirs,  # Changed from file_path
-                    'node_type': file_node.node_type,
-                    'id': file_node.id,
-                    'repo_id': file_node.repo_id,
-                }
+                files_and_folders[folder_id] = asdict(file_node)
 
         # Add all files in current node
         for file_id in tree_node.get('files', []):
             if file_id in self.file_node_index:
                 file_node = self.file_node_index[file_id]
-                files_and_folders[file_id] = {
-                    'file_name': file_node.file_name,
-                    'file_dirs': file_node.file_dirs,  # Changed from file_path
-                    'node_type': file_node.node_type,
-                    'id': file_node.id,
-                    'repo_id': file_node.repo_id,
-                }
+                files_and_folders[file_id] = asdict(file_node)
 
         # Recursively traverse subfolders
         for subfolder in tree_node.get('folders', []):
@@ -339,7 +345,7 @@ id = "{repo_id}"
             },
         )
 
-    def scan_folders(self, repo_id: dict[str, str] | None = None) -> None:
+    def scan_folders(self, repo: dict[str, str] | None = None) -> None:
         """
         Scans repository folders and indexes their files.
 
@@ -353,7 +359,7 @@ id = "{repo_id}"
             ValueError: If the specified repo_id is not found.
         """
         repo_root = self._get_repo_root()
-        repos_to_scan = self._determine_repos_to_scan(repo_id, repo_root)
+        repos_to_scan = self._determine_repos_to_scan(repo, repo_root)
 
         self._send_repo_directory_scanned()
         self._scan_and_index_repos(repos_to_scan, repo_root)
@@ -366,9 +372,9 @@ id = "{repo_id}"
             raise RuntimeError(error)
         return Path(repo_root).expanduser()
 
-    def _determine_repos_to_scan(self, repo_id: dict[str, str] | None, repo_root: Path) -> dict[str, Repo]:
+    def _determine_repos_to_scan(self, repo: dict[str, str] | None, repo_root: Path) -> dict[str, Repo]:
         """Determine which repositories need to be scanned."""
-        target_repo_id = repo_id.get('repo_id') if repo_id is not None else None
+        target_repo_id = repo.get('repo_id') if repo is not None else None
 
         if target_repo_id is not None:
             return self._get_specific_repo(target_repo_id, repo_root)
@@ -528,15 +534,24 @@ id = "{repo_id}"
             file_name=file_name,
             node_type=FileNode.Type.FILE.value,
             repo_id=repo_id,
-            tracking_id=str(uuid.uuid4()),
         )
 
         # Check to see if the document has been loaded before.
         fetched_doc: dict[str, Any] = self.document_repository.load(doc.id)
 
-        # If it has been loaded, add that one to the file_node_index.
+        # If it has been found before, then use that version.
         if len(fetched_doc['document']) != 0:
             doc = FileNode(**fetched_doc['document'][0])
+        else:
+            self.document_repository.save(doc)
+
+            # TODO: Need to make this run once.
+            async def send_message() -> None:
+                self.send_message_async(
+                    Service.Topic.REPO_FILE_FOUND, {'document_id': doc.id, 'tracking_id': doc.tracking_id}
+                )
+
+            self.run_task(send_message())
 
         return doc
 

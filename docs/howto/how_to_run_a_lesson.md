@@ -84,7 +84,7 @@ document = FileNode(
     FileNode.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
 )
 self.document_id = document.id
-sense_service.submit_document(document, overwrite=True)
+sense_service.scan_document(document, overwrite=True)
 ```
 
 This code:
@@ -185,7 +185,7 @@ To add lesson functionality to your Engramic application:
         'YourDocument.pdf'
     )
 
-    sense_service.submit_document(document, True)
+    sense_service.scan_document(document, True)
     ```
 
 3. Listen for lesson events if needed:

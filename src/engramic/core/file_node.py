@@ -23,17 +23,13 @@ class FileNode:
         FOLDER = 'folder'
 
     root_directory: str
-
     file_name: str
     node_type: str = Type.FILE.value  # Add node_type field
     file_dirs: list[str] = field(default_factory=list)
-
     id: str = ''
     module_path: str | None = None
     repo_id: str | None = None
     tracking_id: str | None = None
-    percent_complete_document: float | None = 0.0
-    percent_complete_lesson: float | None = 0.0
 
     def get_source_id(self) -> str:
         if self.root_directory == self.Root.RESOURCE.value:

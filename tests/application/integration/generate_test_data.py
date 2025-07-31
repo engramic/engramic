@@ -54,7 +54,7 @@ class TestService(Service):
             )
             self.document_id = document.id
             document.tracking_id = 2
-            sense_service.submit_document(document)
+            sense_service.scan_document(document)
 
     def on_document_inserted(self, message_in: dict[str, Any]) -> None:
         document_id = message_in['id']

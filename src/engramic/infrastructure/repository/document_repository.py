@@ -28,3 +28,6 @@ class DocumentRepository:
             table=DB.DBTables.DOCUMENT, ids=[document_id], args=None
         )
         return ret[0]
+
+    def delete(self, document_id: str) -> None:
+        self.db_plugin['func'].delete_documents(table=DB.DBTables.DOCUMENT, ids=[document_id], args=None)

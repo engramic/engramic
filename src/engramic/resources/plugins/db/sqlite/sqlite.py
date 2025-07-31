@@ -65,6 +65,16 @@ class Sqlite(DB):
                     data TEXT
                 )
             """)
+
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS process (
+                    id TEXT PRIMARY KEY,
+                    data TEXT
+                )
+            """)
+            self.cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_created_date ON process(json_extract(data, '$.created_date'))"
+            )
             self.db.commit()
 
     @db_impl
@@ -161,4 +171,23 @@ class Sqlite(DB):
             table_name: Final[str] = self._table_name_map[table]
             query = f'INSERT OR REPLACE INTO {table_name} (id, data) VALUES (?, ?)'
             self.cursor.executemany(query, values)
+            self.db.commit()
+
+    @db_impl
+    def delete_documents(self, table: DB.DBTables, ids: list[dict[str, Any]], args: dict[str, Any]) -> None:
+        del args
+
+        with self.multi_process_lock:
+            if table not in self._table_name_map:
+                type_error = 'Invalid table enum value'
+                raise TypeError(type_error)
+
+            if not ids:
+                return  # Nothing to delete
+
+            table_name: Final[str] = self._table_name_map[table]
+            placeholders = ','.join('?' for _ in ids)
+            query = f'DELETE FROM {table_name} WHERE id IN ({placeholders})'
+
+            self.cursor.execute(query, ids)
             self.db.commit()

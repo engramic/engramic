@@ -95,7 +95,13 @@ class DBspec(DB):
     @db_spec
     def insert_documents(self, table: DB.DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:
         del table, docs, args
-        error_message = 'Subclasses must implement `execute_data`'
+        error_message = 'Subclasses must implement `insert_documents`'
+        raise NotImplementedError(error_message)
+
+    @db_spec
+    def delete_documents(self, table: DB.DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:
+        del table, docs, args
+        error_message = 'Subclasses must implement `delete_documents`'
         raise NotImplementedError(error_message)
 
 

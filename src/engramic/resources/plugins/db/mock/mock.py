@@ -54,3 +54,19 @@ class Mock(DB):
         elif table.value == 'meta':
             for doc in docs:
                 self.metas[doc['id']] = doc
+
+    @db_impl
+    def delete_documents(self, table: DB.DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:
+        del args
+        if table.value == 'history':
+            for doc in docs:
+                del self.history[doc['id']]
+        elif table.value == 'observation':
+            for doc in docs:
+                del self.observations[doc['id']]
+        elif table.value == 'engram':
+            for doc in docs:
+                del self.engrams[doc['id']]
+        elif table.value == 'meta':
+            for doc in docs:
+                del self.metas[doc['id']]

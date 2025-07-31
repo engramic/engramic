@@ -62,7 +62,7 @@ document = FileNode(
     FileNode.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
 )
 self.document_id = document.id
-sense_service.submit_document(document)
+sense_service.scan_document(document)
 ```
 
 This code:
@@ -127,7 +127,7 @@ def on_main_prompt_complete(self, message_in: dict[str, Any]) -> None:
 
 ### Document Submission Options
 
-To submit a document for processing, you can use the submit_document method from the SenseService (as shown in the example) or via the Document.Topic.SUBMIT_DOCUMENT message.
+To submit a document for processing, you can use the scan_document method from the SenseService (as shown in the example) or via the Document.Topic.DOCUMENT_SCAN_DOCUMENT message.
 
 When submitting documents that may have been processed before, you can use the overwrite parameter to force reprocessing:
 

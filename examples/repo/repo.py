@@ -39,9 +39,9 @@ class TestService(Service):
         self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
         repo_service = self.host.get_service(RepoService)
         repo_service.scan_folders()
-        self.run_task(self.submit_documents())
+        self.run_task(self.scan_documents())
 
-    async def submit_documents(self) -> None:
+    async def scan_documents(self) -> None:
         repo_service = self.host.get_service(RepoService)
         self.document_id1 = 'ebafc7af85629e1346863e4622087032'  # 'IntroductiontoQuantumNetworking.pdf'
         self.document_id2 = 'bb8f78c67efb2e7f5d843038ef5e072d'  # 'Elysian_Fields.pdf'

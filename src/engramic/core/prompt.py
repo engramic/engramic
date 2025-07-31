@@ -12,6 +12,7 @@ from typing import Any
 class Prompt:
     prompt_str: str = ''
     prompt_id: str = ''
+    is_background: bool = False
     repo_ids_filters: list[str] | None = None
     training_mode: bool | None = False
     is_lesson: bool | None = False
