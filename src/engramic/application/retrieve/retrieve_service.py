@@ -101,7 +101,7 @@ class RetrieveService(Service):
             if repo_data.get('is_default', True):
                 self.default_repos[repo_id] = repo_data
 
-    # when called from monitor service
+    # when called from events
     def on_submit_prompt(self, msg: dict[Any, Any]) -> None:
         self.submit(Prompt(**msg))
 

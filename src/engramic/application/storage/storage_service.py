@@ -119,7 +119,7 @@ class StorageService(Service):
         response_dict['prompt'] = Prompt(**response_dict['prompt'])
         response = Response(**response_dict)
 
-        if not response.prompt.is_lesson:
+        if not response.prompt.is_lesson and response.prompt.save_in_history:
             self.run_task(self.save_history(response))
 
     def on_meta_complete(self, meta_dict: dict[str, str]) -> None:

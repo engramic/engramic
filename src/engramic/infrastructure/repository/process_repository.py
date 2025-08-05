@@ -6,8 +6,8 @@ import logging
 from dataclasses import asdict
 from typing import Any
 
+from engramic.application.process.process import Process
 from engramic.core.interface.db import DB
-from engramic.core.process import Process
 
 
 class ProcessRepository:
@@ -21,7 +21,8 @@ class ProcessRepository:
         self.db_plugin = plugin
 
     def save(self, process: Process) -> None:
-        self.db_plugin['func'].insert_documents(table=DB.DBTables.PROCESS, docs=[asdict(process)], args=None)
+        process_dict = asdict(process)
+        self.db_plugin['func'].insert_documents(table=DB.DBTables.PROCESS, docs=[process_dict], args=None)
 
     def load(self, process_id: str) -> dict[str, Any]:
         ret: list[dict[str, Any]] = self.db_plugin['func'].fetch(table=DB.DBTables.PROCESS, ids=[process_id], args=None)

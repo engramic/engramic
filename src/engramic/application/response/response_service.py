@@ -108,10 +108,16 @@ class ResponseService(Service):
             self.host.update_mock_data_input(self, retrieve_result_in)
 
         prompt = Prompt(**retrieve_result_in['prompt'])
-        prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
+
+        prompt_analysis = None
+
+        if retrieve_result_in['analysis']:
+            prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
+
         retrieve_result = RetrieveResult(**retrieve_result_in['retrieve_response'])
         source_id = retrieve_result.source_id
         self.metrics_tracker.increment(ResponseMetric.RETRIEVES_RECIEVED)
+
         fetch_engrams_task = self.run_tasks([
             self._fetch_retrieval(
                 prompt=prompt, source_id=source_id, analysis=prompt_analysis, retrieve_result=retrieve_result
@@ -138,7 +144,7 @@ class ResponseService(Service):
         return history
 
     async def _fetch_retrieval(
-        self, prompt: Prompt, source_id: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult
+        self, prompt: Prompt, source_id: str, retrieve_result: RetrieveResult, analysis: PromptAnalysis | None = None
     ) -> dict[str, Any]:
         engram_array: list[Engram] = await asyncio.to_thread(
             self.engram_repository.load_batch_retrieve_result, retrieve_result

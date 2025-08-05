@@ -181,16 +181,16 @@ class ProgressService(Service):
         else:
             self.progress_array[prompt_id].tracking_id = tracking_id
 
-            # self.send_message_async(
-            #     Service.Topic.PROGRESS_UPDATED,
-            #     {
-            #         'progress_type': 'prompt',
-            #         'id': prompt_id,
-            #         'target_id': prompt_id,
-            #         'percent_complete': 0.05,
-            #         'tracking_id': tracking_id,
-            #     },
-            # )
+            self.send_message_async(
+                Service.Topic.PROGRESS_PROGRESS_UPDATED,
+                {
+                    'progress_type': 'prompt',
+                    'id': prompt_id,
+                    'target_id': prompt_id,
+                    'percent_complete': 0.00,
+                    'tracking_id': tracking_id,
+                },
+            )
 
     def on_codify_created(self, msg: dict[str, Any]) -> None:
         """
@@ -214,16 +214,16 @@ class ProgressService(Service):
         else:
             self.progress_array[codify_id].tracking_id = tracking_id
 
-            # self.send_message_async(
-            #     Service.Topic.PROGRESS_UPDATED,
-            #     {
-            #         'progress_type': 'codify',
-            #         'id': codify_id,
-            #         'target_id': codify_id,
-            #         'percent_complete': 0.05,
-            #         'tracking_id': tracking_id,
-            #     },
-            # )
+            self.send_message_async(
+                Service.Topic.PROGRESS_PROGRESS_UPDATED,
+                {
+                    'progress_type': 'codify',
+                    'id': codify_id,
+                    'target_id': codify_id,
+                    'percent_complete': 0.05,
+                    'tracking_id': tracking_id,
+                },
+            )
 
     def on_document_created(self, msg: dict[str, Any]) -> None:
         """
@@ -252,16 +252,16 @@ class ProgressService(Service):
             self.progress_array[doc_id].tracking_id = tracking_id
             self.progress_array[doc_id].target_id = doc_id
 
-            # self.send_message_async(
-            #     Service.Topic.PROGRESS_UPDATED,
-            #     {
-            #         'progress_type': 'document',
-            #         'id': doc_id,
-            #         'target_id': doc_id,
-            #         'percent_complete': 0.05,
-            #         'tracking_id': tracking_id,
-            #     },
-            # )
+            self.send_message_async(
+                Service.Topic.PROGRESS_PROGRESS_UPDATED,
+                {
+                    'progress_type': 'document',
+                    'id': doc_id,
+                    'target_id': doc_id,
+                    'percent_complete': 0.05,
+                    'tracking_id': tracking_id,
+                },
+            )
 
     def on_observation_created(self, msg: dict[str, Any]) -> None:
         """

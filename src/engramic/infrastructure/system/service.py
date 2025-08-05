@@ -28,9 +28,10 @@ T = TypeVar('T', bound=Enum)
 
 class Service(ABC):
     class Topic(Enum):
-        PROCESS_CMD = 'process_cmd'
-        PROCESS_PROGRESS_UPDATED = 'process_progress_updated'
-        PROCESS_RECENT_PROCESS_UPDATED = 'process_recent_process_updated'
+        PROCESS_CREATE = 'process_create'
+        PROCESS_ACTIVE_PROGRESS_UPDATED = 'process_active_progress_updated'
+        PROCESS_RECENT_PROGRESS_UPDATED = 'process_recent_process_updated'
+        PROCESS_RUN_PROCESS = 'process_run_process'
         ENGRAMIC_SHUTDOWN = 'engramic_shutdown'
         SUBMIT_PROMPT = 'submit_prompt'
         PROMPT_CREATED = 'prompt_created'

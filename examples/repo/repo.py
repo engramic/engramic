@@ -37,6 +37,7 @@ class TestService(Service):
         self.subscribe(Service.Topic.REPO_DIRECTORY_SCANNED, self._on_repo_directory_scanned)
         self.subscribe(Service.Topic.REPO_UPDATE_REPOS, self._on_repo_update)
         self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
+        self.subscribe(Service.Topic.DOCUMENT_INSERTED, self.on_document_inserted)
         repo_service = self.host.get_service(RepoService)
         repo_service.scan_folders()
         self.run_task(self.scan_documents())
@@ -45,8 +46,8 @@ class TestService(Service):
         repo_service = self.host.get_service(RepoService)
         self.document_id1 = 'ebafc7af85629e1346863e4622087032'  # 'IntroductiontoQuantumNetworking.pdf'
         self.document_id2 = 'bb8f78c67efb2e7f5d843038ef5e072d'  # 'Elysian_Fields.pdf'
-        repo_service.submit_ids([self.document_id1], overwrite=True)
-        repo_service.submit_ids([self.document_id2])
+        repo_service.scan_ids([self.document_id1], overwrite=True)
+        repo_service.scan_ids([self.document_id2])
 
     def _on_repo_directory_scanned(self, message_in: dict[str, Any]) -> None:
         if message_in['repos'] is not None:

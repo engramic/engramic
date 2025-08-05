@@ -66,7 +66,11 @@ Deliver results related to the user_intent and resist explaining the work you ar
 
 <sources>
     <engramic_working_memory>
-        working_memory: ${working_memory['working_memory']}
+        % if working_memory:
+            working_memory: ${working_memory['working_memory']}
+        % else:
+            No working memory in this prompt.
+        % endif
     </engramic_working_memory>
 
     % if len(engram_list) == 0:
@@ -140,7 +144,11 @@ Deliver results related to the user_intent and resist explaining the work you ar
 </sources>
 <current_user_prompt>
     user_prompt: ${prompt_str}
-    user_intent: ${working_memory['current_user_intent']}
+    % if working_memory:
+        user_intent: ${working_memory['current_user_intent']}
+    % else:
+        user_intent not availible, follow user_prompt.
+    % endif
 </current_user_prompt>
 <current_engramic_widget>
     current widget: ${current_engramic_widget}
@@ -150,9 +158,6 @@ Deliver results related to the user_intent and resist explaining the work you ar
 </current_engramic_widget>
 
 Write your text in dense commonmark markdown.
-
-
-
 
 """).render(timestamp=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'), **self.input_data)
         return str(render_string)

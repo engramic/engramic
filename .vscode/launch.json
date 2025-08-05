@@ -44,6 +44,13 @@
       "console": "integratedTerminal"
     },
     {
+      "name": "Example - Process",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/process/process.py",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Integration Tests",
       "type": "debugpy",
       "request": "launch",
