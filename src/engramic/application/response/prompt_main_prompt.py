@@ -2,8 +2,10 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import logging
 from datetime import datetime, timezone
 
+from mako.exceptions import text_error_template
 from mako.template import Template
 
 from engramic.core.prompt import Prompt
@@ -11,7 +13,9 @@ from engramic.core.prompt import Prompt
 
 class PromptMainPrompt(Prompt):
     def render_prompt(self) -> str:
-        render_string = Template("""
+        render_string = ''  # Initialize with default value
+        try:
+            render_string = Template("""
 Your name is Engramic.
 
 Date is ${timestamp}
@@ -160,4 +164,8 @@ Deliver results related to the user_intent and resist explaining the work you ar
 Write your text in dense commonmark markdown.
 
 """).render(timestamp=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'), **self.input_data)
+        except Exception:
+            error_message = text_error_template().render()
+            logging.exception(error_message)
+            render_string = error_message  # Use error message as fallback
         return str(render_string)

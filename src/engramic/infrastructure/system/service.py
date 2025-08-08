@@ -54,6 +54,7 @@ class Service(ABC):
         REPO_DELETE_FILE = 'repo_delete_file'
         REPO_ADD_FILE = 'repo_add_file'
         REPO_ADD_REPO = 'repo_add_repo'
+        RESPONSE_SUBMIT_RESPONSE = 'response_submit_response'
         RETRIEVE_COMPLETE = 'retrieve_complete'
         MAIN_PROMPT_COMPLETE = 'main_prompt_complete'
         START_PROFILER = 'start_profiler'

@@ -90,6 +90,7 @@ class ResponseService(Service):
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
         self.subscribe(Service.Topic.REPO_DIRECTORY_SCANNED, self._on_repo_directory_scanned)
+        self.subscribe(Service.Topic.RESPONSE_SUBMIT_RESPONSE, self._on_submit_response)
         self.web_socket_manager.init_async()
         super().start()
 
@@ -266,6 +267,28 @@ class ResponseService(Service):
 
         if __debug__:
             self.host.update_mock_data_output(self, asdict(result))
+
+    def _on_submit_response(self, msg: dict[str, Any]) -> None:
+        user_response = msg['user_response']
+        simple_prompt = Prompt(prompt_str=user_response, repo_ids_filters=[])
+
+        analysis = PromptAnalysis({'response_length': 'short', 'user_prompt_type': 'typical'}, {'': None})
+
+        retrieve_result = RetrieveResult(
+            str(uuid.uuid4()),
+            simple_prompt.prompt_id,
+            engram_id_array=[],
+            conversation_direction=None,
+            analysis=asdict(analysis)['prompt_analysis'],
+        )
+
+        response = {
+            'analysis': asdict(analysis),
+            'prompt': asdict(simple_prompt),
+            'retrieve_response': asdict(retrieve_result),
+        }
+
+        self.on_retrieve_complete(response)
 
     """
     ### Ack

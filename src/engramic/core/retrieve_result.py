@@ -10,5 +10,5 @@ class RetrieveResult:
     ask_id: str
     source_id: str
     engram_id_array: list[str]
-    conversation_direction: dict[str, str]
-    analysis: dict[str, str]
+    conversation_direction: dict[str, str] | None = None
+    analysis: dict[str, str] | None = None

@@ -6,11 +6,12 @@
 Provides services for generating educational content and lessons from documents.
 """
 
+import logging
 import uuid
 from dataclasses import asdict
 from typing import Any
 
-from engramic.application.process.process import BasicPromptPass, FileInfoPass, FinalPromptPass, Process, ScanFilePass
+from engramic.application.process.process import FileInfoPass, FinalPromptPass, Process, ScanFilePass
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
 from engramic.infrastructure.repository.process_repository import ProcessRepository
@@ -46,19 +47,22 @@ class ProcessService(Service):
         ret_val = self.process_repository.load_most_recent(10)
 
         async def send_message() -> None:
-            self.send_message_async(Service.Topic.PROCESS_RECENT_PROGRESS_UPDATED, {'recent_progress_list': [ret_val]})
+            self.send_message_async(
+                Service.Topic.PROCESS_RECENT_PROGRESS_UPDATED, {'recent_progress_list': ret_val['process']}
+            )
 
         self.run_task(send_message())
         super().start()
 
     def _on_process_create(self, msg: dict[str, Any]) -> None:
-        process_type = str(msg.get('process_type'))
+        process_type = str(msg.get('process_type')) if msg.get('process_type') is not None else None
         input_prompt = str(msg.get('input_prompt'))
 
         selected_repos = msg.get('selected_repos', [])
         conversation_id = msg.get('conversation_id')
         widget_cmd = msg.get('widget_cmd')
         client_id = msg.get('client_id')
+        thinking_level = msg.get('thinking_level')
 
         input_prompt_obj = Prompt(
             prompt_str=input_prompt,
@@ -66,16 +70,12 @@ class ProcessService(Service):
             repo_ids_filters=selected_repos,
             include_default_repos=True,
             conversation_id=conversation_id,
+            thinking_level=thinking_level,
         )
 
         process = self.build_process(process_type, input_prompt_obj, client_id)
         self.process_repository.save(process)
-        current_tracking_id = process.start_process(self)
-        if current_tracking_id is None:
-            error = 'Current tracking id is none but not expected to be.'
-            raise RuntimeWarning(error)
-
-        self.active_processes[current_tracking_id] = process
+        process.start_process(self)
 
     def _on_repo_file_found(self, msg: dict[str, Any]) -> None:
         process = self.build_process(Process.ProcessType.SCAN.value, None)
@@ -99,7 +99,9 @@ class ProcessService(Service):
         self.process_repository.save(process)
         process.start_process(self)
 
-    def build_process(self, process_name: str, input_prompt: Prompt | None, client_id: str | None = None) -> Process:
+    def build_process(
+        self, process_name: str | None, input_prompt: Prompt | None, client_id: str | None = None
+    ) -> Process:
         process = None
         process_id = str(uuid.uuid4())
 
@@ -117,19 +119,11 @@ class ProcessService(Service):
                 error = 'input_prompt None but expected not to be.'
                 raise RuntimeError(error)
 
-            if input_prompt.repo_ids_filters is None:
-                error = 'input_prompt.repo_ids_filters None but expected not to be.'
-                raise RuntimeError(error)
-
             process = Process(
                 process_name,
                 process_id,
                 0.0,
                 pass_array=[
-                    BasicPromptPass(
-                        prompt_str='As the user for a few seconds to search the files.',
-                        repo_ids_filters=input_prompt.repo_ids_filters,
-                    ),
                     FileInfoPass(
                         input_prompt=input_prompt,
                         files_and_folders_by_repo=self.files_and_folders_by_repo,
@@ -156,7 +150,19 @@ class ProcessService(Service):
         if tracking_id in self.active_processes:
             process = self.active_processes[tracking_id]
 
-            current_pass = process.pass_array[process.current_pass]
+            if process.failed_message:
+                process.status = Process.Status.FAILED.value
+                self.send_message_async(
+                    Service.Topic.RESPONSE_SUBMIT_RESPONSE, {'user_response': process.failed_message}
+                )
+                return
+
+            try:
+                current_pass = process.pass_array[process.current_pass]
+            except IndexError:
+                logging.exception('Current pass index out of range for process %s', process.current_tracking_id)
+                return
+
             current_pass.percent_complete = msg['percent_complete']
 
             if current_pass.percent_complete >= 1.0:
@@ -169,7 +175,13 @@ class ProcessService(Service):
                 else:
                     process.percent_complete = process.current_pass / len(process.pass_array)
                     del self.active_processes[tracking_id]
+
                     new_tracking_id = process.pass_array[process.current_pass].execute(self, process)
+
+                    if new_tracking_id is None:
+                        error = 'New tracking id is None but expected not to be.'
+                        raise RuntimeError(error)
+
                     self.active_processes[new_tracking_id] = process
 
                 self.send_message_async(Service.Topic.PROCESS_ACTIVE_PROGRESS_UPDATED, asdict(process))
