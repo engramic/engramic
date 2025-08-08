@@ -7,7 +7,7 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
 from engramic.application.sense.scan import Scan
-from engramic.core.document import Document
+from engramic.core.file_node import FileNode
 from engramic.infrastructure.system.service import Service
 
 if TYPE_CHECKING:
@@ -33,10 +33,10 @@ class SenseService(Service):
         init_async() -> None:
             Initializes the service asynchronously by calling the parent's init_async method.
         start() -> None:
-            Subscribes to the SUBMIT_DOCUMENT topic and starts the service.
+            Subscribes to the DOCUMENT_SCAN_DOCUMENT topic and starts the service.
         on_document_submit(msg: dict[Any, Any]) -> None:
             Extracts document and overwrite flag from message and submits the document for processing.
-        submit_document(document: Document, *, overwrite: bool = False) -> Document | None:
+        scan_document(document: FileNode, *, overwrite: bool = False) -> FileNode | None:
             Checks if document processing should proceed, updates mock data, sends async notification,
             and triggers document scanning. Returns None if document is already complete and overwrite is False.
         on_document_created_sent(ret: Future[Any]) -> None:
@@ -54,27 +54,25 @@ class SenseService(Service):
         return super().init_async()
 
     def start(self) -> None:
-        self.subscribe(Service.Topic.SUBMIT_DOCUMENT, self.on_document_submit)
+        self.subscribe(Service.Topic.DOCUMENT_SCAN_DOCUMENT, self.on_document_scan)
         super().start()
 
-    def on_document_submit(self, msg: dict[Any, Any]) -> None:
-        document = Document(**msg['document'])
+    def on_document_scan(self, msg: dict[Any, Any]) -> None:
+        document = FileNode(**msg['document'])
         overwrite = False
         if 'overwrite' in msg:
             overwrite = msg['overwrite']
 
-        self.submit_document(document, overwrite=overwrite)
+        self.scan_document(document, overwrite=overwrite)
 
-    def submit_document(self, document: Document, *, overwrite: bool = False) -> Document | None:
-        if document.percent_complete_document and document.percent_complete_document >= 1.0 and overwrite is False:
-            return None
-
+    def scan_document(self, document: FileNode, *, overwrite: bool = False) -> FileNode | None:
+        del overwrite
         self.host.update_mock_data_input(
             self,
             asdict(document),
         )
 
-        async def send_message() -> Document:
+        async def send_message() -> FileNode:
             self.send_message_async(
                 Service.Topic.DOCUMENT_CREATED,
                 {'id': document.id, 'type': 'document', 'tracking_id': document.tracking_id},

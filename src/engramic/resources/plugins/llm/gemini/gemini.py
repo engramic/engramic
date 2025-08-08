@@ -170,7 +170,9 @@ class Gemini(LLM):
         response_id = args['response_id']
         repo_ids_filters = args['repo_ids_filters']
         packet = LLM.StreamPacket(
-            f'{{"response_id":"{response_id}","repo_ids_filters":{json.dumps(repo_ids_filters)}}}', False, ''
+            f'{{"response_type":"header","response_id":"{response_id}","repo_ids_filters":{json.dumps(repo_ids_filters)}}}',
+            False,
+            '',
         )
         websocket_manager.send_message(packet)
 
@@ -188,6 +190,6 @@ class Gemini(LLM):
             if chunk.text:
                 full_response += chunk.text
 
-        websocket_manager.send_message(LLM.StreamPacket('{"response_end":"true"}', False, ''))
+        websocket_manager.send_message(LLM.StreamPacket('{"response_type":"footer"}', False, ''))
 
         return {'llm_response': self.extract_toml_block(full_response)}

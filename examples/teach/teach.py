@@ -8,14 +8,14 @@ from typing import Any
 from engramic.application.codify.codify_service import CodifyService
 from engramic.application.consolidate.consolidate_service import ConsolidateService
 from engramic.application.message.message_service import MessageService
+from engramic.application.process.process_service import TeachService
 from engramic.application.progress.progress_service import ProgressService
 from engramic.application.repo.repo_service import RepoService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.application.sense.sense_service import SenseService
 from engramic.application.storage.storage_service import StorageService
-from engramic.application.teach.teach_service import TeachService
-from engramic.core.document import Document
+from engramic.core.file_node import FileNode
 from engramic.core.host import Host
 from engramic.core.prompt import Prompt
 from engramic.core.response import Response
@@ -33,14 +33,16 @@ class TestService(Service):
         self.subscribe(Service.Topic.LESSON_INSERTED, self.on_lesson_inserted)
 
         sense_service = self.host.get_service(SenseService)
-        document = Document(
-            Document.Root.RESOURCE.value, 'engramic.resources.rag_document', 'IntroductiontoQuantumNetworking.pdf'
+        document = FileNode(
+            FileNode.Root.RESOURCE.value,
+            'IntroductiontoQuantumNetworking.pdf',
+            module_path='engramic.resources.rag_document',
         )
-        # document = Document(
-        #    Document.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
+        # document = FileNode(
+        #    FileNode.Root.RESOURCE, 'engramic.resources.job_descriptions', 'GH SC Official Job Descriptions.pdf'
         # )
         self.document_id = document.id
-        sense_service.submit_document(document, overwrite=True)
+        sense_service.scan_document(document, overwrite=True)
 
     def on_main_prompt_complete(self, message_in: dict[str, Any]) -> None:
         response = Response(**message_in)

@@ -81,7 +81,7 @@ class ResponseService(Service):
         self.engram_repository: EngramRepository = EngramRepository(self.db_document_plugin)
         self.llm_main = self.plugin_manager.get_plugin('llm', 'response_main')
         self.metrics_tracker: MetricsTracker[ResponseMetric] = MetricsTracker[ResponseMetric]()
-        self.repo_folders: dict[str, Any] = {}
+        self.repos: dict[str, Any] = {}
         ##
         # Many methods are not ready to be until their async component is running.
         # Do not call async context methods in the constructor.
@@ -89,7 +89,8 @@ class ResponseService(Service):
     def start(self) -> None:
         self.subscribe(Service.Topic.ACKNOWLEDGE, self.on_acknowledge)
         self.subscribe(Service.Topic.RETRIEVE_COMPLETE, self.on_retrieve_complete)
-        self.subscribe(Service.Topic.REPO_FOLDERS, self._on_repo_folders)
+        self.subscribe(Service.Topic.REPO_DIRECTORY_SCANNED, self._on_repo_directory_scanned)
+        self.subscribe(Service.Topic.RESPONSE_SUBMIT_RESPONSE, self._on_submit_response)
         self.web_socket_manager.init_async()
         super().start()
 
@@ -100,18 +101,24 @@ class ResponseService(Service):
         self.db_document_plugin['func'].connect(args=None)
         return super().init_async()
 
-    def _on_repo_folders(self, msg: dict[str, Any]) -> None:
-        self.repo_folders = msg['repo_folders']
+    def _on_repo_directory_scanned(self, msg: dict[str, Any]) -> None:
+        self.repos = msg['repos']
 
     def on_retrieve_complete(self, retrieve_result_in: dict[str, Any]) -> None:
         if __debug__:
             self.host.update_mock_data_input(self, retrieve_result_in)
 
         prompt = Prompt(**retrieve_result_in['prompt'])
-        prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
+
+        prompt_analysis = None
+
+        if retrieve_result_in['analysis']:
+            prompt_analysis = PromptAnalysis(**retrieve_result_in['analysis'])
+
         retrieve_result = RetrieveResult(**retrieve_result_in['retrieve_response'])
         source_id = retrieve_result.source_id
         self.metrics_tracker.increment(ResponseMetric.RETRIEVES_RECIEVED)
+
         fetch_engrams_task = self.run_tasks([
             self._fetch_retrieval(
                 prompt=prompt, source_id=source_id, analysis=prompt_analysis, retrieve_result=retrieve_result
@@ -138,7 +145,7 @@ class ResponseService(Service):
         return history
 
     async def _fetch_retrieval(
-        self, prompt: Prompt, source_id: str, analysis: PromptAnalysis, retrieve_result: RetrieveResult
+        self, prompt: Prompt, source_id: str, retrieve_result: RetrieveResult, analysis: PromptAnalysis | None = None
     ) -> dict[str, Any]:
         engram_array: list[Engram] = await asyncio.to_thread(
             self.engram_repository.load_batch_retrieve_result, retrieve_result
@@ -207,7 +214,7 @@ class ResponseService(Service):
                 'history': history_array['history'],
                 'working_memory': retrieve_result.conversation_direction,
                 'analysis': retrieve_result.analysis,
-                'all_repos': self.repo_folders,
+                'all_repos': self.repos,
                 'current_engramic_widget': widget,
             },
         )
@@ -260,6 +267,28 @@ class ResponseService(Service):
 
         if __debug__:
             self.host.update_mock_data_output(self, asdict(result))
+
+    def _on_submit_response(self, msg: dict[str, Any]) -> None:
+        user_response = msg['user_response']
+        simple_prompt = Prompt(prompt_str=user_response, repo_ids_filters=[])
+
+        analysis = PromptAnalysis({'response_length': 'short', 'user_prompt_type': 'typical'}, {'': None})
+
+        retrieve_result = RetrieveResult(
+            str(uuid.uuid4()),
+            simple_prompt.prompt_id,
+            engram_id_array=[],
+            conversation_direction=None,
+            analysis=asdict(analysis)['prompt_analysis'],
+        )
+
+        response = {
+            'analysis': asdict(analysis),
+            'prompt': asdict(simple_prompt),
+            'retrieve_response': asdict(retrieve_result),
+        }
+
+        self.on_retrieve_complete(response)
 
     """
     ### Ack

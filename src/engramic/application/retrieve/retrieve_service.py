@@ -87,21 +87,21 @@ class RetrieveService(Service):
         self.subscribe(Service.Topic.SUBMIT_PROMPT, self.on_submit_prompt)
         self.subscribe(Service.Topic.INDICES_COMPLETE, self.on_indices_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
-        self.subscribe(Service.Topic.REPO_FOLDERS, self._on_repo_folders)
+        self.subscribe(Service.Topic.REPO_DIRECTORY_SCANNED, self._on_repo_directory_scanned)
         super().start()
 
     async def stop(self) -> None:
         await super().stop()
 
-    def _on_repo_folders(self, msg: dict[str, Any]) -> None:
-        self.repo_folders = msg['repo_folders']
+    def _on_repo_directory_scanned(self, msg: dict[str, Any]) -> None:
+        self.repo_folders = msg['repos']
         self.default_repos = {}
 
         for repo_id, repo_data in self.repo_folders.items():
             if repo_data.get('is_default', True):
                 self.default_repos[repo_id] = repo_data
 
-    # when called from monitor service
+    # when called from events
     def on_submit_prompt(self, msg: dict[Any, Any]) -> None:
         self.submit(Prompt(**msg))
 

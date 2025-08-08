@@ -18,6 +18,7 @@ class DB(ABC):
         OBSERVATION = 'observation'
         HISTORY = 'history'
         DOCUMENT = 'document'
+        PROCESS = 'process'
 
     @abstractmethod
     def connect(self, args: dict[str, Any]) -> None:
@@ -36,5 +37,10 @@ class DB(ABC):
 
     @abstractmethod
     def insert_documents(self, table: DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:
-        """Execute a query with additional data."""
+        """Insert a document."""
+        # or `return None`
+
+    @abstractmethod
+    def delete_documents(self, table: DBTables, docs: list[dict[str, Any]], args: dict[str, Any]) -> None:
+        """Delete a document"""
         # or `return None`

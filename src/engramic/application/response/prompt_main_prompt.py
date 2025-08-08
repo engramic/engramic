@@ -2,8 +2,10 @@
 # This file is part of Engramic, licensed under the Engramic Community License.
 # See the LICENSE file in the project root for more details.
 
+import logging
 from datetime import datetime, timezone
 
+from mako.exceptions import text_error_template
 from mako.template import Template
 
 from engramic.core.prompt import Prompt
@@ -11,7 +13,9 @@ from engramic.core.prompt import Prompt
 
 class PromptMainPrompt(Prompt):
     def render_prompt(self) -> str:
-        render_string = Template("""
+        render_string = ''  # Initialize with default value
+        try:
+            render_string = Template("""
 Your name is Engramic.
 
 Date is ${timestamp}
@@ -66,7 +70,11 @@ Deliver results related to the user_intent and resist explaining the work you ar
 
 <sources>
     <engramic_working_memory>
-        working_memory: ${working_memory['working_memory']}
+        % if working_memory:
+            working_memory: ${working_memory['working_memory']}
+        % else:
+            No working memory in this prompt.
+        % endif
     </engramic_working_memory>
 
     % if len(engram_list) == 0:
@@ -140,7 +148,11 @@ Deliver results related to the user_intent and resist explaining the work you ar
 </sources>
 <current_user_prompt>
     user_prompt: ${prompt_str}
-    user_intent: ${working_memory['current_user_intent']}
+    % if working_memory:
+        user_intent: ${working_memory['current_user_intent']}
+    % else:
+        user_intent not availible, follow user_prompt.
+    % endif
 </current_user_prompt>
 <current_engramic_widget>
     current widget: ${current_engramic_widget}
@@ -151,8 +163,9 @@ Deliver results related to the user_intent and resist explaining the work you ar
 
 Write your text in dense commonmark markdown.
 
-
-
-
 """).render(timestamp=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'), **self.input_data)
+        except Exception:
+            error_message = text_error_template().render()
+            logging.exception(error_message)
+            render_string = error_message  # Use error message as fallback
         return str(render_string)

@@ -24,8 +24,8 @@ import fitz
 from engramic.application.sense.prompt_gen_full_summary import PromptGenFullSummary
 from engramic.application.sense.prompt_gen_meta import PromptGenMeta
 from engramic.application.sense.prompt_scan_page import PromptScanPage
-from engramic.core.document import Document
 from engramic.core.engram import Engram, EngramType
+from engramic.core.file_node import FileNode
 from engramic.core.index import Index
 from engramic.core.interface.media import Media
 from engramic.core.meta import Meta
@@ -109,12 +109,12 @@ class Scan(Media):
         else:
             self.repo_ids = None
         self.service = parent_service
-        self.document: Document | None = None
+        self.document: FileNode | None = None
         self.tracking_id = tracking_id
         self.page_images: list[str] = []
         self.sense_initial_summary = self.service.sense_initial_summary
 
-    def parse_media_resource(self, document: Document) -> None:
+    def parse_media_resource(self, document: FileNode) -> None:
         async def send_message(observation_id: str, document_id: str) -> None:
             self.service.send_message_async(
                 Service.Topic.OBSERVATION_CREATED, {'id': observation_id, 'parent_id': document_id}
@@ -124,14 +124,15 @@ class Scan(Media):
 
         logging.info('Parsing document: %s', document.file_name)
         file_path: Traversable | Path
-        if document.root_directory == Document.Root.RESOURCE.value:
-            file_path = files(document.file_path).joinpath(document.file_name)
-        elif document.root_directory == Document.Root.DATA.value:
+        if document.root_directory == FileNode.Root.RESOURCE.value:
+            file_path = files(document.module_path).joinpath(document.file_name)
+        elif document.root_directory == FileNode.Root.DATA.value:
             repo_root = os.getenv('REPO_ROOT')
             if repo_root is None:
                 error = "Environment variable 'REPO_ROOT' is not set."
                 raise RuntimeError(error)
-            expanded_path = Path(repo_root + document.file_path).expanduser()
+
+            expanded_path = Path(repo_root + os.path.join(*document.file_dirs)).expanduser()
             file_path = expanded_path / document.file_name
 
         self.document = document
