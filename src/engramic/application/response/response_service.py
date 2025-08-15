@@ -225,7 +225,7 @@ class ResponseService(Service):
         response_id = str(uuid.uuid4())
 
         if prompt_in.thinking_level:
-            args['thinking_level'] = prompt_in.thinking_level * 10000
+            args['thinking_budget'] = prompt_in.thinking_level
 
         if prompt_in.is_lesson:
             response = await asyncio.to_thread(

@@ -11,9 +11,10 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
 import engramic.application.retrieve.retrieve_service
-from engramic.application.retrieve.prompt_analyze_prompt import PromptAnalyzePrompt
-from engramic.application.retrieve.prompt_gen_conversation import PromptGenConversation
-from engramic.application.retrieve.prompt_gen_indices import PromptGenIndices
+from engramic.application.retrieve.ask.prompt_analyze_prompt import PromptAnalyzePrompt
+from engramic.application.retrieve.ask.prompt_gen_conversation import PromptGenConversation
+from engramic.application.retrieve.ask.prompt_gen_indices import PromptGenIndices
+from engramic.application.retrieve.ask.prompt_gen_query import PromptGenQuery
 from engramic.core import Meta, Prompt, PromptAnalysis, Retrieval
 from engramic.core.interface.db import DB
 from engramic.core.retrieve_result import RetrieveResult
@@ -39,7 +40,6 @@ class Ask(Retrieval):
         prompt (Prompt): The original prompt provided by the user.
         service (RetrieveService): Parent service coordinating this request.
         metrics_tracker (MetricsTracker): Tracks operational metrics for observability.
-        library (str | None): Optional target library to search within.
         widget_cmd (Any): Widget command from the prompt.
         conversation_direction (dict[str, Any]): Stores user intent and working memory.
         prompt_analysis (PromptAnalysis | None): Structured analysis of the prompt.
@@ -93,16 +93,15 @@ class Ask(Retrieval):
         metrics_tracker: MetricsTracker[engramic.application.retrieve.retrieve_service.RetrieveMetric],
         db_plugin: dict[str, Any],
         service: RetrieveService,
-        library: str | None = None,
     ) -> None:
         self.id = ask_id
         self.service = service
         self.metrics_tracker: MetricsTracker[engramic.application.retrieve.retrieve_service.RetrieveMetric] = (
             metrics_tracker
         )
-        self.library = library
         self.prompt = prompt
         self.widget_cmd = None
+        self.locations = None
         self.conversation_direction: dict[str, Any]
         self.prompt_analysis: PromptAnalysis | None = None
         self.retrieve_gen_conversation_direction_plugin = plugin_manager.get_plugin(
@@ -113,10 +112,16 @@ class Ask(Retrieval):
         self.prompt_vector_db_plugin = plugin_manager.get_plugin('vector_db', 'db')
         self.prompt_db_document_plugin = db_plugin
         self.embeddings_gen_embed = plugin_manager.get_plugin('embedding', 'gen_embed')
+        self.prompt_retrieve_gen = plugin_manager.get_plugin('llm', 'retrieve_gen_query')
 
     def get_sources(self) -> None:
-        direction_step = self.service.run_task(self._fetch_history())
-        direction_step.add_done_callback(self.on_fetch_history_complete)
+
+        if self.prompt.target_single_file:
+            direction_step = self.service.run_tasks([self._fetch_history(), self._gen_query()])
+        else:
+            direction_step = self.service.run_task(self._fetch_history())
+
+        direction_step.add_done_callback(self._on_fetch_pre_generation)
 
     """
     ### CONVERSATION DIRECTION
@@ -135,10 +140,53 @@ class Ask(Retrieval):
         history_dict: list[dict[str, Any]] = ret_val[0]
         return history_dict
 
-    def on_fetch_history_complete(self, fut: Future[Any]) -> None:
+
+
+
+    async def _gen_query(self) -> None:
+        file_list = []
+        for repo_id in self.prompt.repo_ids_filters:
+
+            files = self.service.files_and_folders_by_repo[repo_id]
+            for file in files:
+                file = files[file]
+                if file['node_type'] == 'file':
+                    full_path = "file://"
+                    for path in file['file_dirs']:
+                        full_path += path + "/"
+                    full_path += file['file_name']
+
+                    file_list.append(full_path)
+
+        input_data = {"file_list": file_list}
+        query_gen = PromptGenQuery(prompt_str=self.prompt.prompt_str, input_data=input_data)
+
+        plugin = self.prompt_retrieve_gen
+
+        structured_schema = {
+            'location': list[str],
+        }
+
+        ret = await asyncio.to_thread(
+            plugin['func'].submit,
+            prompt=query_gen,
+            structured_schema=structured_schema,
+            args=self.service.host.mock_update_args(plugin),
+            images=None,
+        )
+
+        self.locations = json.loads(ret[0]['llm_response'])['location']
+
+    def _on_fetch_pre_generation(self, fut: Future[Any]) -> None:
         response_array: dict[str, Any] = fut.result()
 
-        if response_array['history']:
+        history = None
+        if self.prompt.target_single_file:
+            history = response_array['_fetch_history'][0]['history']
+        else:
+            history = response_array['history']
+
+        if history:
             self.new_conversation = (
                 response_array['history'][0]['prompt']['conversation_id'] != self.prompt.conversation_id
             )
@@ -234,13 +282,17 @@ class Ask(Retrieval):
 
     async def _vector_fetch_direction_meta(self, intent_embedding: list[float]) -> list[str]:
         plugin = self.prompt_vector_db_plugin
-        plugin['args'].update({'threshold': 0.6})  # meta needs a broader threshold.
-        plugin['args'].update({'n_results': 2})  # num results per vector
+        args = plugin['args'].copy()
+        args['threshold'] = 0.99
+        args['n_results'] = 10
 
         self.type_filters = ['native', 'episodic']
 
         if self.prompt.widget_cmd:
             self.type_filters.append('procedural')
+            if self.prompt.target_single_file:
+                self.locations.append("default://")
+
 
         ret = await asyncio.to_thread(
             plugin['func'].query,
@@ -248,7 +300,8 @@ class Ask(Retrieval):
             embeddings=intent_embedding,
             repo_filters=self.prompt.repo_ids_filters,
             type_filters=self.type_filters,
-            args=self.service.host.mock_update_args(plugin),
+            location_filters=None,
+            args=args,
         )
 
         self.service.host.update_mock_data(plugin, ret)
@@ -428,6 +481,12 @@ class Ask(Retrieval):
         if not embeddings:
             return set()
 
+        args = self.service.host.mock_update_args(plugin).copy()
+
+        if self.prompt.target_single_file:
+            args['n_results'] = 100
+            args['threshold'] = 1
+
         ids = set()
 
         ret = await asyncio.to_thread(
@@ -436,7 +495,8 @@ class Ask(Retrieval):
             embeddings=embeddings,
             repo_filters=self.prompt.repo_ids_filters,
             type_filters=self.type_filters,
-            args=self.service.host.mock_update_args(plugin),
+            location_filters=self.locations,
+            args=args
         )
 
         self.service.host.update_mock_data(plugin, ret)
@@ -456,6 +516,7 @@ class Ask(Retrieval):
         if self.prompt_analysis is None:
             error = 'on_query_index_db failed: prompt_analysis is None and likely failed during an earlier process.'
             raise RuntimeError
+
 
         retrieve_result = RetrieveResult(
             self.id,

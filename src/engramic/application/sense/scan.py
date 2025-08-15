@@ -273,8 +273,8 @@ class Scan(Media):
         for page in result['_scan_page']:
             assembled += page
 
-        # matches1 = re.findall(r'<h1[^>]*>(.*?)</h1>', assembled, re.DOTALL | re.IGNORECASE)
-        # matches2 = re.findall(r'<h3[^>]*>(.*?)</h3>', assembled, re.DOTALL | re.IGNORECASE)
+        matches1 = re.findall(r'<h1[^>]*>(.*?)</h1>', assembled, re.DOTALL | re.IGNORECASE)
+        matches2 = re.findall(r'<h3[^>]*>(.*?)</h3>', assembled, re.DOTALL | re.IGNORECASE)
 
         self._process_engrams(assembled, context)
 

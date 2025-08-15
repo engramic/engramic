@@ -9,7 +9,7 @@ from dataclasses import asdict
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-from engramic.application.retrieve.ask import Ask
+from engramic.application.retrieve.ask.ask import Ask
 from engramic.core import Index, Meta, Prompt
 from engramic.core.host import Host
 from engramic.core.metrics_tracker import MetricPacket, MetricsTracker
@@ -76,6 +76,7 @@ class RetrieveService(Service):
         self.metrics_tracker: MetricsTracker[RetrieveMetric] = MetricsTracker[RetrieveMetric]()
         self.meta_repository: MetaRepository = MetaRepository(self.db_plugin)
         self.repo_folders: dict[str, Any] = {}
+        self.files_and_folders_by_repo = {}
         self.default_repos: dict[str, Any] = {}  # default repos are always included in a prompt.
 
     def init_async(self) -> None:
@@ -88,6 +89,7 @@ class RetrieveService(Service):
         self.subscribe(Service.Topic.INDICES_COMPLETE, self.on_indices_complete)
         self.subscribe(Service.Topic.META_COMPLETE, self.on_meta_complete)
         self.subscribe(Service.Topic.REPO_DIRECTORY_SCANNED, self._on_repo_directory_scanned)
+        self.subscribe(Service.Topic.REPO_FILE_FOLDER_TREE_UPDATED, self._on_repo_file_folder_tree_updated)
         super().start()
 
     async def stop(self) -> None:
@@ -100,6 +102,11 @@ class RetrieveService(Service):
         for repo_id, repo_data in self.repo_folders.items():
             if repo_data.get('is_default', True):
                 self.default_repos[repo_id] = repo_data
+
+    def _on_repo_file_folder_tree_updated(self, msg: dict[str, Any]) -> None:
+        repo = msg["repo"]
+        file_and_folder_list = msg["files_and_folders"]
+        self.files_and_folders_by_repo[repo['repo_id']] = file_and_folder_list
 
     # when called from events
     def on_submit_prompt(self, msg: dict[Any, Any]) -> None:
@@ -134,11 +141,12 @@ class RetrieveService(Service):
         tracking_id: str = index_message['tracking_id']
         repo_ids: str = index_message['repo_ids']
         engram_type: str = index_message['engram_type']
+        location_type: str = index_message['location_type']
         index_list: list[Index] = [Index(**item) for item in raw_index]
-        self.run_task(self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id, engram_type))
+        self.run_task(self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id, engram_type, location_type))
 
     async def _insert_engram_vector(
-        self, index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str, engram_type: str
+        self, index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str, engram_type: str, location_type: str
     ) -> None:
         plugin = self.vector_db_plugin
         self.vector_db_plugin['func'].insert(
@@ -148,6 +156,7 @@ class RetrieveService(Service):
             args=plugin['args'],
             filters=repo_ids,
             type_filter=engram_type,
+            location_filter=location_type
         )
 
         index_id_array = [index.id for index in index_list]
@@ -173,6 +182,7 @@ class RetrieveService(Service):
             obj_id=meta.id,
             filters=meta.repo_ids,
             type_filter=meta.type,
+            location_filter=None,
             args=plugin['args'],
         )
 

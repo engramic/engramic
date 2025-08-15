@@ -46,17 +46,21 @@ class ChromaDB(VectorDB):
         repo_filters: list[str],
         args: dict[str, Any],
         type_filters: list[str],
+        location_filters: list[str],
     ) -> dict[str, Any]:
         embeddings_typed: Sequence[float] = embeddings
         n_results = args.get('n_results', self.DEFAULT_N_RESULTS)
         threshold: float = args.get('threshold', self.DEFAULT_THRESHOLD)
 
-        where = self._build_where_clause(repo_filters, type_filters)
+        where = self._build_where_clause(repo_filters, type_filters, location_filters)
+
 
         results = cast(
             dict[str, Any],
             self.collection[collection_name].query(query_embeddings=embeddings_typed, n_results=n_results, where=where),
         )
+
+        # test = self.collection[collection_name].get()
 
         ret_ids = self._extract_results_below_threshold(results, threshold)
         return {'query_set': ret_ids}
@@ -64,12 +68,12 @@ class ChromaDB(VectorDB):
     def _build_repo_filter(self, repo_filters: list[str]) -> dict[str, Any] | None:
         """Build repository filter clause."""
         if not repo_filters:
-            return {'null': True}
+            return {'repo_id': 'null'}
 
         if len(repo_filters) == 1:
-            return {repo_filters[0]: True}
+            return {'repo_id': repo_filters[0]}
 
-        metadatas = [{repo_filter: {'$eq': True}} for repo_filter in repo_filters]
+        metadatas = [{'repo_id': {'$eq': repo_filter}} for repo_filter in repo_filters]
         return {'$or': metadatas}
 
     def _build_type_filter(self, type_filters: list[str]) -> dict[str, Any] | None:
@@ -83,19 +87,30 @@ class ChromaDB(VectorDB):
         type_metadatas = [{'type': {'$eq': type_filter}} for type_filter in type_filters]
         return {'$or': type_metadatas}
 
-    def _build_where_clause(self, repo_filters: list[str], type_filters: list[str]) -> dict[str, Any] | None:
-        """Combine repo and type filters into a where clause."""
+    def _build_location_filter(self, location_filters: list[str]) -> dict[str, Any] | None:
+        """Build location filter clause."""
+        if not location_filters:
+            return None
+
+        if len(location_filters) == 1:
+            return {'location': location_filters[0]}
+
+        location_metadatas = [{'location': {'$eq': location_filter}} for location_filter in location_filters]
+        return {'$or': location_metadatas}
+
+    def _build_where_clause(self, repo_filters: list[str], type_filters: list[str], location_filters: list[str]) -> dict[str, Any] | None:
+        """Combine repo, type, and location filters into a where clause."""
         repo_where = self._build_repo_filter(repo_filters)
         type_where = self._build_type_filter(type_filters)
+        location_where = self._build_location_filter(location_filters)
 
-        if repo_where is not None and type_where is not None:
-            return {'$and': [repo_where, type_where]}
-        if repo_where is not None:
-            return repo_where
-        if type_where is not None:
-            return type_where
+        filters = [f for f in [repo_where, type_where, location_where] if f is not None]
 
-        return None
+        if len(filters) == 0:
+            return None
+        if len(filters) == 1:
+            return filters[0]
+        return {'$and': filters}
 
     def _extract_results_below_threshold(self, results: dict[str, Any], threshold: float) -> list[str]:
         """Extract document IDs from results that are below the distance threshold."""
@@ -119,6 +134,7 @@ class ChromaDB(VectorDB):
         args: dict[str, Any],
         filters: list[str],
         type_filter: str,
+        location_filter: str
     ) -> None:
         # start = time.perf_counter()
         del args
@@ -134,15 +150,21 @@ class ChromaDB(VectorDB):
             metadatas: dict[str, str | int | float | bool | None] = {}
 
             if filters is not None:
-                for filter_name in filters:
-                    metadatas.update({filter_name: True})
-                metadatas_container.append(metadatas)
+                # Store the first filter as repo_id value
+                if filters:
+                    metadatas.update({'repo_id': filters[0]})
+                else:
+                    metadatas.update({'repo_id': 'null'})
             else:
-                metadatas.update({'null': True})
-                metadatas_container.append(metadatas)
+                metadatas.update({'repo_id': 'null'})
 
             if type_filter is not None:
                 metadatas.update({'type': type_filter})
+
+            if location_filter:
+                metadatas.update({'location': location_filter[0]})
+
+            metadatas_container.append(metadatas)
 
         meta_datas = cast(list[Mapping[str, str | int | float | bool | None]], metadatas_container)
 
