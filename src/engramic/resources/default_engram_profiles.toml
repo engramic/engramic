@@ -2,10 +2,12 @@ version = 0.1
 
 [mock]
 type = "profile"
-vector_db.db = {name="Mock"}
+vector_db.meta = {name="Mock"}
+vector_db.engram = {name="Mock"}
 llm.retrieve_gen_conversation_direction = {name="Mock"}
 llm.retrieve_gen_index = {name="Mock"}
 llm.retrieve_prompt_analysis = {name="Mock"}
+llm.retrieve_gen_query = {name="Mock"}
 db.document = {name="Mock"}
 llm.response_main = {name="Mock"}
 llm.validate = {name="Mock"}
@@ -24,10 +26,12 @@ ptr = "standard-2025-07-01"
 
 [standard-2025-07-01]
 type = "profile"
-vector_db.db = {name="ChromaDB"}
+vector_db.meta = {name="ChromaDB",threshold=0.6,n_results=10}
+vector_db.engram = {name="ChromaDB",threshold=0.4,n_results=2}
 llm.retrieve_gen_conversation_direction = {name="Gemini",model="gemini-2.5-flash"}
 llm.retrieve_gen_index = {name="Gemini",model="gemini-2.5-flash"}
 llm.retrieve_prompt_analysis = {name="Gemini",model="gemini-2.5-flash"}
+llm.retrieve_gen_query = {name="Gemini",model="gemini-2.5-flash"}
 db.document = {name="Sqlite"}
 llm.response_main = {name="Gemini",model="gemini-2.5-pro",deterministic="true"}
 llm.validate = {name="Gemini",model="gemini-2.5-flash",deterministic="true"}
