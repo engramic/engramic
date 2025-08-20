@@ -16,7 +16,6 @@ class PromptScanPage(Prompt):
     Never put tags around whitespace (e.g. <h1>\n</h1>)
     Never,ever, make tags with empty inner text (e.g. <h1></h1>)
 
-
     <page></page> - The page number if avaialble in image.
     <header></header> - This would be a standard document header. Typically includes a company name, logo, date, or current section.
     <title></title>  - Reserved only for document titles. They are typically in early pages, often the first page in smaller documents but larger documents sometimes have them on page two or three. They are large bold and may be accompanied by a author or a date.
@@ -29,9 +28,14 @@ class PromptScanPage(Prompt):
 
     <h1> tags. Use these header tags to annotate main topics.
     <h3> tags. Use these header tags as annotate sub topics.
+    <table description="insert one or two word description" origin="table|chart|graph|pie"></table> - A table of data. It may have a header row, but not always. It may have a caption, but not always. If possible, convert charts and graph data to a table.
+    <td></td> - A table data cell. It may contain text, numbers, or images.
+    <tr></tr> - A table row. It may contain one or more <td> tags.
 
     <p></p> - A block of text, might be a paragraphs or a couple of paragraphs but possibly only a line of text. Isn't typically bold and looks like most of the font on the page.
     <img></img> - An alt text description of the image. An img tag should never be empty.
+    <chart></chart> - A description of a chart. Store data for the chart in a table below the chart.
+    <graph></graph> - A description of a graph. Store data for the graph in a table below the graph.
 
     Do not use <ul> tags. Use only the tags you are given.
 

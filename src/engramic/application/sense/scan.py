@@ -114,6 +114,14 @@ class Scan(Media):
         self.page_images: list[str] = []
         self.sense_initial_summary = self.service.sense_initial_summary
 
+        repo_root = os.getenv('IMAGE_ROOT')
+        if repo_root is None:
+            error = "Environment variable 'IMAGE_ROOT' is not set."
+            raise RuntimeError(error)
+        repo_root_path = Path(repo_root).expanduser()
+        if not repo_root_path.exists():
+            repo_root_path.mkdir(parents=True, exist_ok=True)
+
     def parse_media_resource(self, document: FileNode) -> None:
         async def send_message(observation_id: str, document_id: str) -> None:
             self.service.send_message_async(
@@ -171,6 +179,16 @@ class Scan(Media):
 
         # Convert the pixmap to PNG bytes in memory
         img_bytes = pix.tobytes('png')
+
+        # Save PNG to IMAGE_ROOT as documentid_pagenumber.png
+        if self.document is not None:
+            image_root = os.getenv('IMAGE_ROOT')
+            if image_root is None:
+                error = "Environment variable 'IMAGE_ROOT' is not set."
+                raise RuntimeError(error)
+            image_path = Path(image_root).expanduser() / f'{self.document.id}_{page_number + 1}.png'
+            with image_path.open('wb') as img_file:
+                img_file.write(img_bytes)
 
         # Encode to Base64
         encoded_img = base64.b64encode(img_bytes).decode('utf-8')

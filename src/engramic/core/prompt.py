@@ -5,11 +5,16 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any
 
 
 @dataclass
 class Prompt:
+    class Retrievaltype(Enum):
+        ASK = 'ask'
+        FETCH = 'fetch'
+
     prompt_str: str = ''
     prompt_id: str = ''
     is_background: bool = False
@@ -20,12 +25,14 @@ class Prompt:
     include_default_repos: bool | None = False
     widget_cmd: str | None = None
     server_side_cmd: str | None = None
+    retrieval_type: str | None = None
     save_in_history: bool | None = True
     input_data: dict[str, Any] = field(default_factory=dict)
     conversation_id: str | None = None
     parent_id: str | None = None
     tracking_id: str | None = None
     thinking_level: float | None = None
+    target_single_file: bool | None = None
 
     def __post_init__(self) -> None:
         if not self.prompt_id:

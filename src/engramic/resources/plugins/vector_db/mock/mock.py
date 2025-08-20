@@ -22,8 +22,9 @@ class Mock(VectorDB):
         repo_filters: list[str],
         args: dict[str, Any],
         type_filters: list[str],
+        location_filters: list[str],
     ) -> dict[str, Any]:
-        del collection_name, embeddings, repo_filters, type_filters
+        del collection_name, embeddings, repo_filters, type_filters, location_filters
 
         response_str = self.mock_data[args['mock_lookup']]
         return response_str
@@ -37,6 +38,7 @@ class Mock(VectorDB):
         args: dict[str, Any],
         repo_filters: list[str],
         type_filter: str,
+        location_filter: str,
     ) -> None:
-        del obj_id, args, repo_filters, type_filter
+        del obj_id, args, repo_filters, type_filter, location_filter
         logging.info('Add %s %s.', len(index_list), collection_name)

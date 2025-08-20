@@ -10,9 +10,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlparse
 
 import jwt
-
-# from websockets.asyncio.server import Server
-from websockets.legacy.server import WebSocketServerProtocol, serve
+from websockets.asyncio.server import Server, ServerConnection, serve
 
 if TYPE_CHECKING:
     from engramic.core.host import Host
@@ -21,20 +19,25 @@ if TYPE_CHECKING:
 
 class WebsocketManager:
     def __init__(self, host: Host):
-        self.active_connection: WebSocketServerProtocol | None = None
+        self.active_connection: ServerConnection | None = None
         self.host = host
+        self.server: Server | None = None
 
     def init_async(self) -> None:
         self.future = self.host.run_background(self.run_server())
 
     async def run_server(self) -> None:
-        self.websocket = await serve(self.handler, 'localhost', 8765)
-        await self.websocket.wait_closed()
+        self.server = await serve(self.handler, 'localhost', 8765)
+        await self.server.serve_forever()
 
-    async def handler(self, websocket: WebSocketServerProtocol) -> None:
+    async def handler(self, websocket: ServerConnection) -> None:
         # 1. Extract token from path (e.g., ?token=abc123)
 
-        query = urlparse(websocket.path).query
+        if websocket.request is None:
+            error = 'websocket.request is None but not expected to be.'
+            raise RuntimeError(error)
+
+        query = urlparse(websocket.request.path).query
         access_token = parse_qs(query).get('access_token', [None])[0]
 
         if access_token is None:
@@ -72,8 +75,8 @@ class WebsocketManager:
 
     async def shutdown(self) -> None:
         """Gracefully shut down the websocket server."""
-        if self.websocket:
-            self.websocket.close()
-            await self.websocket.wait_closed()
-            del self.websocket
+        if self.server:
+            self.server.close()
+            await self.server.wait_closed()
+            self.server = None
             logging.debug('response web socket closed.')

@@ -29,7 +29,7 @@ class PromptGenConversation(Prompt):
     % if selected_repos is not None and repo_ids_filters is not None and all_repos is not None:
         Repos hold files that the user is interested in. The user has selected the following repos:
         % for repo_id in repo_ids_filters:
-            % if not all_repos[repo_id]['is_default']:
+            % if repo_id and not all_repos[repo_id]['is_default']:
                 ${all_repos[repo_id]['name']}
             % endif
         % endfor

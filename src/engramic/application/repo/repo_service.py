@@ -169,12 +169,16 @@ class RepoService(Service):
             overwrite (bool): Whether to overwrite existing documents. Defaults to False.
         """
         for sub_id in id_array:
-            document = self.file_node_index[sub_id]
+            if sub_id in self.file_node_index:
+                document = self.file_node_index[sub_id]
 
-            self.send_message_async(
-                Service.Topic.DOCUMENT_SCAN_DOCUMENT, {'document': asdict(document), 'overwrite': overwrite}
-            )
-            self.submitted_documents.add(document.id)
+                self.send_message_async(
+                    Service.Topic.DOCUMENT_SCAN_DOCUMENT, {'document': asdict(document), 'overwrite': overwrite}
+                )
+                self.submitted_documents.add(document.id)
+            else:
+                error = f'Scan ID called on id {sub_id} but document is not found.'
+                logging.error(error)
 
     def _load_repository(self, folder_path: Path) -> tuple[str, bool]:
         """
