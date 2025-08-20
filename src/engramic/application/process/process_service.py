@@ -72,7 +72,7 @@ class ProcessService(Service):
             include_default_repos=True,
             conversation_id=conversation_id,
             thinking_level=thinking_level,
-            target_single_file=target_single_file
+            target_single_file=target_single_file,
         )
 
         process = self.build_process(process_type, input_prompt_obj, client_id)

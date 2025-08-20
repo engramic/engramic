@@ -21,6 +21,7 @@ class VectorDB(ABC):
         repo_filters: list[str],
         args: dict[str, Any],
         type_filters: list[str],
+        location_filters: list[str],
     ) -> dict[str, Any]:
         """
         Submits a prompt to the LLM and returns the model-generated text.
@@ -43,5 +44,6 @@ class VectorDB(ABC):
         args: dict[str, Any],
         repo_filters: list[str],
         type_filter: str,
+        location_filter: str,
     ) -> None:
         pass

@@ -15,7 +15,6 @@ class Prompt:
         ASK = 'ask'
         FETCH = 'fetch'
 
-
     prompt_str: str = ''
     prompt_id: str = ''
     is_background: bool = False

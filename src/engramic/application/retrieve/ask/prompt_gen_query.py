@@ -15,10 +15,10 @@ class PromptGenQuery(Prompt):
         try:
             rendered_template = Template("""
         From the user prompt, determine the location as interpreted from the users_prompt.
-                                         
+
         Your options include:
         location : the full file path of one or more files ad defined in the user_prompt.
-                                         
+
         <user_prompt>
             ${prompt_str}
         </user_prompt>

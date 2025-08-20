@@ -7,6 +7,7 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
 from engramic.application.sense.scan import Scan
+from engramic.application.sense.sense_api import SenseAPI
 from engramic.core.file_node import FileNode
 from engramic.infrastructure.system.service import Service
 
@@ -44,18 +45,24 @@ class SenseService(Service):
             the document creation notification is sent.
     """
 
-    def __init__(self, host: Host) -> None:
-        super().__init__(host)
+    def __init__(self, host: Host, api_port: Service.Port | None = None) -> None:
+        super().__init__(host, api_port=api_port)
         self.sense_initial_summary = host.plugin_manager.get_plugin('llm', 'sense_initial_summary')
         self.sense_scan_page = host.plugin_manager.get_plugin('llm', 'sense_scan')
         self.sense_full_summary = host.plugin_manager.get_plugin('llm', 'sense_full_summary')
 
     def init_async(self) -> None:
-        return super().init_async()
+        ret_val = super().init_async()
+        if self.api_port:
+            self.api = SenseAPI(self)
+        return ret_val
 
     def start(self) -> None:
         self.subscribe(Service.Topic.DOCUMENT_SCAN_DOCUMENT, self.on_document_scan)
         super().start()
+
+    async def stop(self) -> None:
+        await super().stop()
 
     def on_document_scan(self, msg: dict[Any, Any]) -> None:
         document = FileNode(**msg['document'])

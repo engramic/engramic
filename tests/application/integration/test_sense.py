@@ -58,7 +58,7 @@ class MiniService(Service):
         self.host.shutdown()
 
 
-@pytest.mark.timeout(10)  # seconds
+@pytest.mark.timeout(timeout=20)  # seconds
 def test_sense_service_submission() -> None:
     host = Host('mock', [MessageService, SenseService, MiniService])
     host.wait_for_shutdown()

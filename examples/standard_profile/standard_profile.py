@@ -9,6 +9,7 @@ from engramic.application.message.message_service import MessageService
 from engramic.application.response.response_service import ResponseService
 from engramic.application.retrieve.retrieve_service import RetrieveService
 from engramic.core.host import Host
+from engramic.core.prompt import Prompt
 from engramic.core.response import Response
 from engramic.infrastructure.system import Service
 
@@ -38,7 +39,7 @@ def main() -> None:
     )
 
     retrieve_service = host.get_service(RetrieveService)
-    # retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.'))
+    retrieve_service.submit(Prompt('Briefly tell me about Chamath Palihapitiya.'))
 
     # The host continues to run and waits for a shutdown message to exit.
     host.wait_for_shutdown()

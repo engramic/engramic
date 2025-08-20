@@ -29,23 +29,43 @@ if TYPE_CHECKING:
 
 
 class Host:
+    def _load_env_file(self) -> None:
+        """Load environment variables from .env file with robust parsing."""
+        path = '.env'
+        if os.path.exists(path):
+            with open(path, encoding='utf-8') as f:
+                for line_iter in f:
+                    line = line_iter.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        # Split only on the first '=' to handle values with '=' in them
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip()
+
+                        # Remove quotes if present
+                        if (value.startswith('"') and value.endswith('"')) or (
+                            value.startswith("'") and value.endswith("'")
+                        ):
+                            value = value[1:-1]
+
+                        # Expand user path (~) if present
+                        if value.startswith('~'):
+                            value = os.path.expanduser(value)
+
+                        os.environ[key] = value
+
     def __init__(
         self,
         selected_profile: str,
         services: list[type[Service]],
         *,
+        http_ports: list[Service.Port | None] | None = None,
         ignore_profile: bool = False,
         generate_mock_data: bool = False,
     ) -> None:
         del ignore_profile
 
-        path = '.env'
-        if os.path.exists(path):
-            with open(path, encoding='utf-8') as f:
-                for line in f:
-                    if line.strip() and not line.startswith('#'):
-                        key, value = line.strip().split('=', 1)
-                        os.environ[key] = value
+        self._load_env_file()
 
         self.mock_data_collector: dict[str, dict[str, Any]] = {}
         self.is_mock_profile = selected_profile == 'mock'
@@ -59,8 +79,11 @@ class Host:
         self.plugin_manager: PluginManager = PluginManager(self, selected_profile)
 
         self.services: dict[str, Service] = {}
-        for ctr in services:
-            self.services[ctr.__name__] = ctr(self)  # Instantiate the class
+        for index, ctr in enumerate(services):
+            if http_ports and http_ports[index]:
+                self.services[ctr.__name__] = ctr(self, http_ports[index])
+            else:
+                self.services[ctr.__name__] = ctr(self)
 
         self.init_async_done_event = threading.Event()
 
@@ -203,17 +226,28 @@ class Host:
     def trigger_stop_event(self) -> None:
         self.stop_event.set()
 
+    # this is some ugly code, but it's working. Bascially, cleanup_complete is waiting for messages to shutdown and uvicorn is waiting for the api system to clear out.
     def wait_for_shutdown(self) -> None:
         try:
             self.stop_event.wait()
 
             for service in self.services:
                 completed = self.services[service].cleanup_complete.wait(timeout=9)
+
                 if not completed:
                     logging.warning(
                         "Event cleanup_complete not set. This means a service didn't shut down correctly. Try subscribe to shudown method by calling super().start() in all service's start method. %s",
                         service,
                     )
+
+                if self.services[service].api_port:
+                    completed = self.services[service].uvicorn_cleanup_complete.wait(timeout=9)
+                    if not completed:
+                        logging.warning(
+                            "Event uvicorn_cleanup_complete not set. This means a service didn't shut down correctly. %s",
+                            service,
+                        )
+
         finally:
             tasks = [t for t in asyncio.all_tasks(self.loop) if not t.done()]
             if len(tasks) > 0:

@@ -83,7 +83,7 @@ class PluginManager:
                 error = '[ERROR] Failed to load config.'
                 raise RuntimeError(error) from err
             except ValueError as err:
-                error = '[ERROR] Invalid config file.'
+                error = f'[ERROR] Invalid config file. {err}'
                 raise RuntimeError(error) from err
             else:
                 logging.debug('Config loaded successfully')

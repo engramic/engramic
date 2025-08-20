@@ -71,12 +71,13 @@ class RetrieveService(Service):
         super().__init__(host)
 
         self.plugin_manager: PluginManager = host.plugin_manager
-        self.vector_db_plugin = host.plugin_manager.get_plugin('vector_db', 'db')
+        self.vector_db_meta_plugin = host.plugin_manager.get_plugin('vector_db', 'meta')
+        self.vector_db_engram_plugin = host.plugin_manager.get_plugin('vector_db', 'engram')
         self.db_plugin = host.plugin_manager.get_plugin('db', 'document')
         self.metrics_tracker: MetricsTracker[RetrieveMetric] = MetricsTracker[RetrieveMetric]()
         self.meta_repository: MetaRepository = MetaRepository(self.db_plugin)
         self.repo_folders: dict[str, Any] = {}
-        self.files_and_folders_by_repo = {}
+        self.files_and_folders_by_repo: dict[str, Any] = {}
         self.default_repos: dict[str, Any] = {}  # default repos are always included in a prompt.
 
     def init_async(self) -> None:
@@ -104,8 +105,8 @@ class RetrieveService(Service):
                 self.default_repos[repo_id] = repo_data
 
     def _on_repo_file_folder_tree_updated(self, msg: dict[str, Any]) -> None:
-        repo = msg["repo"]
-        file_and_folder_list = msg["files_and_folders"]
+        repo = msg['repo']
+        file_and_folder_list = msg['files_and_folders']
         self.files_and_folders_by_repo[repo['repo_id']] = file_and_folder_list
 
     # when called from events
@@ -143,20 +144,28 @@ class RetrieveService(Service):
         engram_type: str = index_message['engram_type']
         location_type: str = index_message['location_type']
         index_list: list[Index] = [Index(**item) for item in raw_index]
-        self.run_task(self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id, engram_type, location_type))
+        self.run_task(
+            self._insert_engram_vector(index_list, engram_id, repo_ids, tracking_id, engram_type, location_type)
+        )
 
     async def _insert_engram_vector(
-        self, index_list: list[Index], engram_id: str, repo_ids: str, tracking_id: str, engram_type: str, location_type: str
+        self,
+        index_list: list[Index],
+        engram_id: str,
+        repo_ids: str,
+        tracking_id: str,
+        engram_type: str,
+        location_type: str,
     ) -> None:
-        plugin = self.vector_db_plugin
-        self.vector_db_plugin['func'].insert(
+        plugin = self.vector_db_engram_plugin
+        plugin['func'].insert(
             collection_name='main',
             index_list=index_list,
             obj_id=engram_id,
             args=plugin['args'],
             filters=repo_ids,
             type_filter=engram_type,
-            location_filter=location_type
+            location_filter=location_type,
         )
 
         index_id_array = [index.id for index in index_list]
@@ -174,9 +183,9 @@ class RetrieveService(Service):
         self.metrics_tracker.increment(RetrieveMetric.META_ADDED_TO_VECTOR)
 
     async def insert_meta_vector(self, meta: Meta) -> None:
-        plugin = self.vector_db_plugin
+        plugin = self.vector_db_meta_plugin
         await asyncio.to_thread(
-            self.vector_db_plugin['func'].insert,
+            plugin['func'].insert,
             collection_name='meta',
             index_list=[meta.summary_full],
             obj_id=meta.id,

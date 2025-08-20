@@ -321,7 +321,7 @@ class ConsolidateService(Service):
                     'tracking_id': engram['tracking_id'],
                     'repo_ids': engram['repo_ids'],
                     'engram_type': builder_data['engram_type'],
-                    'location_type': builder_data['locations']
+                    'location_type': builder_data['locations'],
                 },
             )
 

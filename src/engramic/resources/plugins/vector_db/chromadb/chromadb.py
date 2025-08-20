@@ -54,7 +54,6 @@ class ChromaDB(VectorDB):
 
         where = self._build_where_clause(repo_filters, type_filters, location_filters)
 
-
         results = cast(
             dict[str, Any],
             self.collection[collection_name].query(query_embeddings=embeddings_typed, n_results=n_results, where=where),
@@ -98,7 +97,9 @@ class ChromaDB(VectorDB):
         location_metadatas = [{'location': {'$eq': location_filter}} for location_filter in location_filters]
         return {'$or': location_metadatas}
 
-    def _build_where_clause(self, repo_filters: list[str], type_filters: list[str], location_filters: list[str]) -> dict[str, Any] | None:
+    def _build_where_clause(
+        self, repo_filters: list[str], type_filters: list[str], location_filters: list[str]
+    ) -> dict[str, Any] | None:
         """Combine repo, type, and location filters into a where clause."""
         repo_where = self._build_repo_filter(repo_filters)
         type_where = self._build_type_filter(type_filters)
@@ -134,7 +135,7 @@ class ChromaDB(VectorDB):
         args: dict[str, Any],
         filters: list[str],
         type_filter: str,
-        location_filter: str
+        location_filter: str,
     ) -> None:
         # start = time.perf_counter()
         del args

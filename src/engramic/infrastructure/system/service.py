@@ -17,6 +17,9 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 import zmq
 import zmq.asyncio
+from fastapi import FastAPI
+
+from engramic.infrastructure.system.uvicorn_embedded import UvicornEmbedded
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Sequence
@@ -77,16 +80,36 @@ class Service(ABC):
         DEBUG_ASK_META = 'debug_ask_meta'
         DEBUG_MAIN_PROMPT_INPUT = 'debug_main_prompt_input'
 
-    def __init__(self, host: Host) -> None:
+    class Port:
+        PORT_MAX = 65535
+
+        def __init__(self, value: int) -> None:
+            if not isinstance(value, int) or not (0 <= value <= Service.Port.PORT_MAX):
+                error = f'Invalid port: {value}. Must be an integer between 0 and 65535.'
+                raise ValueError(error)
+            self.value = value
+
+        def __int__(self) -> int:
+            return self.value
+
+        def __repr__(self) -> str:
+            return f'Port({self.value})'
+
+    def __init__(self, host: Host, api_port: Port | None = None) -> None:
         self.id = str(uuid.uuid4())
         self.init_async_complete = False
         self.host = host
+        self.api_port = api_port
         self.subscriber_callbacks: dict[str, list[Callable[..., None]]] = {}
         self.context: zmq.asyncio.Context | None = None
         self.sub_socket: zmq.asyncio.Socket | None = None
         self.push_socket: zmq.asyncio.Socket | None = None
         self.recieved_stop_message = False
         self.cleanup_complete = threading.Event()
+        self.uvicorn_cleanup_complete = threading.Event()
+        self.uvicorn_server: UvicornEmbedded | None = None
+        self.uvicorn_cleanup_complete = threading.Event()
+        self.uvicorn_future: Future[Any] | None = None
 
     def init_async(self) -> None:
         try:
@@ -104,7 +127,28 @@ class Service(ABC):
         if self.__class__.__name__ != 'MessageService':
             self.background_future = self.run_background(self._listen_for_published_messages())
             self.background_future.add_done_callback(self.on_run_background_end)
+
+        if self.api_port is not None:
+            self.app = FastAPI(title='Service API')
+            self.uvicorn_server = UvicornEmbedded(
+                app=self.app, host='127.0.0.1', port=int(self.api_port), log_level='debug'
+            )
+            self.uvicorn_future = self.run_background(self.uvicorn_server.serve())
+            self.uvicorn_future.add_done_callback(self.on_uvicorn_end)
+
         self.init_async_complete = True
+
+    def on_uvicorn_end(self, fut: Future[Any]) -> None:
+        """Handle Uvicorn server completion"""
+        try:
+            result = fut.result()
+            del result
+            self.uvicorn_cleanup_complete.set()
+        except Exception as e:
+            exception = f'Uvicorn server ended with error: {e}'
+            logging.exception(exception)
+        finally:
+            logging.debug('Uvicorn server stopped: %s', self.__class__.__name__)
 
     def validate_service(self) -> bool:
         validation = {}
@@ -118,7 +162,8 @@ class Service(ABC):
         self.subscribe(Service.Topic.ENGRAMIC_SHUTDOWN, self.on_run_background_end)
 
     async def stop(self) -> None:
-        pass
+        if self.uvicorn_server:
+            await self.uvicorn_server.shutdown()
 
     def shutdown(self) -> None:
         pass
@@ -172,6 +217,10 @@ class Service(ABC):
 
             if self.context is not None:
                 self.context.term()
+
+            # if self.uvicorn_server is not None:
+            #    self.uvicorn_server._server.should_exit = True
+            #   self.uvicorn_server._server.shutdown()
 
             self.cleanup_complete.set()
 

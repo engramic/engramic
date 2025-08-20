@@ -109,13 +109,13 @@ class Ask(Retrieval):
         )
         self.prompt_analysis_plugin = plugin_manager.get_plugin('llm', 'retrieve_prompt_analysis')
         self.prompt_retrieve_indices_plugin = plugin_manager.get_plugin('llm', 'retrieve_gen_index')
-        self.prompt_vector_db_plugin = plugin_manager.get_plugin('vector_db', 'db')
+        self.prompt_vector_db_meta_plugin = plugin_manager.get_plugin('vector_db', 'meta')
+        self.prompt_vector_db_engram_plugin = plugin_manager.get_plugin('vector_db', 'engram')
         self.prompt_db_document_plugin = db_plugin
         self.embeddings_gen_embed = plugin_manager.get_plugin('embedding', 'gen_embed')
         self.prompt_retrieve_gen = plugin_manager.get_plugin('llm', 'retrieve_gen_query')
 
     def get_sources(self) -> None:
-
         if self.prompt.target_single_file:
             direction_step = self.service.run_tasks([self._fetch_history(), self._gen_query()])
         else:
@@ -140,25 +140,22 @@ class Ask(Retrieval):
         history_dict: list[dict[str, Any]] = ret_val[0]
         return history_dict
 
-
-
-
     async def _gen_query(self) -> None:
         file_list = []
-        for repo_id in self.prompt.repo_ids_filters:
+        if self.prompt.repo_ids_filters:
+            for repo_id in self.prompt.repo_ids_filters:
+                files = self.service.files_and_folders_by_repo[repo_id]
+                for file_index in files:
+                    file = files[file_index]
+                    if file['node_type'] == 'file':
+                        full_path = 'file://'
+                        for path in file['file_dirs']:
+                            full_path += path + '/'
+                        full_path += file['file_name']
 
-            files = self.service.files_and_folders_by_repo[repo_id]
-            for file in files:
-                file = files[file]
-                if file['node_type'] == 'file':
-                    full_path = "file://"
-                    for path in file['file_dirs']:
-                        full_path += path + "/"
-                    full_path += file['file_name']
+                        file_list.append(full_path)
 
-                    file_list.append(full_path)
-
-        input_data = {"file_list": file_list}
+        input_data = {'file_list': file_list}
         query_gen = PromptGenQuery(prompt_str=self.prompt.prompt_str, input_data=input_data)
 
         plugin = self.prompt_retrieve_gen
@@ -281,18 +278,14 @@ class Ask(Retrieval):
         fetch_direction_step.add_done_callback(self.on_vector_fetch_direction_meta_complete)
 
     async def _vector_fetch_direction_meta(self, intent_embedding: list[float]) -> list[str]:
-        plugin = self.prompt_vector_db_plugin
-        args = plugin['args'].copy()
-        args['threshold'] = 0.99
-        args['n_results'] = 10
+        plugin = self.prompt_vector_db_meta_plugin
 
         self.type_filters = ['native', 'episodic']
 
         if self.prompt.widget_cmd:
             self.type_filters.append('procedural')
-            if self.prompt.target_single_file:
-                self.locations.append("default://")
-
+            if self.prompt.target_single_file and self.locations:
+                self.locations.append('default://')
 
         ret = await asyncio.to_thread(
             plugin['func'].query,
@@ -300,8 +293,8 @@ class Ask(Retrieval):
             embeddings=intent_embedding,
             repo_filters=self.prompt.repo_ids_filters,
             type_filters=self.type_filters,
-            location_filters=None,
-            args=args,
+            location_filters=self.locations,
+            args=self.service.host.mock_update_args(plugin),
         )
 
         self.service.host.update_mock_data(plugin, ret)
@@ -476,16 +469,14 @@ class Ask(Retrieval):
     """
 
     async def _query_index_db(self, embeddings: list[list[float]]) -> set[str]:
-        plugin = self.prompt_vector_db_plugin
+        plugin = self.prompt_vector_db_engram_plugin
 
         if not embeddings:
             return set()
 
-        args = self.service.host.mock_update_args(plugin).copy()
-
-        if self.prompt.target_single_file:
-            args['n_results'] = 100
-            args['threshold'] = 1
+        # if self.prompt.target_single_file:
+        # Was setting a different threshold and n_results here but remove it.
+        # Will implement a more reliable approach.
 
         ids = set()
 
@@ -496,7 +487,7 @@ class Ask(Retrieval):
             repo_filters=self.prompt.repo_ids_filters,
             type_filters=self.type_filters,
             location_filters=self.locations,
-            args=args
+            args=self.service.host.mock_update_args(plugin),
         )
 
         self.service.host.update_mock_data(plugin, ret)
@@ -516,7 +507,6 @@ class Ask(Retrieval):
         if self.prompt_analysis is None:
             error = 'on_query_index_db failed: prompt_analysis is None and likely failed during an earlier process.'
             raise RuntimeError
-
 
         retrieve_result = RetrieveResult(
             self.id,
